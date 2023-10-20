@@ -14,6 +14,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 3.9.1\n"
 
+msgid "api.400.errorUploadingImage"
+msgstr "There was an error uploading this image."
+
+msgid "api.422.routeRequestUnableToProcess"
+msgstr "Unable to process API request."
+
+msgid "api.417.routeResponseIsNull"
+msgstr "Unable to receive any expected response."
+
 msgid "api.400.paramNotSupported"
 msgstr "The {$param} parameter is not supported."
 
@@ -133,6 +142,15 @@ msgstr "Files larger than {$maxSize} can not be uploaded."
 
 msgid "api.files.400.config"
 msgstr "File could not be uploaded because of a server configuration error. Please contact the system administrator."
+
+msgid "api.highlights.400.noOrderData"
+msgstr "Highlight order could not be saved because no ordering information was found."
+
+msgid "api.highlights.400.orderHighlightNotFound"
+msgstr "Highlight order could not be saved because one or more of the highlights could not be found."
+
+msgid "api.highlights.404.highlightNotFound"
+msgstr "The highlight you requested was not found."
 
 msgid "api.publication.403.alreadyPublished"
 msgstr "The publication you want to publish is already published."

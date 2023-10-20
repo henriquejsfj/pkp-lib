@@ -6,6 +6,10 @@
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * Administration settings page.
+ *
+ * @hook Template::Settings::admin::setup []
+ * @hook Template::Settings::admin::appearance []
+ * @hook Template::Settings::admin []
  *}
 {extends file="layouts/backend.tpl"}
 
@@ -52,6 +56,14 @@
 					{load_url_in_div id="navigationMenuGridContainer" url=$navigationMenusGridUrl}
 					{capture assign=navigationMenuItemsGridUrl}{url router=\PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.navigationMenus.NavigationMenuItemsGridHandler" op="fetchGrid" escape=false}{/capture}
 					{load_url_in_div id="navigationMenuItemsGridContainer" url=$navigationMenuItemsGridUrl}
+				</tab>
+				{/if}
+				{if $componentAvailability['highlights']}
+				<tab id="highlights" label="{translate key="common.highlights"}">
+					<highlights-list-panel
+						v-bind="components.highlights"
+						@set="set"
+					/>
 				</tab>
 				{/if}
 				{if $componentAvailability['bulkEmails']}

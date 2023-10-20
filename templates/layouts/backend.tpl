@@ -6,6 +6,8 @@
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * Common site header.
+ *
+ * @hook Template::Layout::Backend::HeaderActions []
  *}
 <!DOCTYPE html>
 <html lang="{$currentLocale|replace:"_":"-"}" xml:lang="{$currentLocale|replace:"_":"-"}">
@@ -33,13 +35,17 @@
 				{rdelim});
 		{rdelim});
 	</script>
-
 	<div id="app" class="app {if $isLoggedInAs} app--isLoggedInAs{/if}" v-cloak>
-		<vue-announcer></vue-announcer>
+		<vue-announcer class="sr-only"></vue-announcer>
+		<pkp-dialog
+			:open="pkpIsDialogOpened"
+			@close="pkpIsDialogOpened = false"
+			v-bind="pkpDialogProps"
+		></pkp-dialog>
 		<header class="app__header" role="banner">
 			{if $availableContexts}
 				<dropdown class="app__headerAction app__contexts">
-					<template slot="button">
+					<template #button>
 						<icon icon="sitemap"></icon>
 						<span class="-screenReader">{translate key="context.contexts"}</span>
 					</template>
@@ -80,7 +86,7 @@
 						</button>
 					</div>
 					<dropdown class="app__headerAction app__userNav">
-						<template slot="button">
+						<template #button>
 							<icon icon="user-circle-o"></icon>
 							{if $isUserLoggedInAs}
 								<icon icon="user-circle" class="app__userNav__isLoggedInAsWarning"></icon>

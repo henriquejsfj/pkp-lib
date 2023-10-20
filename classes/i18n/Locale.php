@@ -33,6 +33,7 @@ use PKP\core\PKPRequest;
 use PKP\facades\Repo;
 use PKP\i18n\interfaces\LocaleInterface;
 use PKP\i18n\translation\LocaleBundle;
+use PKP\i18n\ui\UITranslator;
 use PKP\plugins\Hook;
 use PKP\plugins\PluginRegistry;
 use PKP\session\SessionManager;
@@ -235,6 +236,8 @@ class Locale implements LocaleInterface
 
     /**
      * @copy LocaleInterface::installLocale()
+     *
+     * @hook Locale::installLocale [[&$locale]]
      */
     public function installLocale(string $locale): void
     {
@@ -390,6 +393,16 @@ class Locale implements LocaleInterface
     }
 
     /**
+     * @copy LocaleInterface::getUiTranslator()
+    */
+    public function getUiTranslator(): UITranslator
+    {
+        $locale = $this->getLocale();
+        $localeBundleCacheKey = $this->getBundle($locale)->getLastCacheKey();
+        return new UITranslator($locale, $this->paths, $localeBundleCacheKey);
+    }
+
+    /**
      * Get the filtered locales by locale codes
      *
      * @param array $locales List of available all locales
@@ -408,6 +421,8 @@ class Locale implements LocaleInterface
 
     /**
      * Translates the texts
+     *
+     * @hook Locale::translate [[&$value, $key, $params, $number, $locale, $localeBundle]]
      */
     protected function translate(string $key, ?int $number, array $params, ?string $locale): string
     {

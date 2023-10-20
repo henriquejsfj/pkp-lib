@@ -75,7 +75,7 @@ class LoginHandler extends Handler
         $templateMgr = TemplateManager::getManager($request);
         $templateMgr->assign([
             'loginMessage' => $request->getUserVar('loginMessage'),
-            'username' => $request->getUserVar('username') ?? $session->getSessionVar('username'),
+            'username' => $session->getSessionVar('email') ?? $session->getSessionVar('username'),
             'remember' => $request->getUserVar('remember'),
             'source' => $request->getUserVar('source'),
             'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
@@ -237,7 +237,7 @@ class LoginHandler extends Handler
                     'error' => 'user.login.lostPassword.confirmationSentFailedWithReason',
                     'reason' => empty($reason = $user->getDisabledReason() ?? '')
                         ? __('user.login.accountDisabled')
-                        : __('user.login.accountDisabledWithReason', ['reason' => $reason])
+                        : __('user.login.accountDisabledWithReason', ['reason' => htmlspecialchars($reason)])
                 ])
                 ->display('frontend/pages/userLostPassword.tpl');
 
@@ -300,7 +300,7 @@ class LoginHandler extends Handler
                     'messageTranslated' => __('user.login.lostPassword.confirmationSentFailedWithReason', [
                         'reason' => empty($reason = $user->getDisabledReason() ?? '')
                             ? __('user.login.accountDisabled')
-                            : __('user.login.accountDisabledWithReason', ['reason' => $reason])
+                            : __('user.login.accountDisabledWithReason', ['reason' => htmlspecialchars($reason)])
                     ]),
                 ])
                 ->display('frontend/pages/message.tpl');

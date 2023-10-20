@@ -17,6 +17,7 @@ namespace PKP\services;
 
 use APP\core\Application;
 use Exception;
+use finfo;
 use Illuminate\Support\Facades\DB;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
@@ -28,11 +29,15 @@ use PKP\plugins\Hook;
 
 class PKPFileService
 {
+    private const FALLBACK_MIME_TYPE = 'application/octet-stream';
+
     /** @var Filesystem */
     public $fs;
 
     /**
      * Initialize and configure flysystem
+     *
+     * @hook File::adapter [[&$adapter, $this]]
      */
     public function __construct()
     {
@@ -92,7 +97,12 @@ class PKPFileService
         if (is_resource($stream)) {
             fclose($stream);
         }
-        $mimetype = $this->fs->mimeType($to);
+        try {
+            $mimetype = $this->fs->mimeType($to);
+        } catch (Exception $e) {
+            // When a very good mime-type cannot be guessed, FlySystem emits an Exception
+            $mimetype = (new finfo(FILEINFO_MIME_TYPE))->file($to) ?: static::FALLBACK_MIME_TYPE;
+        }
 
         // Check and override ambiguous mime types based on file extension
         if ($extension = pathinfo($to, PATHINFO_EXTENSION)) {
@@ -141,6 +151,8 @@ class PKPFileService
      * @param int $fileId File ID
      * @param string $filename Filename to give to the downloaded file
      * @param bool $inline Whether to stream the file to the browser
+     *
+     * @hook File::download [[$file, &$filename, $inline]]
      */
     public function download($fileId, $filename, $inline = false)
     {
@@ -181,6 +193,8 @@ class PKPFileService
      * @param string $filename Source filename to sanitize
      *
      * @return string
+     *
+     * @hook File::formatFilename [[&$newFilename, $path, $filename]]
      */
     public function formatFilename($path, $filename)
     {

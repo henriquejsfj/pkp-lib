@@ -41,7 +41,7 @@
 			<div class="username">
 				<label>
 					<span class="label">
-						{translate key="user.username"}
+						{translate key="user.usernameOrEmail"}
 						<span class="required" aria-hidden="true">*</span>
 						<span class="pkp_screen_reader">
 							{translate key="common.required"}
@@ -80,7 +80,7 @@
 					<div class="fields">
 						<div class="recaptcha">
 							<div class="g-recaptcha" data-sitekey="{$recaptchaPublicKey|escape}">
-							</div>
+							</div><label for="g-recaptcha-response" style="display:none;" hidden>Recaptcha response</label>
 						</div>
 					</div>
 				</fieldset>

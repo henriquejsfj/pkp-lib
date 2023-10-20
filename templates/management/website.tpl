@@ -6,6 +6,11 @@
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * The website settings page.
+ *
+ * @hook Template::Settings::website::appearance []
+ * @hook Template::Settings::website::setup []
+ * @hook Template::Settings::website::plugins []
+ * @hook Template::Settings::website []
  *}
 {extends file="layouts/backend.tpl"}
 
@@ -71,6 +76,12 @@
 						v-bind="components.{$smarty.const.FORM_ANNOUNCEMENT_SETTINGS}"
 						@set="set"
 					/>
+				</tab>
+				<tab id="highlights" label="{translate key="common.highlights"}">
+					<highlights-list-panel
+						v-bind="components.highlights"
+						@set="set"
+					></highlights-list-panel>
 				</tab>
 				<tab id="lists" label="{translate key="manager.setup.lists"}">
 					<pkp-form

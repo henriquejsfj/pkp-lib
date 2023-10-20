@@ -100,9 +100,6 @@ class PKPTemplateManager extends Smarty
     /** @var array Key/value list of constants to expose in the JS interface */
     private $_constants = [];
 
-    /** @var array Key/value list of locale keys to expose in the JS interface */
-    private $_localeKeys = [];
-
     /** @var array Initial state data to be managed by the page's Vue.js component */
     protected $_state = [];
 
@@ -331,6 +328,7 @@ class PKPTemplateManager extends Smarty
         $this->registerPlugin('function', 'help', $this->smartyHelp(...));
         $this->registerPlugin('function', 'flush', $this->smartyFlush(...));
         $this->registerPlugin('function', 'call_hook', $this->smartyCallHook(...));
+        $this->registerPlugin('function', 'run_hook', $this->smartyRunHook(...));
         $this->registerPlugin('function', 'html_options_translate', $this->smartyHtmlOptionsTranslate(...));
         $this->registerPlugin('block', 'iterate', $this->smartyIterate(...));
         $this->registerPlugin('function', 'page_links', $this->smartyPageLinks(...));
@@ -439,6 +437,8 @@ class PKPTemplateManager extends Smarty
      *   'addLess': Array of additional LESS files to parse before compiling
      *
      * @return string Compiled CSS styles
+     *
+     * @hook PageHandler::compileLess [[&$less, &$lessFile, &$args, $name, $request]]
      */
     public function compileLess($name, $lessFile, $args = [])
     {
@@ -619,20 +619,6 @@ class PKPTemplateManager extends Smarty
     }
 
     /**
-     * Set locale keys to be exposed in JavaScript at pkp.localeKeys.<key>
-     *
-     * @param array $keys Array of locale keys
-     */
-    public function setLocaleKeys($keys)
-    {
-        foreach ($keys as $key) {
-            if (!array_key_exists($key, $this->_localeKeys)) {
-                $this->_localeKeys[$key] = __($key);
-            }
-        }
-    }
-
-    /**
      * Get a piece of the state data
      *
      */
@@ -796,6 +782,8 @@ class PKPTemplateManager extends Smarty
 
     /**
      * Set up the template requirements for editorial backend pages
+     *
+     * @hook TemplateManager::setupBackendPage []
      */
     public function setupBackendPage()
     {
@@ -832,65 +820,18 @@ class PKPTemplateManager extends Smarty
             'STATUS_SCHEDULED' => Submission::STATUS_SCHEDULED,
         ]);
 
-        // Common locale keys available in the browser for every page
-        $this->setLocaleKeys([
-            'common.attachFiles',
-            'common.cancel',
-            'common.clearSearch',
-            'common.close',
-            'common.commaListSeparator',
-            'common.confirm',
-            'common.delete',
-            'common.edit',
-            'common.editItem',
-            'common.error',
-            'common.filter',
-            'common.filterAdd',
-            'common.filterRemove',
-            'common.inParenthesis',
-            'common.insertContent',
-            'common.loading',
-            'common.loaded',
-            'common.no',
-            'common.noItemsFound',
-            'common.none',
-            'common.ok',
-            'common.order',
-            'common.orderUp',
-            'common.orderDown',
-            'common.pageNumber',
-            'common.pagination.goToPage',
-            'common.pagination.label',
-            'common.pagination.next',
-            'common.pagination.previous',
-            'common.remove',
-            'common.required',
-            'common.save',
-            'common.saving',
-            'common.search',
-            'common.selectWithName',
-            'common.unknownError',
-            'common.uploadedBy',
-            'common.uploadedByAndWhen',
-            'common.view',
-            'list.viewLess',
-            'list.viewMore',
-            'common.viewWithName',
-            'common.yes',
-            'form.dataHasChanged',
-            'form.errorA11y',
-            'form.errorGoTo',
-            'form.errorMany',
-            'form.errorOne',
-            'form.errors',
-            'form.multilingualLabel',
-            'form.multilingualProgress',
-            'form.saved',
-            'grid.action.sort',
-            'help.help',
-            'navigation.backTo',
-            'validator.required'
-        ]);
+
+
+        $hash = Locale::getUITranslator()->getCacheHash();
+        $this->addJavaScript(
+            'i18n_keys',
+            $request->getDispatcher()->url($request, Application::ROUTE_API, $request->getContext()?->getPath() ?? 'index', '_i18n/ui.js?hash=' . $hash),
+            [
+                'priority' => self::STYLE_SEQUENCE_CORE,
+                'contexts' => 'backend',
+            ]
+        );
+
 
         // Set up the document type icons
         $documentTypeIcons = [
@@ -1178,6 +1119,8 @@ class PKPTemplateManager extends Smarty
      * @param null|mixed $cache_id
      * @param null|mixed $compile_id
      * @param null|mixed $parent
+     *
+     * @hook TemplateManager::fetch [[$this, $template, $cache_id, $compile_id, &$result]]
      */
     public function fetch($template = null, $cache_id = null, $compile_id = null, $parent = null)
     {
@@ -1255,6 +1198,8 @@ class PKPTemplateManager extends Smarty
      * @param null|mixed $cache_id
      * @param null|mixed $compile_id
      * @param null|mixed $parent
+     *
+     * @hook TemplateManager::display [[$this, &$template, &$output]]
      */
     public function display($template = null, $cache_id = null, $compile_id = null, $parent = null)
     {
@@ -1262,9 +1207,6 @@ class PKPTemplateManager extends Smarty
         $output = '';
         if (!empty($this->_constants)) {
             $output .= 'pkp.const = ' . json_encode($this->_constants) . ';';
-        }
-        if (!empty($this->_localeKeys)) {
-            $output .= 'pkp.localeKeys = ' . json_encode($this->_localeKeys) . ';';
         }
 
         // Load current user data
@@ -1735,12 +1677,27 @@ class PKPTemplateManager extends Smarty
     }
 
     /**
-     * Call hooks from a template.
+     * Call hooks from a template. (DEPRECATED: For new hooks, {run_hook} is preferred.
      */
     public function smartyCallHook($params, $smarty)
     {
         $output = null;
         Hook::call($params['name'], [&$params, $smarty, &$output]);
+        return $output;
+    }
+
+    /**
+     * Run hooks from a template.
+     */
+    public function smartyRunHook(array $params): ?string
+    {
+        $output = null;
+
+        // Don't pollute the parameter list with a redundant hook name
+        $hookName = $params['name'];
+        unset($params['name']);
+
+        Hook::run($hookName, ['templateMgr' => $this, 'output' => &$output, ...$params]);
         return $output;
     }
 
@@ -2181,7 +2138,11 @@ class PKPTemplateManager extends Smarty
             ksort($styles);
             foreach ($styles as $priorityGroup) {
                 foreach ($priorityGroup as $htmlStyle) {
-                    $links .= '<link rel="stylesheet" href="' . $htmlStyle['style'] . '" type="text/css">' . "\n";
+                    if (!empty($htmlStyle['inline'])) {
+                        $links .= '<style type="text/css">' . $htmlStyle['style'] . '</style>' . "\n";
+                    } else {
+                        $links .= '<link rel="stylesheet" href="' . $htmlStyle['style'] . '" type="text/css">' . "\n";
+                    }
                 }
             }
         }

@@ -20,7 +20,6 @@ use APP\core\Application;
 use APP\core\PageRouter;
 use APP\core\Request;
 use APP\facades\Repo;
-use APP\log\event\SubmissionEventLogEntry;
 use APP\notification\NotificationManager;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
@@ -47,7 +46,6 @@ use PKP\facades\Locale;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\AjaxModal;
 use PKP\log\event\PKPSubmissionEventLogEntry;
-use PKP\log\SubmissionLog;
 use PKP\mail\Mailable;
 use PKP\mail\mailables\ReviewerReinstate;
 use PKP\mail\mailables\ReviewerResendRequest;
@@ -711,6 +709,10 @@ class PKPReviewerGridHandler extends GridHandler
      */
     public function reviewRead($args, $request)
     {
+        if (!$request->checkCSRF()) {
+            return new JSONMessage(false);
+        }
+
         // Retrieve review assignment.
         $reviewAssignment = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_REVIEW_ASSIGNMENT); /** @var \PKP\submission\reviewAssignment\ReviewAssignment $reviewAssignment */
 

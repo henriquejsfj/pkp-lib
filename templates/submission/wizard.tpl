@@ -6,6 +6,9 @@
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * The submission wizard screen with all steps to complete for submission.
+ *
+ * @hook Template::SubmissionWizard::Section::Review [[submission, step], $templateMgr, $output]
+ * @hook Template::SubmissionWizard::Section [[submission], $templateMgr, $output]
  *}
 {extends file="layouts/backend.tpl"}
 
@@ -37,7 +40,7 @@
                 <button
                     class="-linkButton"
                     aria-describedby="submission-configuration"
-                    @click="$modal.show('config')"
+                    @click="isModalOpenedConfig = true"
                 >
                     {translate key="manager.reviewerSearch.change"}
                 </button>
@@ -45,6 +48,8 @@
                     close-label="{translate key="common.close"}"
                     name="config"
                     title="{translate key="submission.wizard.changeSubmission"}"
+                    :open="isModalOpenedConfig"
+                    @close="isModalOpenedConfig = false"
                 >
                     <pkp-form
                         v-bind="components.reconfigureSubmission"
@@ -72,7 +77,7 @@
             >
                 <panel>
                     <panel-section v-for="section in step.sections" :key="section.id">
-                        <template slot="header">
+                        <template #header>
                             <h2>{{ section.name }}</h2>
                             <div v-html="section.description" />
                         </template>
@@ -135,7 +140,7 @@
         </steps>
 
         <button-row class="submissionWizard__footer">
-            <template slot="end">
+            <template #end>
                 <pkp-button
                     v-if="!isOnFirstStep"
                     :is-warnable="true"
