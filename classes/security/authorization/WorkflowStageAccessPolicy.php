@@ -40,7 +40,7 @@ class WorkflowStageAccessPolicy extends ContextPolicy
         parent::__construct($request);
 
         // A workflow stage component requires a valid workflow stage.
-        $this->addPolicy(new WorkflowStageRequiredPolicy($stageId));
+        $this->addPolicy(new WorkflowStageRequiredPolicy(5));
 
         // A workflow stage component can only be called if there's a
         // valid submission in the request.
