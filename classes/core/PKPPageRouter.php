@@ -18,11 +18,13 @@ namespace PKP\core;
 
 use APP\core\Application;
 use APP\facades\Repo;
+use PKP\config\Config;
+use Illuminate\Support\Facades\Auth;
+use PKP\context\Context;
 use PKP\facades\Locale;
 use PKP\plugins\Hook;
 use PKP\security\Role;
 use PKP\security\Validation;
-use PKP\session\SessionManager;
 
 define('ROUTER_DEFAULT_PAGE', './pages/index/index.php');
 define('ROUTER_DEFAULT_OP', 'index');
@@ -38,44 +40,36 @@ class PKPPageRouter extends PKPRouter
     // only via their respective getters/setters
     //
     /** @var string the requested page */
-    public $_page;
+    public string $_page;
     /** @var string the requested operation */
-    public $_op;
+    public string $_op;
     /** @var string cache filename */
-    public $_cacheFilename;
+    public string $_cacheFilename;
 
     /**
      * get the installation pages
-     *
-     * @return array
      */
-    public function getInstallationPages()
+    public function getInstallationPages(): array
     {
         return $this->_installationPages;
     }
 
     /**
      * get the cacheable pages
-     *
-     * @return array
      */
-    public function getCacheablePages()
+    public function getCacheablePages(): array
     {
-        // Can be overridden by sub-classes.
         return [];
     }
 
     /**
      * Determine whether or not the request is cacheable.
      *
-     * @param PKPRequest $request
-     * @param bool $testOnly required for unit test to
-     *  bypass session check.
-     *
+     * @param bool $testOnly required for unit test to bypass session check.
      */
-    public function isCacheable($request, $testOnly = false): bool
+    public function isCacheable(PKPRequest $request, bool $testOnly = false): bool
     {
-        if (SessionManager::isDisabled() && !$testOnly) {
+        if (PKPSessionGuard::isSessionDisable() && !$testOnly) {
             return false;
         }
         if (Application::isUnderMaintenance()) {
@@ -98,54 +92,38 @@ class PKPPageRouter extends PKPRouter
 
     /**
      * Get the page requested in the URL.
-     *
-     * @param PKPRequest $request the request to be routed
-     *
-     * @return string the page path (under the "pages" directory)
      */
-    public function getRequestedPage($request)
+    public function getRequestedPage(PKPRequest $request): string
     {
         if (!isset($this->_page)) {
-            $this->_page = $this->_getRequestedUrlParts(['Core', 'getPage'], $request);
+            $this->_page = $this->_getRequestedUrlParts(Core::getPage(...), $request);
         }
         return $this->_page;
     }
 
     /**
      * Get the operation requested in the URL (assumed to exist in the requested page handler).
-     *
-     * @param PKPRequest $request the request to be routed
-     *
-     * @return string
      */
-    public function getRequestedOp($request)
+    public function getRequestedOp(PKPRequest $request): string
     {
         if (!isset($this->_op)) {
-            $this->_op = $this->_getRequestedUrlParts(['Core', 'getOp'], $request);
+            $this->_op = $this->_getRequestedUrlParts(Core::getOp(...), $request);
         }
         return $this->_op;
     }
 
     /**
      * Get the arguments requested in the URL.
-     *
-     * @param PKPRequest $request the request to be routed
-     *
-     * @return array
      */
-    public function getRequestedArgs($request)
+    public function getRequestedArgs(PKPRequest $request): array
     {
-        return $this->_getRequestedUrlParts(['Core', 'getArgs'], $request);
+        return $this->_getRequestedUrlParts(Core::getArgs(...), $request);
     }
 
     /**
      * Get the anchor (#anchor) requested in the URL
-     *
-     * @para $request PKPRequest the request to be routed
-     *
-     * @return string
      */
-    public function getRequestedAnchor($request)
+    public function getRequestedAnchor(PKPRequest $request): string
     {
         $url = $request->getRequestUrl();
         $parts = explode('#', $url);
@@ -162,7 +140,7 @@ class PKPPageRouter extends PKPRouter
     /**
      * @copydoc PKPRouter::getCacheFilename()
      */
-    public function getCacheFilename($request)
+    public function getCacheFilename(PKPRequest $request): string
     {
         if (!isset($this->_cacheFilename)) {
             $id = $_SERVER['PATH_INFO'] ?? 'index';
@@ -178,26 +156,28 @@ class PKPPageRouter extends PKPRouter
      *
      * @hook LoadHandler [[&$page, &$op, &$sourceFile, &$handler]]
      */
-    public function route($request)
+    public function route(PKPRequest $request): void
     {
         // Determine the requested page and operation
         $page = $this->getRequestedPage($request);
         $op = $this->getRequestedOp($request);
 
         // If the application has not yet been installed we only
-        // allow installer pages to be displayed.
-        if (!Application::isInstalled()) {
-            if (!in_array($page, $this->getInstallationPages())) {
-                // A non-installation page was called although
-                // the system is not yet installed. Redirect to
-                // the installation page.
-                $request->redirect('index', 'install');
-            }
+        // allow installer pages to be displayed,
+        // or is installed and one of the installer pages was called
+        if (!Application::isInstalled() && !in_array($page, $this->getInstallationPages())) {
+            // A non-installation page was called although
+            // the system is not yet installed. Redirect to
+            // the installation page.
+            $request->redirect('index', 'install');
+        } elseif (Application::isInstalled() && in_array($page, $this->getInstallationPages())) {
+            // Redirect to the index page
+            $request->redirect('index', 'index');
         }
 
         // Redirect requests from logged-out users to a context which is not
         // publicly enabled
-        if (!SessionManager::isDisabled()) {
+        if (!PKPSessionGuard::isSessionDisable()) {
             $user = $request->getUser();
             $currentContext = $request->getContext();
             if ($currentContext && !$currentContext->getEnabled() && !$user instanceof \PKP\user\User) {
@@ -233,10 +213,13 @@ class PKPPageRouter extends PKPRouter
             }
         }
 
-        if (!SessionManager::isDisabled()) {
-            // Initialize session
-            SessionManager::getManager();
-        }
+        // Set locale from URL or from 'setLocale'-op/search-params
+        $setLocale = ($op === 'setLocale'
+            ? ($this->getRequestedArgs($request)[0] ?? null)
+            : ($page === 'install'
+                ? ($_GET['setLocale'] ?? null)
+                : null));
+        $this->_setLocale($request, $setLocale);
 
         // Call the selected handler's index operation if
         // no operation was defined in the request.
@@ -281,24 +264,18 @@ class PKPPageRouter extends PKPRouter
 
     /**
      * @copydoc PKPRouter::url()
-     *
-     * @param null|mixed $newContext
-     * @param null|mixed $page
-     * @param null|mixed $op
-     * @param null|mixed $path
-     * @param null|mixed $params
-     * @param null|mixed $anchor
      */
     public function url(
         PKPRequest $request,
         ?string $newContext = null,
-        $page = null,
-        $op = null,
-        $path = null,
-        $params = null,
-        $anchor = null,
-        $escape = false
-    ) {
+        ?string $page = null,
+        ?string $op = null,
+        mixed $path = null,
+        ?array $params = null,
+        ?string $anchor = null,
+        bool $escape = false,
+        ?string $urlLocaleForPage = null,
+    ): string {
         //
         // Base URL and Context
         //
@@ -394,8 +371,14 @@ class PKPPageRouter extends PKPRouter
         //
         // Assemble URL
         //
-        // Context, page, operation and additional path go into the path info.
+        // Context, locale?, page, operation and additional path go into the path info.
         $pathInfoArray = $context;
+        if ($urlLocaleForPage !== '') {
+            [$contextObject, $contextLocales] = $this->_getContextAndLocales($request, $context[0] ?? '');
+            if (count($contextLocales) > 1) {
+                $pathInfoArray[] = $this->_getLocaleForUrl($request, $contextObject, $contextLocales, $urlLocaleForPage);
+            }
+        }
         if (!empty($page)) {
             $pathInfoArray[] = $page;
             if (!empty($op)) {
@@ -414,10 +397,10 @@ class PKPPageRouter extends PKPRouter
      * @copydoc PKPRouter::handleAuthorizationFailure()
      */
     public function handleAuthorizationFailure(
-        $request,
-        $authorizationMessage,
+        PKPRequest $request,
+        string $authorizationMessage,
         array $messageParams = []
-    ) {
+    ): void {
         // Redirect to the authorization denied page.
         if (!$request->getUser()) {
             Validation::redirectLogin();
@@ -428,7 +411,7 @@ class PKPPageRouter extends PKPRouter
     /**
      * Redirect to user home page (or the user group home page if the user has one user group).
      */
-    public function redirectHome(PKPRequest $request)
+    public function redirectHome(PKPRequest $request): void
     {
         $request->redirectUrl($this->getHomeUrl($request));
     }
@@ -438,9 +421,9 @@ class PKPPageRouter extends PKPRouter
      *
      * @param PKPRequest $request the request to be routed
      */
-    public function getHomeUrl($request)
+    public function getHomeUrl($request): string
     {
-        $user = $request->getUser();
+        $user = Auth::user(); /** @var \PKP\user\User $user */
         $userId = $user->getId();
 
         if ($context = $this->getContext($request)) {
@@ -454,12 +437,32 @@ class PKPPageRouter extends PKPRouter
                 return $request->url(null, 'index');
             }
 
+            if(Config::getVar('features', 'enable_new_submission_listing')) {
+
+                $roleIds = $userGroups->map(function ($group) {
+                    return $group->getRoleId();
+                });
+
+                $roleIdsArray = $roleIds->all();
+
+                if (count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT], $roleIdsArray))) {
+                    return $request->url(null, 'dashboard', 'editorial');
+
+                }
+                if(count(array_intersect([ Role::ROLE_ID_REVIEWER], $roleIdsArray))) {
+                    return $request->url(null, 'dashboard', 'reviewAssignments');
+
+                }
+                if(count(array_intersect([  Role::ROLE_ID_AUTHOR], $roleIdsArray))) {
+                    return $request->url(null, 'dashboard', 'mySubmissions');
+                }
+            }
+
             return $request->url(null, 'submissions');
         } else {
             // The user is at the site context, check to see if they are
             // only registered in one place w/ one role
             $userGroups = Repo::userGroup()->userUserGroups($userId, \PKP\core\PKPApplication::CONTEXT_ID_NONE);
-
             if ($userGroups->count() == 1) {
                 $firstUserGroup = $userGroups->first();
                 $contextDao = Application::getContextDAO();
@@ -487,19 +490,90 @@ class PKPPageRouter extends PKPRouter
      * page, operation or arguments from url.
      * @param PKPRequest $request
      *
-     * @return array|string|null
      */
-    private function _getRequestedUrlParts($callback, &$request)
+    private function _getRequestedUrlParts($callback, $request): array|string|null
     {
         $url = null;
-        assert($request->getRouter() instanceof \PKP\core\PKPPageRouter);
+        if (!$request->getRouter() instanceof PKPPageRouter) {
+            throw new \Exception('Router is not expected PKPPageRouter!');
+        }
 
         if (isset($_SERVER['PATH_INFO'])) {
             $url = $_SERVER['PATH_INFO'];
         }
 
         $userVars = $request->getUserVars();
-        return call_user_func_array($callback, [$url, true, $userVars]);
+        return $callback($url ?? '', $userVars);
+    }
+
+    /**
+     * Get context object and context/site/all locales.
+     */
+    private function _getContextAndLocales(PKPRequest $request, string $contextPath): array
+    {
+        return [
+            $context = $this->getCurrentContext() ?? (($contextPath === 'index' || !$contextPath || $contextPath === Application::CONTEXT_ID_ALL)
+                ? null
+                : Application::getContextDAO()->getByPath($contextPath)),
+            $context?->getSupportedLocales()
+                ?? (($contextPath === 'index')
+                    ? (Application::isInstalled()
+                        ? $request->getSite()->getSupportedLocales()
+                        : array_keys(Locale::getLocales()))
+                    : [])
+        ];
+    }
+
+    /**
+     * Get locale for URL from session or primary
+     */
+    private function _getLocaleForUrl(PKPRequest $request, ?Context $context, array $locales, ?string $urlLocaleForPage): string
+    {
+        return in_array($locale = $urlLocaleForPage ?: Locale::getLocale(), $locales)
+            ? $locale
+            : (($context ?? $request->getSite())?->getPrimaryLocale() ?? Locale::getLocale());
+    }
+
+    /**
+     * Change the locale for the current user.
+     * Redirect to url with(out) locale if locale changed or context set to multi/monolingual.
+     */
+    private function _setLocale(PKPRequest $request, ?string $setLocale): void
+    {
+        $contextPath = $this->_getRequestedUrlParts(['Core', 'getContextPath'], $request);
+        $urlLocale = $this->_getRequestedUrlParts(['Core', 'getLocalization'], $request);
+        $multiLingual = count($this->_getContextAndLocales($request, $contextPath)[1]) > 1;
+
+        if (!$multiLingual && !$urlLocale && !$setLocale || $multiLingual && !$setLocale && $urlLocale === Locale::getLocale()) {
+            return;
+        }
+
+        $sessionLocale = (function (string $l) use ($request): string {
+            $session = $request->getSession();
+            if (Locale::isSupported($l) && $l !== $session->get('currentLocale')) {
+                $session->put('currentLocale', $l);
+                $request->setCookieVar('currentLocale', $l);
+            }
+            // In case session current locale has been set to non-supported locale, or is null, somewhere else
+            if (!Locale::isSupported($session->get('currentLocale') ?? '')) {
+                $session->put('currentLocale', Locale::getLocale());
+                $request->setCookieVar('currentLocale', Locale::getLocale());
+            }
+            return $session->get('currentLocale');
+        })($setLocale ?? $urlLocale);
+
+        if (preg_match('#^/\w#', $source = $request->getUserVar('source') ?? '')) {
+            $request->redirectUrl($source);
+        }
+
+        $indexUrl = $this->getIndexUrl($request);
+        $uri = preg_replace("#^{$indexUrl}#", '', $setLocale ? ($_SERVER['HTTP_REFERER'] ?? '') : $request->getCompleteUrl(), 1);
+        $newUrlLocale = $multiLingual ? "/{$sessionLocale}" : '';
+        $pathInfo = ($uri)
+            ? preg_replace("#^/{$contextPath}" . ($urlLocale ? "/{$urlLocale}" : '') . '(?=[/?\\#]|$)#', "/{$contextPath}{$newUrlLocale}", $uri, 1)
+            : "/index{$newUrlLocale}";
+
+        $request->redirectUrl($indexUrl . $pathInfo);
     }
 }
 

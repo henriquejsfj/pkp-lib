@@ -1,19 +1,20 @@
+# Johanna Skaug <johanna.skaug@ub.uio.no>, 2024.
+# "My L. Bjørnflaten" <myl@uio.no>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:54+00:00\n"
-"PO-Revision-Date: 2021-01-29 12:17+0000\n"
-"Last-Translator: FRITT, University of Oslo Library <fritt-info@journals.uio."
-"no>\n"
-"Language-Team: Norwegian Bokmål <http://translate.pkp.sfu.ca/projects/pkp-"
-"lib/common/nb_NO/>\n"
-"Language: nb_NO\n"
+"PO-Revision-Date: 2024-06-25 08:44+0000\n"
+"Last-Translator: Johanna Skaug <johanna.skaug@ub.uio.no>\n"
+"Language-Team: Norwegian Bokmål <http://translate.pkp.sfu.ca/projects/"
+"pkp-lib/common/nb_NO/>\n"
+"Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.9.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "common.publicKnowledgeProject"
 msgstr "Public Knowledge Project"
@@ -349,7 +350,7 @@ msgid "common.description"
 msgstr "Beskrivelse"
 
 msgid "common.details"
-msgstr ""
+msgstr "Detaljer"
 
 msgid "common.dimensionsInches"
 msgstr "{$width}&Prime;&times;{$height}&Prime; at {$dpi} DPI/PPI"
@@ -382,7 +383,7 @@ msgid "common.downloadPdf"
 msgstr "Last ned PDF"
 
 msgid "common.downloadReport"
-msgstr ""
+msgstr "Last ned rapport"
 
 msgid "common.dragAndDropHere"
 msgstr ""
@@ -471,10 +472,10 @@ msgid "common.findTemplate"
 msgstr ""
 
 msgid "common.formatting"
-msgstr ""
+msgstr "Formatering"
 
 msgid "common.geographic"
-msgstr ""
+msgstr "Geografisk"
 
 msgid "common.go"
 msgstr "Fortsett"
@@ -527,8 +528,9 @@ msgstr "Språk"
 msgid "common.languages"
 msgstr "Språk"
 
+#, fuzzy
 msgid "common.lastSaved"
-msgstr ""
+msgstr "Sist lagret {$when}"
 
 msgid "common.lastActivity"
 msgstr "Siste aktivitet registrert {$date}."
@@ -587,8 +589,9 @@ msgstr "Ingen"
 msgid "common.noneSelected"
 msgstr ""
 
+#, fuzzy
 msgid "common.noneProvided"
-msgstr ""
+msgstr "Ingen angitt"
 
 msgid "common.no"
 msgstr "Nei"
@@ -782,7 +785,7 @@ msgid "common.reviewRoundNumber"
 msgstr ""
 
 msgid "common.role"
-msgstr ""
+msgstr "Rolle"
 
 msgid "common.saveAndContinue"
 msgstr "Lagre og fortsett"
@@ -835,8 +838,9 @@ msgstr "Send e-post"
 msgid "common.showAllSteps"
 msgstr ""
 
+#, fuzzy
 msgid "common.showingSteps"
-msgstr ""
+msgstr "Steg {$current}/{$total}"
 
 msgid "common.size"
 msgstr "Størrelse"
@@ -1542,7 +1546,7 @@ msgid "navigation.viewFrontend"
 msgstr "Se nettside"
 
 msgid "institution.institutions"
-msgstr ""
+msgstr "Institusjoner"
 
 msgid "notification.addedAuditor"
 msgstr "Sluttkontrollør lagt til."
@@ -1873,7 +1877,7 @@ msgid "notification.signedFile"
 msgstr "Fil tatt stilling til."
 
 msgid "timeZone"
-msgstr ""
+msgstr "Tidssone"
 
 msgid "user.email"
 msgstr "E-post"
@@ -2339,3 +2343,7 @@ msgstr "Forfatter redigert."
 #~ msgstr ""
 #~ "Captcha-valideringen for nettstedet er ikke konfigurert riktig. Koden "
 #~ "mangler."
+
+#, fuzzy
+msgid "common.highlights"
+msgstr "Høydepunkter"

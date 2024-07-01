@@ -82,19 +82,6 @@ class PKPMetadataSettingsForm extends FormComponent
                 ],
                 'value' => $context->getData('disciplines') ? $context->getData('disciplines') : Context::METADATA_DISABLE,
             ]))
-            ->addField(new FieldMetadataSetting('languages', [
-                'label' => __('common.languages'),
-                'description' => __('manager.setup.metadata.languages.description'),
-                'options' => [
-                    ['value' => Context::METADATA_ENABLE, 'label' => __('manager.setup.metadata.languages.enable')]
-                ],
-                'submissionOptions' => [
-                    ['value' => Context::METADATA_ENABLE, 'label' => __('manager.setup.metadata.languages.noRequest')],
-                    ['value' => Context::METADATA_REQUEST, 'label' => __('manager.setup.metadata.languages.request')],
-                    ['value' => Context::METADATA_REQUIRE, 'label' => __('manager.setup.metadata.languages.require')],
-                ],
-                'value' => $context->getData('languages') ? $context->getData('languages') : Context::METADATA_DISABLE,
-            ]))
             ->addField(new FieldMetadataSetting('agencies', [
                 'label' => __('submission.supportingAgencies'),
                 'description' => __('manager.setup.metadata.agencies.description'),
@@ -159,6 +146,16 @@ class PKPMetadataSettingsForm extends FormComponent
                     ['value' => Context::METADATA_REQUIRE, 'label' => __('manager.setup.metadata.type.require')],
                 ],
                 'value' => $context->getData('type') ? $context->getData('type') : Context::METADATA_DISABLE,
+            ]))
+            ->addField(new FieldOptions('requireAuthorCompetingInterests', [
+                'label' => __('manager.setup.competingInterests'),
+                'options' => [
+                    [
+                        'value' => 'true',
+                        'label' => __('manager.setup.competingInterests.requireAuthors'),
+                    ],
+                ],
+                'value' => (bool) $context->getData('requireAuthorCompetingInterests'),
             ]))
             ->addField(new FieldMetadataSetting('citations', [
                 'label' => __('submission.citations'),

@@ -24,37 +24,31 @@ use PKP\services\PKPSchemaService;
 
 class Dispatcher
 {
-    /** @var PKPApplication */
-    public $_application;
+    public PKPApplication $_application;
 
     /** @var array an array of Router implementation class names */
-    public $_routerNames = [];
+    public array $_routerNames = [];
 
     /** @var array an array of Router instances */
-    public $_routerInstances = [];
+    public array $_routerInstances = [];
 
-    /** @var PKPRouter */
-    public $_router;
+    public PKPRouter $_router;
 
     /** @var PKPRequest Used for a callback hack - NOT GENERALLY SET. */
-    public $_requestCallbackHack;
+    public ?PKPRequest $_requestCallbackHack;
 
     /**
      * Get the application
-     *
-     * @return PKPApplication
      */
-    public function &getApplication()
+    public function &getApplication(): PKPApplication
     {
         return $this->_application;
     }
 
     /**
      * Set the application
-     *
-     * @param PKPApplication $application
      */
-    public function setApplication($application)
+    public function setApplication(PKPApplication $application)
     {
         $this->_application = $application;
     }
@@ -64,7 +58,7 @@ class Dispatcher
      *
      * @return array an array of Router names
      */
-    public function &getRouterNames()
+    public function &getRouterNames(): array
     {
         return $this->_routerNames;
     }
@@ -89,9 +83,8 @@ class Dispatcher
      * @param string $shortcut a shortcut name for the router
      *  to be used for quick router instance retrieval.
      */
-    public function addRouterName($routerName, $shortcut)
+    public function addRouterName(string $routerName, string $shortcut)
     {
-        assert(is_array($this->_routerNames) && is_string($routerName));
         $this->_routerNames[$shortcut] = $routerName;
     }
 
@@ -100,11 +93,9 @@ class Dispatcher
      * let the router dispatch the request to the appropriate
      * handler method.
      *
-     * @param PKPRequest $request
-     *
      * @hook Dispatcher::dispatch [[$request]]
      */
-    public function dispatch($request)
+    public function dispatch(PKPRequest $request)
     {
         // Make sure that we have at least one router configured
         $routerNames = $this->getRouterNames();
@@ -123,6 +114,9 @@ class Dispatcher
                 $request->setRouter($routerCandidate);
                 $request->setDispatcher($this);
 
+                $this->setUserResolver();
+                $this->initSession();
+
                 // We've found our router and can go on
                 // to handle the request.
                 $router = & $routerCandidate;
@@ -134,7 +128,7 @@ class Dispatcher
         // None of the router handles this request? This is a development-time
         // configuration error.
         if (is_null($router)) {
-            fatalError('None of the configured routers supports this request.');
+            throw new \Exception('None of the configured routers supports this request.');
         }
 
         // Can we serve a cached response?
@@ -168,37 +162,72 @@ class Dispatcher
     }
 
     /**
+     * Init the session by running through session related middleware
+     */
+    public function initSession(): void
+    {
+        if (PKPSessionGuard::isSessionDisable()) {
+            return;
+        }
+
+        $illuminateRequest = app(\Illuminate\Http\Request::class); /** @var \Illuminate\Http\Request $illuminateRequest */
+
+        (new \Illuminate\Pipeline\Pipeline(PKPContainer::getInstance()))
+            ->send($illuminateRequest)
+            ->through([
+                \PKP\middleware\PKPEncryptCookies::class,
+                \Illuminate\Session\Middleware\StartSession::class,
+                \PKP\middleware\PKPAuthenticateSession::class,
+            ])
+            ->via('handle')
+            ->then(function (\Illuminate\Http\Request $request) {
+                return app()->get(\Illuminate\Http\Response::class);
+            });
+    }
+
+    /**
+     * Set the user resolving logic for laravel inner use purpose
+     */
+    public function setUserResolver(): void
+    {
+        $illuminateRequest = app()->get(\Illuminate\Http\Request::class); /** @var \Illuminate\Http\Request $illuminateRequest */
+
+        $illuminateRequest->setUserResolver(fn () => \APP\core\Application::get()->getRequest()->getUser());
+    }
+
+    /**
      * Build a handler request URL into PKPApplication.
      *
-     * @param PKPRequest $request the request to be routed
-     * @param string $shortcut the short name of the router that should be used to construct the URL
-     * @param mixed $newContext Optional contextual paths
-     * @param string $handler Optional name of the handler to invoke
-     * @param string $op Optional name of operation to invoke
-     * @param mixed $path Optional string or array of args to pass to handler
-     * @param array $params Optional set of name => value pairs to pass as user parameters
-     * @param string $anchor Optional name of anchor to add to URL
-     * @param bool $escape Whether or not to escape ampersands for this URL; default false.
-     *
-     * @return string the URL
+     * @param $shortcut the short name of the router that should be used to construct the URL
+     * @param $newContext Optional contextual path
+     * @param $handler Optional name of the handler to invoke
+     * @param $op Optional name of operation to invoke
+     * @param $path Optional string or array of args to pass to handler
+     * @param $params Optional set of name => value pairs to pass as user parameters
+     * @param $anchor Optional name of anchor to add to URL
+     * @param $escape Whether or not to escape ampersands for this URL; default false.
+     * @param $urlLocaleForPage Whether or not to override locale for this URL; Use '' to exclude.
      */
     public function url(
         PKPRequest $request,
         string $shortcut,
         ?string $newContext = null,
-        $handler = null,
-        $op = null,
-        $path = null,
-        $params = null,
-        $anchor = null,
-        $escape = false
-    ) {
+        ?string $handler = null,
+        ?string $op = null,
+        mixed $path = null,
+        ?array $params = null,
+        ?string $anchor = null,
+        bool $escape = false,
+        ?string $urlLocaleForPage = null,
+    ): string {
         // Instantiate the requested router
-        assert(isset($this->_routerNames[$shortcut]));
+        if (!isset($this->_routerNames[$shortcut])) {
+            throw new \Exception('Specified router is not configured!');
+        }
         $routerName = $this->_routerNames[$shortcut];
         $router = & $this->_instantiateRouter($routerName, $shortcut);
 
-        return $router->url($request, $newContext, $handler, $op, $path, $params, $anchor, $escape);
+        return $router->url($request, $newContext, $handler, $op, $path, $params, $anchor, $escape, $urlLocaleForPage);
     }
 
     //
@@ -207,11 +236,8 @@ class Dispatcher
 
     /**
      * Instantiate a router
-     *
-     * @param string $routerName
-     * @param string $shortcut
      */
-    public function &_instantiateRouter($routerName, $shortcut)
+    public function &_instantiateRouter(string $routerName, string $shortcut): PKPRouter
     {
         if (!isset($this->_routerInstances[$shortcut])) {
             // Instantiate the router
@@ -223,7 +249,7 @@ class Dispatcher
             $router->setDispatcher($this);
 
             // Save the router instance for later re-use
-            $this->_routerInstances[$shortcut] = & $router;
+            $this->_routerInstances[$shortcut] = $router;
         }
 
         return $this->_routerInstances[$shortcut];
@@ -231,10 +257,8 @@ class Dispatcher
 
     /**
      * Display the request contents from cache.
-     *
-     * @param PKPRouter $router
      */
-    public function _displayCached($router, $request)
+    public function _displayCached(PKPRouter $router, PKPRequest $request): bool
     {
         $filename = $router->getCacheFilename($request);
         if (!file_exists($filename)) {
@@ -248,10 +272,7 @@ class Dispatcher
             exit;
         }
 
-        $fp = fopen($filename, 'r');
-        $data = fread($fp, filesize($filename));
-        fclose($fp);
-
+        $data = file_get_contents($filename);
         $i = strpos($data, ':');
         $time = substr($data, 0, $i);
         $contents = substr($data, $i + 1);
@@ -268,14 +289,9 @@ class Dispatcher
 
     /**
      * Cache content as a local file.
-     *
-     * @param string $contents
-     *
-     * @return string
      */
-    public function _cacheContent($contents)
+    public function _cacheContent(string $contents): string
     {
-        assert($this->_router instanceof \PKP\core\PKPRouter);
         if ($contents == '') {
             return $contents;
         } // Do not cache empties
@@ -294,7 +310,8 @@ class Dispatcher
     public static function handle404()
     {
         header('HTTP/1.0 404 Not Found');
-        fatalError('404 Not Found');
+        echo "<h1>404 Not Found</h1>\n";
+        exit;
     }
 }
 

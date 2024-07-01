@@ -71,14 +71,19 @@
 	{fbvFormSection}
 		{fbvElement type="text" label="user.url" name="userUrl" id="userUrl" value=$userUrl maxlength="255"}
 	{/fbvFormSection}
-	{fbvFormSection}
-		{fbvElement type="text" label="user.orcid" name="orcid" id="orcid" value=$orcid maxlength="46"}
-	{/fbvFormSection}
+
+    {if $orcidEnabled}
+        {* FIXME: The form element is still required for "connect ORCID" functionality to work. *}
+        {fbvFormSection}
+            {fbvElement type="text" label="user.orcid" name="orcid" id="orcid" value=$orcid maxlength="46"}
+        {/fbvFormSection}
+        {include file="form/orcidProfile.tpl"}
+    {/if}
 
 	{call_hook name="User::PublicProfile::AdditionalItems"}
 
 	<p>
-		{capture assign="privacyUrl"}{url router=\PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
+		{capture assign="privacyUrl"}{url router=PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
 		{translate key="user.privacyLink" privacyUrl=$privacyUrl}
 	</p>
 

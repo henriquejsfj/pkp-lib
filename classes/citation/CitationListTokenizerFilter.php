@@ -17,7 +17,6 @@
 
 namespace PKP\citation;
 
-use PKP\core\PKPString;
 use PKP\filter\Filter;
 
 class CitationListTokenizerFilter extends Filter
@@ -47,7 +46,7 @@ class CitationListTokenizerFilter extends Filter
         // The default implementation assumes that raw citations are
         // separated with line endings.
         // 1) Remove empty lines and normalize line endings.
-        $input = PKPString::regexp_replace('/[\r\n]+/s', "\n", $input);
+        $input = preg_replace('/[\r\n]+/us', "\n", $input);
         // 2) Remove trailing/leading line breaks.
         $input = trim($input, "\n");
         // 3) Break up at line endings.
@@ -56,10 +55,8 @@ class CitationListTokenizerFilter extends Filter
         } else {
             $citations = explode("\n", $input);
         }
-        // 4) Remove numbers from the beginning of each citation.
-        foreach ($citations as $index => $citation) {
-            $citations[$index] = PKPString::regexp_replace('/^\s*[\[#]?[0-9]+[.)\]]?\s*/', '', $citation);
-        }
+        // 4) Remove whitespace from the beginning and the end of each citation.
+        $citations = array_map('trim', $citations);
 
         return $citations;
     }

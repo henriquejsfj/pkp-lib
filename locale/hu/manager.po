@@ -235,7 +235,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1994,27 +1994,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "A beküldés elfogadásának feltétele, hogy a szerző kulcsszavakat adjon meg."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"A nyelv az anyag elsődleges nyelvét jelzik egy nyelvi kóddal (\"en\") és az "
-"opcionális országkóddal (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Nyelvi metaadatok engedélyezése"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"A benyújtás során ne kérje a szerzőtől a benyújtás nyelveinek megadását."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Kérje meg a szerzőt, hogy a benyújtás során jelölje meg a beadvány nyelveit."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"A beküldés elfogadásának feltétele, hogy a szerző megadja a beküldési "
-"nyelveket."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "A benyújtás kapcsán fennálló jogok, amelyek magukban foglalhatják a szellemi "
@@ -2351,16 +2330,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Ez a link csak akkor jelenik meg, ha kitöltötte a Folyóirat rovat mezőt a "
 "Beállítások > Folyóirat menüpontban."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Hivatkozás egy oldalra, amely megmutatja a fejléc tartalmát (Beállítások> "
-"Folyóirat)."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Ez a link csak akkor látszik, amikor kitöltötte a Szerkesztőség tagjai mezőt "
-"a Beállítások > Folyóirat -nál."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Link ahhoz az oldalhoz, amely megjeleníti a Beküldési javaslatokat."
@@ -3877,3 +3846,11 @@ msgstr ""
 #~ msgstr ""
 #~ "Ezt az emailt a Rovatszerkesztő küldi a Szakmai Lektornak, hogy "
 #~ "emlékeztesse a lektorálási határidőre."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"A cikket beadó szerzők felszólítása az összeférhetetlenségi nyilatkozat "
+"benyújtására."
+
+msgid "manager.setup.masthead"
+msgstr "Impresszum"

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @file tools/jobs.php
  *
@@ -21,14 +19,14 @@ namespace PKP\tools;
 use APP\core\Application;
 use APP\facades\Repo;
 use Carbon\Carbon;
-use Illuminate\Console\Concerns\InteractsWithIO;
-use Illuminate\Console\OutputStyle;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use PKP\cliTool\CommandLineTool;
+use PKP\cliTool\traits\HasCommandInterface;
+use PKP\cliTool\traits\HasParameterList;
 use PKP\config\Config;
 use PKP\job\models\Job as PKPJobModel;
 use PKP\jobs\testJobs\TestJobFailure;
@@ -36,54 +34,29 @@ use PKP\jobs\testJobs\TestJobSuccess;
 use PKP\queue\WorkerConfiguration;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\InvalidArgumentException as CommandInvalidArgumentException;
-use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Helper\TableCellStyle;
-use Symfony\Component\Console\Input\StringInput;
-use Symfony\Component\Console\Output\StreamOutput;
 use Throwable;
 
 define('APP_ROOT', dirname(__FILE__, 4));
 require_once APP_ROOT . '/tools/bootstrap.php';
 
-class commandInterface
-{
-    use InteractsWithIO;
-
-    public function __construct()
-    {
-        $output = new OutputStyle(
-            new StringInput(''),
-            new StreamOutput(fopen('php://stdout', 'w'))
-        );
-
-        $this->setOutput($output);
-    }
-
-    public function errorBlock(array $messages = [], ?string $title = null): void
-    {
-        $this->getOutput()->block(
-            $messages,
-            $title,
-            'fg=white;bg=red',
-            ' ',
-            true
-        );
-    }
-}
-
 class commandJobs extends CommandLineTool
 {
+    use HasParameterList;
+    use HasCommandInterface;
+    
     protected const AVAILABLE_OPTIONS = [
-        'list' => 'admin.cli.tool.jobs.available.options.list.description',
-        'purge' => 'admin.cli.tool.jobs.available.options.purge.description',
-        'test' => 'admin.cli.tool.jobs.available.options.test.description',
-        'total' => 'admin.cli.tool.jobs.available.options.total.description',
-        'help' => 'admin.cli.tool.jobs.available.options.help.description',
-        'run' => 'admin.cli.tool.jobs.available.options.run.description',
-        'work' => 'admin.cli.tool.jobs.available.options.work.description',
-        'failed' => 'admin.cli.tool.jobs.available.options.failed.description',
-        'usage' => 'admin.cli.tool.jobs.available.options.usage.description',
+        'list'      => 'admin.cli.tool.jobs.available.options.list.description',
+        'purge'     => 'admin.cli.tool.jobs.available.options.purge.description',
+        'test'      => 'admin.cli.tool.jobs.available.options.test.description',
+        'total'     => 'admin.cli.tool.jobs.available.options.total.description',
+        'help'      => 'admin.cli.tool.jobs.available.options.help.description',
+        'run'       => 'admin.cli.tool.jobs.available.options.run.description',
+        'work'      => 'admin.cli.tool.jobs.available.options.work.description',
+        'failed'    => 'admin.cli.tool.jobs.available.options.failed.description',
+        'restart'   => 'admin.cli.tool.jobs.available.options.restart.description',
+        'usage'     => 'admin.cli.tool.jobs.available.options.usage.description',
     ];
 
     protected const CURRENT_PAGE = 'current';
@@ -94,16 +67,6 @@ class commandJobs extends CommandLineTool
      * @var null|string Which option will be call?
      */
     protected $option = null;
-
-    /**
-     * @var null|array Parameters and arguments from CLI
-     */
-    protected $parameterList = null;
-
-    /**
-     * CLI interface, this object should extends InteractsWithIO
-     */
-    protected $commandInterface = null;
 
     /**
      * Constructor
@@ -125,69 +88,7 @@ class commandJobs extends CommandLineTool
 
         $this->option = $this->getParameterList()[0];
 
-        $this->setCommandInterface(new commandInterface());
-    }
-
-    public function setCommandInterface(commandInterface $commandInterface): self
-    {
-        $this->commandInterface = $commandInterface;
-
-        return $this;
-    }
-
-    public function getCommandInterface(): commandInterface
-    {
-        return $this->commandInterface;
-    }
-
-    /**
-     * Save the parameter list passed on CLI
-     *
-     * @param array $items Array with parameters and arguments passed on CLI
-     *
-     */
-    public function setParameterList(array $items): self
-    {
-        $parameters = [];
-
-        foreach ($items as $param) {
-            if (strpos($param, '=')) {
-                [$key, $value] = explode('=', ltrim($param, '-'));
-                $parameters[$key] = $value;
-
-                continue;
-            }
-
-            $parameters[] = $param;
-        }
-
-        $this->parameterList = $parameters;
-
-        return $this;
-    }
-
-    /**
-     * Get the parameter list passed on CLI
-     *
-     */
-    public function getParameterList(): ?array
-    {
-        return $this->parameterList;
-    }
-
-    /**
-     * Get the value of a specific parameter
-     *
-     * @param mixed $default
-     *
-     */
-    protected function getParameterValue(string $parameter, mixed $default = null): mixed
-    {
-        if (!isset($this->getParameterList()[$parameter])) {
-            return $default;
-        }
-
-        return $this->getParameterList()[$parameter];
+        $this->setCommandInterface();
     }
 
     /**
@@ -199,7 +100,7 @@ class commandJobs extends CommandLineTool
         $this->getCommandInterface()->line(__('admin.cli.tool.usage.parameters') . PHP_EOL);
         $this->getCommandInterface()->line('<comment>' . __('admin.cli.tool.available.commands', ['namespace' => 'jobs']) . '</comment>');
 
-        $this->printUsage(self::AVAILABLE_OPTIONS);
+        $this->printCommandList(self::AVAILABLE_OPTIONS);
     }
 
     /**
@@ -211,20 +112,6 @@ class commandJobs extends CommandLineTool
     }
 
     /**
-     * Retrieve the columnWidth based on the commands text size
-     */
-    protected function getColumnWidth(array $commands): int
-    {
-        $widths = [];
-
-        foreach ($commands as $command) {
-            $widths[] = Helper::width($command);
-        }
-
-        return $widths ? max($widths) + 2 : 0;
-    }
-
-    /**
      * Failed jobs list/redispatch/remove
      */
     protected function failed(): void
@@ -233,7 +120,7 @@ class commandJobs extends CommandLineTool
 
         if (in_array('--redispatch', $parameterList) || ($jobIds = $this->getParameterValue('redispatch'))) {
             $jobsCount = Repo::failedJob()->redispatchToQueue(
-                $this->getParameterValue('--queue'),
+                $this->getParameterValue('queue'),
                 collect(explode(',', $jobIds ?? ''))
                     ->filter()
                     ->map(fn ($item) => (int)$item)
@@ -245,7 +132,7 @@ class commandJobs extends CommandLineTool
 
         if (in_array('--clear', $parameterList) || ($jobIds = $this->getParameterValue('clear'))) {
             $jobsCount = Repo::failedJob()->deleteJobs(
-                $this->getParameterValue('--queue'),
+                $this->getParameterValue('queue'),
                 collect(explode(',', $jobIds ?? ''))
                     ->filter()
                     ->map(fn ($item) => (int)$item)
@@ -258,6 +145,21 @@ class commandJobs extends CommandLineTool
         array_push($this->parameterList, '--failed');
 
         $this->list();
+    }
+
+    /**
+     * Signal the queue worker to quit gracefully
+     */
+    protected function restart(): void
+    {
+        $cache = app()->get("cache.store"); /** @var \Illuminate\Contracts\Cache\Repository $cache */
+
+        $cache->forever('illuminate:queue:restart', Carbon::now()->getTimestamp());
+
+        $this
+            ->getCommandInterface()
+            ->getOutput()
+            ->info(__('admin.cli.tool.jobs.available.options.restart.confirm'));
     }
 
     /**
@@ -374,6 +276,12 @@ class commandJobs extends CommandLineTool
             return;
         }
 
+        if (Config::getVar('general', 'sandbox', false)) {
+            $this->getCommandInterface()->getOutput()->error(__('admin.cli.tool.jobs.sandbox.message'));
+            error_log(__('admin.cli.tool.jobs.sandbox.message'));
+            return;
+        }
+
         $connection = $parameterList['connection'] ?? Config::getVar('queues', 'default_connection', 'database');
         $queue = $parameterList['queue'] ?? Config::getVar('queues', 'default_queue', 'queue');
 
@@ -397,6 +305,12 @@ class commandJobs extends CommandLineTool
     {
         if (Application::isUnderMaintenance()) {
             $this->getCommandInterface()->getOutput()->error(__('admin.cli.tool.jobs.maintenance.message'));
+            return;
+        }
+
+        if (Config::getVar('general', 'sandbox', false)) {
+            $this->getCommandInterface()->getOutput()->error(__('admin.cli.tool.jobs.sandbox.message'));
+            error_log(__('admin.cli.tool.jobs.sandbox.message'));
             return;
         }
 
@@ -510,17 +424,17 @@ class commandJobs extends CommandLineTool
         $workerConfig = new WorkerConfiguration();
 
         return [
-            'name' => $this->getParameterValue('--name', $workerConfig->getName()),
-            'backoff' => $this->getParameterValue('--backoff', $workerConfig->getBackoff()),
-            'memory' => $this->getParameterValue('--memory', $workerConfig->getMemory()),
-            'timeout' => $this->getParameterValue('--timeout', $workerConfig->getTimeout()),
-            'sleep' => $this->getParameterValue('--sleep', $workerConfig->getSleep()),
-            'maxTries' => $this->getParameterValue('--tries', $workerConfig->getMaxTries()),
-            'force' => $this->getParameterValue('--force', in_array('--force', $parameters) ? true : $workerConfig->getForce()),
-            'stopWhenEmpty' => $this->getParameterValue('--stop-when-empty', in_array('--stop-when-empty', $parameters) ? true : $workerConfig->getStopWhenEmpty()),
-            'maxJobs' => $this->getParameterValue('--max-jobs', $workerConfig->getMaxJobs()),
-            'maxTime' => $this->getParameterValue('--max-time', $workerConfig->getMaxTime()),
-            'rest' => $this->getParameterValue('--rest', $workerConfig->getRest()),
+            'name' => $this->getParameterValue('name', $workerConfig->getName()),
+            'backoff' => $this->getParameterValue('backoff', $workerConfig->getBackoff()),
+            'memory' => $this->getParameterValue('memory', $workerConfig->getMemory()),
+            'timeout' => $this->getParameterValue('timeout', $workerConfig->getTimeout()),
+            'sleep' => $this->getParameterValue('sleep', $workerConfig->getSleep()),
+            'maxTries' => $this->getParameterValue('tries', $workerConfig->getMaxTries()),
+            'force' => $this->getParameterValue('force', in_array('force', $parameters) ? true : $workerConfig->getForce()),
+            'stopWhenEmpty' => $this->getParameterValue('stop-when-empty', in_array('stop-when-empty', $parameters) ? true : $workerConfig->getStopWhenEmpty()),
+            'maxJobs' => $this->getParameterValue('max-jobs', $workerConfig->getMaxJobs()),
+            'maxTime' => $this->getParameterValue('max-time', $workerConfig->getMaxTime()),
+            'rest' => $this->getParameterValue('rest', $workerConfig->getRest()),
         ];
     }
 
@@ -605,27 +519,7 @@ class commandJobs extends CommandLineTool
             '--test' => __('admin.cli.tool.jobs.work.option.test.description'),
         ];
 
-        $this->printUsage($options, false);
-    }
-
-    /**
-     * Print given options in a pretty way.
-     */
-    protected function printUsage(array $options, bool $shouldTranslate = true): void
-    {
-        $width = $this->getColumnWidth(array_keys($options));
-
-        foreach ($options as $commandName => $description) {
-            $spacingWidth = $width - Helper::width($commandName);
-            $this->getCommandInterface()->line(
-                sprintf(
-                    '  <info>%s</info>%s%s',
-                    $commandName,
-                    str_repeat(' ', $spacingWidth),
-                    $shouldTranslate ? __($description) : $description
-                )
-            );
-        }
+        $this->printCommandList($options, false);
     }
 
     /**
@@ -670,7 +564,7 @@ try {
     $tool = new commandJobs($argv ?? []);
     $tool->execute();
 } catch (Throwable $e) {
-    $output = new commandInterface();
+    $output = new \PKP\cliTool\CommandInterface;
 
     if ($e instanceof CommandInvalidArgumentException) {
         $output->errorBlock([$e->getMessage()]);

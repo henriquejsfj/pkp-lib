@@ -21,6 +21,7 @@ use APP\facades\Repo;
 use Illuminate\Support\LazyCollection;
 use PKP\components\forms\FieldAutosuggestPreset;
 use PKP\components\forms\FieldOptions;
+use PKP\components\forms\FieldSlider;
 use PKP\components\forms\FieldSelectUsers;
 use PKP\components\forms\FormComponent;
 use PKP\context\Context;
@@ -44,10 +45,13 @@ class SubmissionFilters extends FormComponent
         public LazyCollection $categories
     ) {
         $this
+            ->addPage(['id' => 'default', 'submitButton' => null])
+            ->addGroup(['id' => 'default', 'pageId' => 'default'])
             ->addSectionFields()
             ->addAssignedTo()
             ->addIssues()
             ->addCategories()
+            ->addDaysSinceLastActivity()
         ;
     }
 
@@ -79,6 +83,7 @@ class SubmissionFilters extends FormComponent
         }
 
         return $this->addField(new FieldOptions('sectionIds', [
+            'groupId' => 'default',
             'label' => __('section.section'),
             'options' => $options,
             'value' => [],
@@ -94,6 +99,7 @@ class SubmissionFilters extends FormComponent
         $request = Application::get()->getRequest();
 
         return $this->addField(new FieldSelectUsers('assignedTo', [
+            'groupId' => 'default',
             'label' => __('editor.submissions.assignedTo'),
             'value' => [],
             'apiUrl' => $request->getDispatcher()->url(
@@ -118,6 +124,7 @@ class SubmissionFilters extends FormComponent
         $request = Application::get()->getRequest();
 
         return $this->addField(new FieldSelectIssues('issueIds', [
+            'groupId' => 'default',
             'label' => __('issue.issues'),
             'value' => [],
             'apiUrl' => $request->getDispatcher()->url($request, Application::ROUTE_API, $request->getContext()->getPath(), 'issues'),
@@ -140,6 +147,7 @@ class SubmissionFilters extends FormComponent
             ->all();
 
         $props = [
+            'groupId' => 'default',
             'label' => __('category.category'),
             'options' => $options,
             'value' => [],
@@ -150,5 +158,20 @@ class SubmissionFilters extends FormComponent
         }
 
         return $this->addField(new FieldOptions('categoryIds', $props));
+    }
+
+    protected function addDaysSinceLastActivity(): self
+    {
+        $props = [
+            'min' => 0,
+            'max' => 180,
+            'label' => __('submission.list.daysSinceLastActivity'),
+            'value' => 0,
+            'groupId' => 'default',
+
+        ];
+
+        return $this->addField(new FieldSlider('daysInactive', $props));
+  
     }
 }

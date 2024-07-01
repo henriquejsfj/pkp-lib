@@ -1,10 +1,10 @@
-# Hüseyin Körpeoğlu <yoruyenturk@hotmail.com>, 2021, 2022, 2023.
+# Hüseyin Körpeoğlu <yoruyenturk@hotmail.com>, 2021, 2022, 2023, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:50:07+00:00\n"
-"PO-Revision-Date: 2023-08-01 08:25+0000\n"
+"PO-Revision-Date: 2024-06-03 05:04+0000\n"
 "Last-Translator: Hüseyin Körpeoğlu <yoruyenturk@hotmail.com>\n"
 "Language-Team: Turkish <http://translate.pkp.sfu.ca/projects/pkp-lib/manager/"
 "tr/>\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "manager.website.information"
 msgstr "Bilgi"
@@ -249,7 +249,7 @@ msgstr "Kayıtları Gör"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Başarılı Kayıt Mesajı"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI'ler başarıyla güncellendi"
 
 msgid "manager.dois.registration.depositDois"
@@ -286,13 +286,15 @@ msgid "manager.dois.filters.doiAssigned.description"
 msgstr "DOI atanan tüm ögeler."
 
 msgid "manager.dois.status.unregistered.description"
-msgstr ""
+msgstr "DOI'si atanmış ancak henüz deposit edilmemiş tüm ögeler."
 
 msgid "manager.dois.status.submitted.description"
-msgstr ""
+msgstr "Deposit edilmiş tüm ögeler."
 
 msgid "manager.dois.status.registered.description"
 msgstr ""
+"DOI için gönderilmiş veya manuel olarak kayıtlı olarak işaretlenmiş tüm "
+"ögeler."
 
 msgid "manager.dois.status.error.description"
 msgstr ""
@@ -2026,25 +2028,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "Yazarın gönderisini kabul etmeden önce anahtar kelime önermesini isteyin."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Dil, çalışmanın birincil dilini, isteğe bağlı bir ülke koduyla (\"en_US\") "
-"bir dil kodu (\"en\") kullanarak gösterir."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Dil üst verilerini etkinleştir"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Gönderi sırasında yazardan gönderinin dilini talep etmeyin."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Yazardan, gönderi sırasında aday makalenin dilini belirtmesini isteyin."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Yazarın gönderisini kabul etmeden önce gönderi dillerini girmesini isteyin."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Gönderi ile ilgili olarak Fikri Mülkiyet Hakları (IPR), Telif Hakkı ve "
@@ -2379,16 +2362,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Bu bağlantı sadece \"Ayarlar > Dergi\" altındaki Dergi Hakkında bölümünü "
 "doldurduysanız görüntülenir."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"\"Ayarlar > Dergi\" bölümündeki Yönetici Listesi içeriğini görüntüleyen bir "
-"sayfaya bağlantı verin."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Bu bağlantı sadece \"Ayarlar > Dergi\" altındaki Kişiler ve Kurullar "
-"bölümünü doldurduysanız görüntülenir."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Gönderi talimatlarını gösteren sayfaya bağlantı ver."
@@ -3581,3 +3554,16 @@ msgstr ""
 
 #~ msgid "emailTemplate.variable.statisticsReportNotify.publicationStatsLink"
 #~ msgstr "Yayımlanan makale istatistikleri sayfasına bağlantı"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Yazarların gönderileriyle birlikte bir Çıkar Çatışması bildirimi dosyası "
+"göndermeleri gereklidir."
+
+msgid "manager.setup.masthead"
+msgstr "Yönetici Listesi"
+
+msgid "manager.announcements.notEnabled"
+msgstr ""
+"<a href=\"#announcements/announcement-settings\">Duyuruları</a> "
+"etkinleştirmelisiniz."

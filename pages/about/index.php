@@ -19,7 +19,8 @@
 
 switch ($op) {
     case 'index':
-    case 'editorialTeam':
+    case 'editorialMasthead':
+    case 'editorialHistory':
     case 'submissions':
     case 'contact':
         return new \PKP\pages\about\AboutContextHandler();

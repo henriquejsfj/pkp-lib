@@ -23,14 +23,12 @@ use APP\facades\Repo;
 use APP\statistics\StatisticsHelper;
 use APP\template\TemplateManager;
 use Exception;
-use PKP\cache\CacheManager;
-use PKP\cache\FileCache;
 use PKP\config\Config;
 use PKP\context\Context;
 use PKP\core\Core;
 use PKP\core\PKPApplication;
+use PKP\core\PKPSessionGuard;
 use PKP\db\DAORegistry;
-use PKP\session\SessionManager;
 
 define('LESS_FILENAME_SUFFIX', '.less');
 define('THEME_OPTION_PREFIX', 'themeOption_');
@@ -123,7 +121,7 @@ abstract class ThemePlugin extends LazyLoadPlugin
     {
         // Don't fully initialize the theme until the application is installed, so that
         // there are no requests to the database before it exists
-        if (SessionManager::isDisabled()) {
+        if (PKPSessionGuard::isSessionDisable()) {
             return;
         }
 
@@ -162,7 +160,7 @@ abstract class ThemePlugin extends LazyLoadPlugin
      */
     public function isActive()
     {
-        if (SessionManager::isDisabled()) {
+        if (PKPSessionGuard::isSessionDisable()) {
             return false;
         }
         $request = Application::get()->getRequest();
@@ -533,26 +531,6 @@ abstract class ThemePlugin extends LazyLoadPlugin
     }
 
     /**
-     * Modify option configuration settings
-     *
-     * @deprecated Unnecessary since 3.2 because options are stored as objects,
-     *  so changes can be made directly (via reference) and args don't need to be
-     *  manually merged
-     *
-     * @param string $name The name of the option config to retrieve
-     * @param array $args The new configuration settings for this option
-     */
-    public function modifyOptionsConfig($name, $args = [])
-    {
-        $option = $this->getOption($name);
-        foreach ($args as $key => $value) {
-            if (property_exists($option, $key)) {
-                $option->{$key} = $value;
-            }
-        }
-    }
-
-    /**
      * Remove an option
      *
      * @param string $name The name of the option to remove
@@ -589,7 +567,7 @@ abstract class ThemePlugin extends LazyLoadPlugin
         foreach ($this->options as $optionName => $optionConfig) {
             $value = $values[$optionName] ?? null;
             // Convert values stored in the db to the type of the default value
-            if (!is_null($optionConfig->default)) {
+            if ($value !== null && $optionConfig->default !== null) {
                 switch (gettype($optionConfig->default)) {
                     case 'boolean':
                         $value = !$value || $value === 'false' ? false : true;
@@ -599,7 +577,7 @@ abstract class ThemePlugin extends LazyLoadPlugin
                         break;
                     case 'array':
                         try {
-                            $value = json_decode($value, true, flags: JSON_THROW_ON_ERROR);
+                            $value = json_decode((string) $value, true, flags: JSON_THROW_ON_ERROR);
                         } catch (Exception) {
                             // FIXME: pkp/pkp-lib#6250 Remove after 3.3.x upgrade code is removed (see also pkp/pkp-lib#5772)
                             $value = unserialize($value);
@@ -607,6 +585,16 @@ abstract class ThemePlugin extends LazyLoadPlugin
                         $value = is_array($value) ? $value : [];
                         break;
                 }
+            }
+            // If the value isn't null and it's a multilingual field, then we must ensure it's an array
+            if ($optionConfig->isMultilingual && $value !== null && !is_array($value)) {
+                try {
+                    $value = json_decode((string) $value, true, flags: JSON_THROW_ON_ERROR);
+                } catch (Exception) {
+                    // FIXME: pkp/pkp-lib#6250 Remove after 3.3.x upgrade code is removed (see also pkp/pkp-lib#5772)
+                    $value = unserialize($value);
+                }
+                $value = is_array($value) ? $value : [];
             }
             $return[$optionName] = $value;
         }
@@ -967,14 +955,9 @@ abstract class ThemePlugin extends LazyLoadPlugin
      */
     protected function getAllDownloadsStats(int $submissionId): array
     {
-        $cache = CacheManager::getManager()->getCache('downloadStats', $submissionId, $this->downloadStatsCacheMiss(...));
-        if (time() - $cache->getCacheTime() > 60 * 60 * 24) {
-            // Cache is older than one day, erase it.
-            $cache->flush();
-        }
+        $data = Cache::remember("downloadStats-{$submissionId}", 60 * 60 * 24, fn () => $this->downloadStatsCacheMiss($submissionId));
         $statsByMonth = [];
         $totalDownloads = 0;
-        $data = $cache->get($submissionId);
         foreach ($data as $monthlyDownloadStats) {
             [$year, $month] = explode('-', $monthlyDownloadStats['date']);
             $month = ltrim($month, '0');
@@ -992,7 +975,7 @@ abstract class ThemePlugin extends LazyLoadPlugin
     /**
      * Callback to fill cache with submission's download usage statistics data.
      */
-    public function downloadStatsCacheMiss(FileCache $cache, int $submissionId): array
+    public function downloadStatsCacheMiss(int $submissionId): array
     {
         $request = Application::get()->getRequest();
         $submission = Repo::submission()->get($submissionId);
@@ -1015,7 +998,6 @@ abstract class ThemePlugin extends LazyLoadPlugin
 
         $statsService = Services::get('publicationStats'); /** @var \App\services\StatsPublicationService $statsService */
         $data = $statsService->getTimeline($params['timelineInterval'], $params);
-        $cache->setEntireCache([$submissionId => $data]);
         return $data;
     }
 

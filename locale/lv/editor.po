@@ -1,8 +1,8 @@
-# Ieva Tiltina <pastala@gmail.com>, 2022, 2023.
+# Ieva Tiltina <pastala@gmail.com>, 2022, 2023, 2024.
 # Gints Buda <gints.buda@gmail.com>, 2022.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2023-09-22 13:06+0000\n"
+"PO-Revision-Date: 2024-02-23 01:11+0000\n"
 "Last-Translator: Ieva Tiltina <pastala@gmail.com>\n"
 "Language-Team: Latvian <http://translate.pkp.sfu.ca/projects/pkp-lib/editor/"
 "lv/>\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n % 10 == 0 || n % 100 >= 11 && n % 100 <= "
 "19) ? 0 : ((n % 10 == 1 && n % 100 != 11) ? 1 : 2);\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "editor.submissionArchive.confirmDelete"
 msgstr "Vai tiešām vēlaties neatgriezeniski dzēst šo iesniegumu?"
@@ -64,7 +64,7 @@ msgstr "Šī recenzēšanas kārta nav atrasta."
 msgid "editor.submission.workflowDecision.invalidReviewRoundStage"
 msgstr ""
 "Tika nodrošināta recenzēšanas kārta, bet šis lēmums netiek pieņemts "
-"recenzēšanas fāzē."
+"recenzēšanas posmā."
 
 msgid "editor.submission.workflowDecision.invalidReviewRoundSubmission"
 msgstr "Šī recenzēšanas kārta nav daļa no materiāla iesniegšanas."
@@ -76,7 +76,7 @@ msgstr ""
 
 msgid "editor.submission.workflowDecision.noUnassignedDecisions"
 msgstr ""
-"Lai reģistrētu redakcionālu lēmumu, jums nepieciešama piesaiste šim "
+"Lai reģistrētu redaktora lēmumu, jums nepieciešama piesaiste šim "
 "iesniegtajam materiālam."
 
 msgid "editor.submission.workflowDecision.requiredReviewRound"
@@ -84,7 +84,7 @@ msgstr "Lai pieņemtu šo lēmumu, jānorāda recenzēšanas kārtas ID."
 
 msgid "editor.submission.workflowDecision.requiredDecidingEditor"
 msgstr ""
-"Ieteikumu var sniegt tikai tad, ja šajā posmā ir norīkots redaktors, kurš "
+"Rekomendāciju var sniegt tikai tad, ja šajā posmā ir iecelts redaktors, kurš "
 "var pieņemt galīgo lēmumu."
 
 msgid "editor.submission.workflowDecision.submissionInvalid"
@@ -106,7 +106,7 @@ msgstr ""
 "Izvēlieties zemāk norādītos failus, lai tos nosūtītu uz recenzēšanas posmu."
 
 msgid "editor.submission.fileAuditor.form.fileRequired"
-msgstr "Jāizvēlas vismaz viens fails, kuram piešķirt lietotāju."
+msgstr "Jāizvēlas vismaz viena datne, kurai piešķirt lietotāju."
 
 msgid "editor.submission.fileAuditor.form.messageRequired"
 msgstr "Jums jāiekļauj personiska ziņa."
@@ -129,10 +129,10 @@ msgstr "Labojumi"
 msgid "editor.submission.review.reviewersDescription"
 msgstr ""
 "Lietojiet<em>+Pievienot recenzentu</em>, lai uzaicinātu lasītājus recenzēt "
-"iesniegtā materiāla failus. Piezīmju grāmatiņas ikona norāda, ka ir "
-"iesniegta recenzija, kas pēc tam pārskatīšanas tiek atzīmēta kā "
-"<em>Pieņemts</em>. Ja recenzēšanas termiņš ir nokavēts, atgādināšanai "
-"recenzentiem tiek parādīta sarkana aploksnes ikona."
+"iesniegtā materiāla datnes. Piezīmju grāmatiņas ikona norāda, ka ir "
+"iesniegta recenzija, kas pēc tās izskatīšanas tiek atzīmēta kā <em>Pieņemts</"
+"em>. Ja recenzēšanas termiņš ir nokavēts, tiek parādīta sarkanas aploksnes "
+"ikona."
 
 msgid "editor.submission.addReviewer"
 msgstr "Pievienot recenzentu"
@@ -432,10 +432,10 @@ msgid "editor.submission.newRound"
 msgstr "Jauna recenzēšanas kārta"
 
 msgid "editor.submissionReview.recordDecision"
-msgstr "Ierakstīt redakcionālu lēmumu"
+msgstr "Ierakstīt redakcijas lēmumu"
 
 msgid "editor.submissionReview.recordRecommendation"
-msgstr "Ierakstīt redaktora rekomendāciju"
+msgstr "Ierakstīt redakcijas rekomendāciju"
 
 msgid "editor.submissionReview.recordRecommendation.notifyEditors"
 msgstr "Paziņot redaktoriem"
@@ -613,3 +613,6 @@ msgstr "Izlaist šo e-pastu"
 
 msgid "editor.decision.stepError"
 msgstr "Radās problēma ar soli {$stepName}."
+
+msgid "reviewer.list.reviewerSameInstitution"
+msgstr "Tā pati iestāde, kas autoram"

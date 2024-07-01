@@ -16,6 +16,9 @@
 		{translate key="user.login"}
 	</h1>
 
+	<p>
+		{translate key="common.requiredField"}
+	</p>
 	{* A login message may be displayed if the user was redireceted to the
 	   login page from another request. Examples include if login is required
 	   before dowloading a file. *}
@@ -47,7 +50,7 @@
 							{translate key="common.required"}
 						</span>
 					</span>
-					<input type="text" name="username" id="username" value="{$username|default:""|escape}" maxlength="32" required aria-required="true" autocomplete="username">
+					<input type="text" name="username" id="username" value="{$username|default:""|escape}" required aria-required="true" autocomplete="username">
 				</label>
 			</div>
 			<div class="password">

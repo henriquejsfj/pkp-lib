@@ -133,14 +133,14 @@ class UserSelectGridHandler extends GridHandler
         $rangeInfo = $this->getGridRangeInfo($request, $this->getId());
 
         $collector = Repo::user()->getCollector()
-            ->filterByContextIds([$submission->getContextId()])
+            ->filterByContextIds([$submission->getData('contextId')])
             ->filterExcludeSubmissionStage($submission->getId(), $stageId, $filterUserGroupId)
             ->searchPhrase($name)
             ->limit($rangeInfo->getCount())
             ->offset($rangeInfo->getOffset() + max(0, $rangeInfo->getPage() - 1) * $rangeInfo->getCount());
 
         $users = $collector->getMany()->toArray();
-        $totalCount = $collector->limit(null)->offset(null)->getCount();
+        $totalCount = $collector->getCount();
         return new \PKP\core\VirtualArrayIterator($users, $totalCount, $rangeInfo->getPage(), $rangeInfo->getCount());
     }
 

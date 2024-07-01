@@ -17,7 +17,15 @@
 		{translate key="user.register"}
 	</h1>
 
+	<p>
+		{translate key="common.requiredField"}
+	</p>
+
 	<form class="cmp_form register" id="register" method="post" action="{url op="register"}" role="form">
+        {if $orcidEnabled}
+           {include file="form/orcidProfile.tpl"}
+        {/if}
+
 		{csrf}
 
 		{if $source}
@@ -39,7 +47,7 @@
 						<div class="optin optin-privacy">
 							<label>
 								<input type="checkbox" name="privacyConsent" value="1"{if $privacyConsent} checked="checked"{/if}>
-								{capture assign="privacyUrl"}{url router=\PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
+								{capture assign="privacyUrl"}{url router=PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
 								{translate key="user.register.form.privacyConsent" privacyUrl=$privacyUrl}
 							</label>
 						</div>
@@ -120,8 +128,8 @@
 				<div class="fields">
 					<div class="optin optin-privacy">
 						<label>
-							<input type="checkbox" name="privacyConsent[{\PKP\core\PKPApplication::CONTEXT_ID_NONE}]" id="privacyConsent[{\PKP\core\PKPApplication::CONTEXT_ID_NONE}]" value="1"{if $privacyConsent[\PKP\core\PKPApplication::CONTEXT_ID_NONE]} checked="checked"{/if}>
-							{capture assign="privacyUrl"}{url router=\PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
+							<input type="checkbox" name="privacyConsent[{PKP\core\PKPApplication::CONTEXT_ID_NONE}]" id="privacyConsent[{PKP\core\PKPApplication::CONTEXT_ID_NONE}]" value="1"{if $privacyConsent[PKP\core\PKPApplication::CONTEXT_ID_NONE]} checked="checked"{/if}>
+							{capture assign="privacyUrl"}{url router=PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
 							{translate key="user.register.form.privacyConsent" privacyUrl=$privacyUrl}
 						</label>
 					</div>

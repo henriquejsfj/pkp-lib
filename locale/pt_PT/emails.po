@@ -4,20 +4,19 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-02T16:17:18-08:00\n"
-"PO-Revision-Date: 2022-01-07 11:25+0000\n"
-"Last-Translator: Carla Marques <carla.marques@usdb.uminho.pt>\n"
+"PO-Revision-Date: 2024-02-19 11:08+0000\n"
+"Last-Translator: José Carvalho <jcarvalho@keep.pt>\n"
 "Language-Team: Portuguese (Portugal) <http://translate.pkp.sfu.ca/projects/"
-"ojs/emails/pt_PT/>\n"
+"pkp-lib/emails/pt_PT/>\n"
 "Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 3.9.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
-#, fuzzy
 msgid "emails.submissionAck.subject"
-msgstr "Obrigado pela sua submissão a {$contextName}"
+msgstr "Obrigado pela submissão a {$contextName}"
 
 #, fuzzy
 msgid "emails.submissionAck.body"
@@ -39,11 +38,10 @@ msgstr ""
 "{$contextSignature}"
 
 msgid "emails.submissionAck.description"
-msgstr ""
+msgstr "Este e-mail é enviado automaticamente ao autor quando envia o trabalho."
 
-#, fuzzy
 msgid "emails.reviewAck.subject"
-msgstr "Agradecimento pela revisão"
+msgstr "Obrigado pela revisão"
 
 #, fuzzy
 msgid "emails.reviewAck.body"
@@ -55,20 +53,19 @@ msgstr ""
 "qualidade dos trabalhos publicados."
 
 msgid "emails.decision.notifyReviewers.subject"
-msgstr ""
+msgstr "Obrigado pela sua revisão"
 
 msgid "emails.decision.notifyReviewers.body"
 msgstr ""
 
 msgid "emails.decision.notifyOtherAuthors.subject"
-msgstr ""
+msgstr "Uma atualização sobre sua submissão"
 
 msgid "emails.decision.notifyOtherAuthors.body"
 msgstr ""
 
-#, fuzzy
 msgid "emails.editorDecisionSendToExternal.subject"
-msgstr "Decisão editorial"
+msgstr "A sua submissão foi enviada para revisão"
 
 #, fuzzy
 msgid "emails.editorDecisionSendToExternal.body"
@@ -82,7 +79,6 @@ msgstr ""
 "<br />\n"
 "URL da submissão: {$submissionUrl}"
 
-#, fuzzy
 msgid "emails.editorDecisionSendToProduction.subject"
 msgstr "Próximos passos para publicar a sua submissão"
 
@@ -96,9 +92,8 @@ msgstr ""
 "<br />\n"
 "URL da submissão : {$submissionUrl}"
 
-#, fuzzy
 msgid "emails.editorDecisionRevisions.subject"
-msgstr "A sua submissão foi revista e encorajamo-lo a inserir revisões"
+msgstr "A sua submissão foi revista e encorajamo-lo(a) a inserir revisões"
 
 #, fuzzy
 msgid "emails.editorDecisionRevisions.body"
@@ -110,7 +105,6 @@ msgstr ""
 "<br />\n"
 "A decisão é: Revisões Requeridas"
 
-#, fuzzy
 msgid "emails.editorDecisionResubmit.subject"
 msgstr "A sua submissão foi revista - por favor reveja e volte a submeter"
 
@@ -124,7 +118,6 @@ msgstr ""
 "<br />\n"
 "A decisão é: Submeter Novamente Para Revisão"
 
-#, fuzzy
 msgid "emails.editorDecisionDecline.subject"
 msgstr "A sua submissão foi recusada"
 
@@ -138,7 +131,6 @@ msgstr ""
 "<br />\n"
 "A decisão é: Rejeitar"
 
-#, fuzzy
 msgid "emails.editorRecommendation.subject"
 msgstr "Recomendação Editorial"
 
@@ -154,7 +146,6 @@ msgstr ""
 "p><p>Encontro-me ao dispor para responder a qualquer pergunta.</"
 "p><p>Cumprimentos,</p><p>{$senderName}</p>"
 
-#, fuzzy
 msgid "emails.copyeditRequest.subject"
 msgstr ""
 "A submissão {$submissionId} está pronta para edição de texto para "
@@ -181,24 +172,23 @@ msgstr ""
 "Nome de utilizador: {$recipientUsername}"
 
 msgid "emails.editorDecisionNewReviewRound.subject"
-msgstr ""
+msgstr "Sua submissão foi enviada para outra ronda de revisão"
 
 msgid "emails.editorDecisionNewReviewRound.body"
 msgstr ""
 
 msgid "emails.editorDecisionRevertDecline.subject"
-msgstr ""
+msgstr "Revertemos a decisão de rejeitar a submissão"
 
 msgid "emails.editorDecisionRevertDecline.body"
 msgstr ""
 
 msgid "emails.editorDecisionRevertInitialDecline.subject"
-msgstr ""
+msgstr "Revertemos a decisão de rejeitar a submissão"
 
 msgid "emails.editorDecisionRevertInitialDecline.body"
 msgstr ""
 
-#, fuzzy
 msgid "emails.editorDecisionInitialDecline.subject"
 msgstr "A sua submissão foi recusada"
 
@@ -214,78 +204,91 @@ msgstr ""
 "A decisão é: Rejeitar a Submissão"
 
 msgid "emails.editorialReminder.subject"
-msgstr ""
+msgstr "Tarefas editoriais excepcionais para {$contextName}"
 
 msgid "emails.editorialReminder.body"
 msgstr ""
 
 msgid "discussion.notification.description"
 msgstr ""
+"Este e-mail é enviado quando um utilizador cria uma nova discussão ou "
+"responde a uma discussão existente"
 
 msgid "emails.editorDecisionBackFromProduction.subject"
-msgstr ""
+msgstr "A submissão foi enviada de volta para edição de texto"
 
 msgid "emails.editorDecisionBackFromProduction.body"
 msgstr ""
 
 msgid "emails.editorDecisionBackFromCopyediting.subject"
-msgstr ""
+msgstr "A submissão foi enviada novamente para avaliação"
 
 msgid "emails.editorDecisionBackFromCopyediting.body"
 msgstr ""
 
 msgid "emails.editorDecisionCancelReviewRound.subject"
-msgstr ""
+msgstr "Uma ronda de avaliação da sua submissão foi cancelada"
 
 msgid "emails.editorDecisionCancelReviewRound.body"
 msgstr ""
 
 msgid "emails.reviewResendRequest.subject"
-msgstr ""
+msgstr "A solicitar novamente a sua avaliação para {$contextName}"
 
 msgid "emails.reviewResendRequest.body"
 msgstr ""
 
 msgid "emails.footer.unsubscribe"
 msgstr ""
+"<br><br>—<br><a href=\"{$unsubscribeUrl}\">Cancelar subscrição</a> de e-"
+"mails enviados por <a href=\"{$contextUrl}\">{$contextName}</a>."
 
 msgid "emails.footer.unsubscribe.discussion"
 msgstr ""
+"<br><br>—<br>Responda a este comentário em <a href=\"{$submissionUrl}\""
+">#{$submissionId} {$authorsShort}</a> ou <a href=\"{$unsubscribeUrl}\" "
+">cancelar subscrição</a> de e-mails enviados por <a href=\"{$contextUrl}\""
+">{$contextName}</a>."
 
 msgid "emails.footer.unsubscribe.automated"
 msgstr ""
+"<br><br>—<br>Esta é uma mensagem automática de <a href=\"{$contextUrl}\""
+">{$contextName}</a>. Pode <a href=\"{$unsubscribeUrl}\">cancelar a "
+"subscrição</a> deste e-mail a qualquer momento."
 
 msgid "emailTemplate.variable.unsubscribe"
-msgstr ""
+msgstr "O link para cancelar a subscrição deste e-mail."
 
-#, fuzzy
 msgid "emails.discussion.subject"
-msgstr "Uma mensagem relativa {$contextName}"
+msgstr "Uma mensagem de {$contextName}"
 
 msgid "emails.discussion.body"
 msgstr "Escreva a sua mensagem."
 
 msgid "emails.versionCreated.subject"
-msgstr ""
+msgstr "Foi criada uma nova versão para {$submissionTitle}"
 
 msgid "emails.versionCreated.body"
 msgstr ""
 
 msgid "emails.reviewComplete.subject"
 msgstr ""
+"Avaliação concluída: {$reviewerName} recomenda {$reviewRecommendation} para "
+"#{$submissionId} {$authorsShort} — {$submissionTitle}"
 
 msgid "emails.reviewComplete.body"
 msgstr ""
 
 msgid "emails.reviewEdit.subject"
-msgstr ""
+msgstr "A tarefa de avaliação foi alterada em {$contextName}"
 
 msgid "emails.reviewEdit.body"
 msgstr ""
 
-#, fuzzy
 msgid "emails.reviewConfirm.subject"
-msgstr "Disponível para realizar a revisão"
+msgstr ""
+"Revisão aceite: {$reviewerName} aceitou rever a submissão #{$submissionId} "
+"{$authorsShort} — {$submissionTitle}"
 
 #, fuzzy
 msgid "emails.reviewConfirm.body"
@@ -299,19 +302,23 @@ msgstr ""
 "{$senderName}"
 
 msgid "emails.submissionSavedForLater.subject"
-msgstr ""
+msgstr "Retome a sua submissão em {$contextName}"
 
 msgid "emails.submissionSavedForLater.body"
 msgstr ""
 
 msgid "emails.submissionNeedsEditor.subject"
 msgstr ""
+"Esta nova submissão precisa que lhe seja designado um editor: "
+"{$submissionTitle}"
 
 msgid "emails.submissionNeedsEditor.body"
 msgstr ""
 
 msgid "emails.submissionAckNotUser.description"
 msgstr ""
+"Este e-mail é enviado automaticamente para os autores nomeados numa nova "
+"submissão que não sejam o autor da submissão."
 
 msgid "emails.submissionAckNotAuthor.subject"
 msgstr "Confirmação da submissão"
@@ -332,3 +339,80 @@ msgstr ""
 #~ msgstr ""
 #~ "Este e-mail é enviado pelo Editor de Secção ao Revisor para confirmar a "
 #~ "receção e agradecer ao revisor pela conclusão da revisão."
+
+msgid "emails.orcidCollectAuthorId.subject"
+msgstr "Submissão ao ORCID"
+
+msgid "emails.orcidCollectAuthorId.body"
+msgstr ""
+"Caro(a) {$recipientName},<br/>\n"
+"<br/>\n"
+"O seu nome foi indicado como autor de um manuscrito submetido à revista "
+"{$contextName}. <br/>\n"
+"<br/>\n"
+"Para confirmar a sua autoria, por favor adicione o seu identificador ORCID à "
+"submissão visitando a página indicada abaixo.<br/>\n"
+"<br/>\n"
+"<a href=\"{$authorOrcidUrl}\"><img id=\"orcid-id-logo\" src=\""
+"https://info.orcid.org/sites/default/files/images/orcid_wp-content/uploads/"
+"2020/12/ORCIDiD_icon16x16.png\" width='16' height='16' alt=\"ORCID iD icon\" "
+"style=\"display: block; margin: 0 .5em 0 0; padding: 0; float: left;\"/>"
+"Registe ou entre no seu ORCID</a><br/>\n"
+"<br/>\n"
+"<br/>\n"
+"<a href=\"{$orcidAboutUrl}\">Mais informação sobre o ORCID em "
+"{$contextName}</a><br/>\n"
+"<br/>\n"
+"Não hesite em contactar-nos para qualquer  questão.<br/>\n"
+"<br/>\n"
+"{$principalContactSignature}<br/>\n"
+
+msgid "emails.orcidCollectAuthorId.description"
+msgstr "Este e-mail é usado para recolher os identificadores ORCID dos autores."
+
+msgid "emails.orcidRequestAuthorAuthorization.description"
+msgstr ""
+"Este template de email é utilizado para solicitar o acesso ao ORCID dos "
+"autores."
+
+msgid "emails.orcidRequestAuthorAuthorization.subject"
+msgstr "Pedido de Associação de Identificador ORCID"
+
+msgid "emails.orcidRequestAuthorAuthorization.body"
+msgstr ""
+"Caro(a) {$recipientName},<br>\n"
+"<br>\n"
+"Foi adicionado como autor do manuscrito da submissão \"{$submissionTitle}\" "
+"feita a {$contextName}.\n"
+"<br>\n"
+"<br>\n"
+"Por favor, conceda-nos permissão para adicionar o seu ORCID a esta submissão "
+"e também para adicionar a submissão ao seu perfil do ORCID como publicação. "
+"<br>\n"
+"Consulte o site oficial do ORCID, entre na sua conta e autorize o acesso "
+"seguindo as instruções que lhe fornecemos.<br>\n"
+"<a href=\"{$authorOrcidUrl}\"><img id=\"orcid-id-logo\" src=\""
+"https://info.orcid.org/sites/default/files/images/orcid_wp-content/uploads/"
+"2020/12/ORCIDiD_icon16x16.png\" width='16' height='16' alt=\"ORCID iD icon\" "
+"style=\"display: block; margin: 0 .5em 0 0; padding: 0; float: left;\"/>"
+"Registar ou Entrar no seu ORCID iD</a><br/>\n"
+"<br>\n"
+"<br>\n"
+"<a href=\"{$orcidAboutUrl}\">Saiba mais sobre o ORCID em {$contextName}</a><"
+"br/>\n"
+"<br>\n"
+"Se tiver alguma questão adicional, entre em contacto connosco.<br>\n"
+"<br>\n"
+"{$principalContactSignature}<br>\n"
+
+msgid "orcid.orcidRequestAuthorAuthorization.name"
+msgstr "orcidRequestAuthorAuthorization"
+
+msgid "orcid.orcidCollectAuthorId.name"
+msgstr "orcidCollectAuthorId"
+
+msgid "emailTemplate.variable.authorOrcidUrl"
+msgstr "Link de autorização ORCID OAuth"
+
+msgid "emailTemplate.variable.orcidAboutUrl"
+msgstr "URL para a página sobre ORCID"

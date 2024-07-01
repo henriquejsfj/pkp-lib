@@ -249,7 +249,7 @@ msgstr "ჩანაწერის ნახვა"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "წარმატებული რეგისტრაციის შეტყობინება"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI წარმატებით განახლდა"
 
 msgid "manager.dois.registration.depositDois"
@@ -2033,24 +2033,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "ავტორს მოსთხოვეთ შესთავაზოს საკვანძო სიტყვები, სანამ მიიღებს წარდგენას."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"ენა მიუთითებს ნაწარმოების ძირითად ენაზე ენის კოდის (\"en\") გამოყენებით, "
-"ქვეყნის არასავალდებულო კოდით (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "ენების მეტამონაცემების ჩართვა"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "არ მოითხოვოთ წარდგენის ენები ავტორისგან წარდგენის დროს."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "სთხოვეთ ავტორს წარდგენის დროს მიუთითოს წარდგენის ენები."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"მოითხოვეთ ავტორი შეიტანოს წარდგენის ენები, სანამ მიიღებს მათ წარდგენას."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "წარდგენისას დაცულია ნებისმიერი უფლებები, რომელიც შეიძლება მოიცავდეს "
@@ -2378,16 +2360,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "ეს ბმული გამოჩნდება მხოლოდ იმ შემთხვევაში, თუ შეავსეთ ჟურნალის შესახებ "
 "განყოფილება განყოფილებაში პარამეტრები > ჟურნალი."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"მიჰყევით გვერდს, სადაც ნაჩვენებია Masthead-ის შინაარსი პარამეტრებში > "
-"ჟურნალი."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"ეს ბმული მხოლოდ იმ შემთხვევაში გამოჩნდება, თუ შეავსეთ სარედაქციო ჯგუფის "
-"განყოფილება პარამეტრები > ჟურნალი."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "გვერდის ბმული, რომელიც აჩვენებს წარდგენის ინსტრუქციას."
@@ -3579,3 +3551,11 @@ msgstr ""
 
 #~ msgid "manager.setup.enableDois.enable"
 #~ msgstr "DOI-ების ჩართვა"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"ავტორებისაგან ინტერესთა კონფლიქტის დეკლარაციის წარმოდგენა, გამოგზავნილ "
+"მასალასთან ერთად."
+
+msgid "manager.setup.masthead"
+msgstr "გამომავალი მონაცემები"

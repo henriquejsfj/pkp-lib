@@ -259,7 +259,7 @@ msgstr "Podgląd rekordu"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Zapisy poprawnej rejestracji"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI zarejestrowane pomyślnie"
 
 msgid "manager.dois.registration.depositDois"
@@ -2073,25 +2073,6 @@ msgstr ""
 "Wymagaj od autora podania danych dot. Słów kluczowych zanim zgłoszenie "
 "zostanie zaakceptowane do wydania."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Język oznacza główny język tekstu oznaczony wg kodu (\"pl\") z opcją w "
-"postaci (\"pl_PL\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Włącz metadane Język"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Nie wymagaj podania danych dot. Języka w trakcie zgłaszania tekstu."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Poproś autora o podanie danych dot. Języka w trakcie składania tekstu."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Wymagaj od autora podania danych dot. Języka zanim zgłoszenie zostanie "
-"zaakceptowane do wydania."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Dowolne prawa które są częścią tego zgłoszenia, które są częścią czyjejś "
@@ -2434,15 +2415,6 @@ msgstr ""
 msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Link będzie wyświetlany w przypadku wypełnienia sekcji O czasopiśmie na "
-"stronie Ustawienia > Czasopismo."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Link do strony wyświetlającej stopkę redakcyjną w Ustawienia > Czasopismo."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Link będzie wyświetlany w przypadku wypełnienia sekcji Zespół redakcyjny na "
 "stronie Ustawienia > Czasopismo."
 
 msgid "manager.navigationMenus.submissions.description"
@@ -3762,3 +3734,9 @@ msgid "plugins.importexport.common.error.publicationCoverImageMissing"
 msgstr ""
 "Obraz okładki publikacji {$id} nie został wyeksportowany, ponieważ "
 "zawierający go plik nie został znaleziony w ścieżce \"{$path}\"."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr "Wymagaj od autorów oświadczenia o zbieżności zainteresowań."
+
+msgid "manager.setup.masthead"
+msgstr "Stopka redakcyjna"

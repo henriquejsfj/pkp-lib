@@ -251,7 +251,7 @@ msgstr "Visa post"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Meddelande om avklarad registrering"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI:er har uppdaterats"
 
 msgid "manager.dois.registration.depositDois"
@@ -2027,23 +2027,6 @@ msgstr "Be författaren att föreslå nyckelord vid inskickandet av bidrag."
 msgid "manager.setup.metadata.keywords.require"
 msgstr "Kräv att författaren föreslår nyckelord innan bidraget accepteras."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Språk anger arbetets primära språk, genom att använda språkkod (\"en\") med "
-"en frivillig landkod (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Gör det möjligt att lägga in metadata om språk"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Kräv inte att författaren ska ange språk vid inskickandet av bidrag."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Be författaren att ange bidragets språk vid inskickandet."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr "Kräv att författaren anger bidragets språk innan bidraget accepteras."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Immateriella rättigheter till bidraget som t.ex. upphovsrätt, patent, eller "
@@ -2387,16 +2370,6 @@ msgstr ""
 msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Den här länken visas bara om du har fyllt i sektionen Om tidskriften under "
-"Inställningar > Tidskrift."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Länka till en sida som visar innehållet i Redaktionsruta i Inställningar > "
-"Tidskrift."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Den här länken visas bara om du har fyllt i sektionen Redaktionsruta under "
 "Inställningar > Tidskrift."
 
 msgid "manager.navigationMenus.submissions.description"
@@ -3589,3 +3562,11 @@ msgstr ""
 #~ msgstr ""
 #~ "Det här e-postmeddelandet meddelar automatiskt anknutna redaktörer om en "
 #~ "ny version av publikationen"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Författare måste skicka in en intressekonfliktsförklaring i samband med att "
+"bidraget skickas in."
+
+msgid "manager.setup.masthead"
+msgstr "Redaktionsruta"

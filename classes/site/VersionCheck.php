@@ -3,13 +3,11 @@
 /**
  * @file classes/site/VersionCheck.php
  *
- * Copyright (c) 2014-2021 Simon Fraser University
- * Copyright (c) 2000-2021 John Willinsky
+ * Copyright (c) 2014-2024 Simon Fraser University
+ * Copyright (c) 2000-2024 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class VersionCheck
- *
- * @ingroup site
  *
  * @see Version
  *
@@ -23,7 +21,6 @@ use DateInterval;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use PKP\config\Config;
-use PKP\core\PKPString;
 use PKP\db\DAORegistry;
 use PKP\file\FileManager;
 use SimpleXMLElement;
@@ -37,10 +34,8 @@ class VersionCheck
 
     /**
      * Return information about the latest available version.
-     *
-     * @return array
      */
-    public static function getLatestVersion()
+    public static function getLatestVersion(): array
     {
         $application = Application::get();
         $includeId = Application::isInstalled() &&
@@ -64,10 +59,8 @@ class VersionCheck
 
     /**
      * Return the currently installed database version.
-     *
-     * @return Version
      */
-    public static function getCurrentDBVersion()
+    public static function getCurrentDBVersion(): Version
     {
         $versionDao = DAORegistry::getDAO('VersionDAO'); /** @var VersionDAO $versionDao */
         return $versionDao->getCurrentVersion();
@@ -123,34 +116,12 @@ class VersionCheck
     }
 
     /**
-     * Find the applicable patch for the current code version (if available).
-     *
-     * @param array $versionInfo as returned by parseVersionXML()
-     * @param Version $codeVersion as returned by getCurrentCodeVersion()
-     *
-     * @return string
-     */
-    public static function getPatch($versionInfo, $codeVersion = null)
-    {
-        if (!isset($codeVersion)) {
-            $codeVersion = self::getCurrentCodeVersion();
-        }
-        if (isset($versionInfo['patch'][$codeVersion->getVersionString()])) {
-            return $versionInfo['patch'][$codeVersion->getVersionString()];
-        }
-        return null;
-    }
-
-    /**
      * Checks whether the given version file exists and whether it
      * contains valid data. Returns a Version object if everything
      * is ok, otherwise throws an Exception.
      *
-     * @param string $versionFile
-     *
-     * @return Version
      */
-    public static function getValidPluginVersionInfo($versionFile)
+    public static function getValidPluginVersionInfo($versionFile): Version
     {
         $fileManager = new FileManager();
         if ($fileManager->fileExists($versionFile)) {
@@ -168,7 +139,7 @@ class VersionCheck
         $pluginVersion = $versionInfo['version'];
         $namesToValidate = [$pluginVersion->getProduct(), $productType[1]];
         foreach ($namesToValidate as $nameToValidate) {
-            if (!PKPString::regexp_match('/[a-z][a-zA-Z0-9]+/', $nameToValidate)) {
+            if (!preg_match('/[a-z][a-zA-Z0-9]+/', $nameToValidate)) {
                 throw new Exception(__('manager.plugins.versionFileInvalid'));
             }
         }
@@ -180,11 +151,16 @@ class VersionCheck
      * Checks the application's version against the latest version
      * on the PKP servers.
      *
-     * @return string|false Version description or false if no newer version
+     * @return Version description or false if no newer version
      */
-    public static function checkIfNewVersionExists()
+    public static function checkIfNewVersionExists(): bool|string
     {
-        $versionInfo = self::getLatestVersion();
+        try {
+            $versionInfo = self::getLatestVersion();
+        } catch (\GuzzleHttp\Exception\TransferException $e) {
+            error_log('Failed to retrieve the latest version info: ' . $e->getMessage());
+            return false;
+        }
         $latestVersion = $versionInfo['release'];
 
         $currentVersion = self::getCurrentDBVersion();

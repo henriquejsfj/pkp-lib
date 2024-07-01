@@ -19,7 +19,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use PKP\db\DAORegistry;
 use PKP\install\DowngradeNotSupportedException;
 
 abstract class MergeLocalesMigration extends \PKP\migration\Migration
@@ -150,7 +149,12 @@ abstract class MergeLocalesMigration extends \PKP\migration\Migration
                 ->pluck('setting_value');
 
             if (!$blocks->isEmpty()) {
-                $blocksArray = json_decode($blocks[0], true);
+                $blockNames = $blocks->first();
+
+                $blocksArray = json_decode($blockNames, true);
+                if (is_null($blocksArray)) {
+                    $blocksArray = unserialize($blockNames);
+                }
 
                 foreach ($blocksArray as $block) {
                     foreach ($blockLocalizedSettingNames as $blockLocalizedSettingName) {
@@ -165,11 +169,6 @@ abstract class MergeLocalesMigration extends \PKP\migration\Migration
                         }
                     }
                 }
-
-                $pluginSettingsDao = DAORegistry::getDAO('PluginSettingsDAO'); /** @var PluginSettingsDAO $pluginSettingsDao */
-
-                $cache = $pluginSettingsDao->_getCache($contextId, $blockPluginName);
-                $cache->flush();
             }
         }
     }

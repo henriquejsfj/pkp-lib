@@ -150,7 +150,7 @@ class HighlightsController extends PKPBaseController
         $highlights = $collector->getMany();
 
         return response()->json([
-            'itemsMax' => $collector->limit(null)->offset(null)->getCount(),
+            'itemsMax' => $collector->getCount(),
             'items' => Repo::highlight()->getSchemaMap()->summarizeMany($highlights)->values(),
         ], Response::HTTP_OK);
     }
@@ -164,7 +164,7 @@ class HighlightsController extends PKPBaseController
 
         $params = $this->convertStringsToSchema(PKPSchemaService::SCHEMA_HIGHLIGHT, $illuminateRequest->input());
         $params['contextId'] = $context?->getId();
-        if (!$params['sequence']) {
+        if (!($params['sequence'] ?? null)) {
             $params['sequence'] = Repo::highlight()->getNextSequence($context?->getId());
         }
 

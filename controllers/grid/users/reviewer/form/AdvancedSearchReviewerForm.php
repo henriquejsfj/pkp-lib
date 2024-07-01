@@ -32,8 +32,8 @@ use PKP\linkAction\request\AjaxAction;
 use PKP\mail\mailables\ReviewRequest;
 use PKP\mail\mailables\ReviewRequestSubsequent;
 use PKP\security\Role;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\reviewAssignment\ReviewAssignment;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
 use PKP\submission\reviewRound\ReviewRound;
 use PKP\submission\reviewRound\ReviewRoundDAO;
 
@@ -95,7 +95,7 @@ class AdvancedSearchReviewerForm extends ReviewerForm
     public function fetch($request, $template = null, $display = false)
     {
         // Get submission context
-        $submissionContext = Services::get('context')->get($this->getSubmission()->getContextId());
+        $submissionContext = Services::get('context')->get($this->getSubmission()->getData('contextId'));
 
         // Pass along the request vars
         $actionArgs = $request->getUserVars();
@@ -112,12 +112,14 @@ class AdvancedSearchReviewerForm extends ReviewerForm
 
         $this->setReviewerFormAction($advancedSearchAction);
 
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
-
         // get reviewer IDs already assign to this submission and this round
-        $reviewAssignments = $reviewAssignmentDao->getBySubmissionId($this->getSubmissionId(), $this->getReviewRound()->getId());
+        $reviewAssignments = Repo::reviewAssignment()->getCollector()
+            ->filterBySubmissionIds([$this->getSubmissionId()])
+            ->filterByReviewRoundIds([$this->getReviewRound()->getId()])
+            ->getMany();
+
         $currentlyAssigned = [];
-        if (!empty($reviewAssignments)) {
+        if ($reviewAssignments->isNotEmpty()) {
             foreach ($reviewAssignments as $reviewAssignment) {
                 $currentlyAssigned[] = (int) $reviewAssignment->getReviewerId();
             }
@@ -126,12 +128,11 @@ class AdvancedSearchReviewerForm extends ReviewerForm
         // Get user IDs already assigned to this submission, and admins and
         // managers who may have access to author identities and can not guarantee
         // anonymous reviews
-        $warnOnAssignment = [];
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-        $stageAssignmentResults = $stageAssignmentDao->getBySubmissionAndStageId($this->getSubmissionId());
-        while ($stageAssignment = $stageAssignmentResults->next()) {
-            $warnOnAssignment[] = $stageAssignment->getUserId();
-        }
+        // Replaces StageAssignmentDAO::getBySubmissionAndStageId
+        $warnOnAssignment = StageAssignment::withSubmissionIds([$this->getSubmissionId()])
+            ->get()
+            ->pluck('userId')
+            ->all();
 
         // Get a list of users in the managerial and admin user groups
         // Managers are assigned only to contexts; site admins are assigned only to site.
@@ -185,7 +186,7 @@ class AdvancedSearchReviewerForm extends ReviewerForm
             $lastReviewRound = $reviewRoundDao->getReviewRound($this->getSubmissionId(), $this->getReviewRound()->getStageId(), $previousRound);
 
             if ($lastReviewRound) {
-                $lastReviewAssignments = $reviewAssignmentDao->getByReviewRoundId($lastReviewRound->getId());
+                $lastReviewAssignments = Repo::reviewAssignment()->getCollector()->filterByReviewerIds([$lastReviewRound->getId()])->getMany();
                 foreach ($lastReviewAssignments as $reviewAssignment) {
                     if (in_array($reviewAssignment->getStatus(), [ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_THANKED, ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_COMPLETE])) {
                         $lastRoundReviewerIds[] = (int) $reviewAssignment->getReviewerId();

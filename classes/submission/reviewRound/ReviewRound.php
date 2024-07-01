@@ -23,10 +23,9 @@ namespace PKP\submission\reviewRound;
 
 use APP\decision\Decision;
 use APP\facades\Repo;
-use PKP\db\DAORegistry;
-use PKP\stageAssignment\StageAssignmentDAO;
+use PKP\security\Role;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\reviewAssignment\ReviewAssignment;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
 
 class ReviewRound extends \PKP\core\DataObject
 {
@@ -197,20 +196,25 @@ class ReviewRound extends \PKP\core\DataObject
         }
 
         // Determine the round status by looking at the recommendOnly editor assignment statuses
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
         $pendingRecommendations = false;
         $recommendationsFinished = true;
         $recommendationsReady = false;
-        $editorsStageAssignments = $stageAssignmentDao->getEditorsAssignedToStage($this->getSubmissionId(), $this->getStageId());
+
+        // Replaces StageAssignmentDAO::getEditorsAssignedToStage
+        $editorsStageAssignments = StageAssignment::withSubmissionIds([$this->getSubmissionId()])
+            ->withStageIds([$this->getStageId()])
+            ->withRoleIds([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])
+            ->get();
+
         foreach ($editorsStageAssignments as $editorsStageAssignment) {
-            if ($editorsStageAssignment->getRecommendOnly()) {
+            if ($editorsStageAssignment->recommendOnly) {
                 $pendingRecommendations = true;
                 // Get recommendation from the assigned recommendOnly editor
                 $decisions = Repo::decision()->getCollector()
                     ->filterBySubmissionIds([$this->getSubmissionId()])
                     ->filterByStageIds([$this->getStageId()])
                     ->filterByReviewRoundIds([$this->getId()])
-                    ->filterByEditorIds([$editorsStageAssignment->getUserId()])
+                    ->filterByEditorIds([$editorsStageAssignment->userId])
                     ->getCount();
 
                 if (!$decisions) {
@@ -232,8 +236,10 @@ class ReviewRound extends \PKP\core\DataObject
         $anyOverdueReview = false;
         $anyIncompletedReview = false;
         $anyUnreadReview = false;
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
-        $reviewAssignments = $reviewAssignmentDao->getByReviewRoundId($this->getId());
+        $reviewAssignments = Repo::reviewAssignment()->getCollector()
+            ->filterByReviewRoundIds([$this->getId()])
+            ->getMany();
+
         foreach ($reviewAssignments as $reviewAssignment) {
             assert($reviewAssignment instanceof ReviewAssignment);
 
@@ -263,7 +269,7 @@ class ReviewRound extends \PKP\core\DataObject
         // Find the correct review round status based on the state of
         // the current review assignments. The check order matters: the
         // first conditions override the others.
-        if (empty($reviewAssignments)) {
+        if ($reviewAssignments->isEmpty()) {
             return self::REVIEW_ROUND_STATUS_PENDING_REVIEWERS;
         } elseif ($anyOverdueReview) {
             return self::REVIEW_ROUND_STATUS_REVIEWS_OVERDUE;

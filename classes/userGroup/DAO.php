@@ -20,7 +20,9 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
+use PKP\core\Core;
 use PKP\core\EntityDAO;
+use PKP\core\PKPApplication;
 use PKP\core\traits\EntityWithParent;
 use PKP\services\PKPSchemaService;
 
@@ -54,6 +56,7 @@ class DAO extends EntityDAO
         'showTitle' => 'show_title',
         'permitSelfRegistration' => 'permit_self_registration',
         'permitMetadataEdit' => 'permit_metadata_edit',
+        'masthead' => 'masthead',
     ];
 
     /**
@@ -79,7 +82,7 @@ class DAO extends EntityDAO
     {
         return $query
             ->getQueryBuilder()
-            ->count();
+            ->getCountForPagination();
     }
 
     /**
@@ -118,9 +121,13 @@ class DAO extends EntityDAO
      */
     public function fromRow(object $row): UserGroup
     {
-        $userGroup = parent::fromRow($row);
+        // The database layer uses null for context_id when a user_group is site-wide
+        // but the PHP layer uses a CONTEXT_SITE constant. Map from DB to PHP.
+        if ($row->context_id === null) {
+            $row->context_id = PKPApplication::CONTEXT_SITE;
+        }
 
-        return $userGroup;
+        return parent::fromRow($row);
     }
 
     /**
@@ -152,11 +159,22 @@ class DAO extends EntityDAO
      */
     public function getUserCountByContextId(?int $contextId = null): Collection
     {
+        $currentDateTime = Core::getCurrentDate();
         return DB::table('user_groups', 'ug')
             ->join('user_user_groups AS uug', 'uug.user_group_id', '=', 'ug.user_group_id')
             ->join('users AS u', 'u.user_id', '=', 'uug.user_id')
             ->when($contextId !== null, fn (Builder $query) => $query->where('ug.context_id', '=', $contextId))
             ->where('u.disabled', '=', 0)
+            ->where(
+                fn (Builder $q) =>
+                $q->where('uug.date_start', '<=', $currentDateTime)
+                    ->orWhereNull('uug.date_start')
+            )
+            ->where(
+                fn (Builder $q) =>
+                $q->where('uug.date_end', '>', $currentDateTime)
+                    ->orWhereNull('uug.date_end')
+            )
             ->groupBy('ug.user_group_id')
             ->select('ug.user_group_id')
             ->selectRaw('COUNT(0) AS count')

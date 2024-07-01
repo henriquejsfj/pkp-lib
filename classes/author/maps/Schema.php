@@ -100,13 +100,18 @@ class Schema extends \PKP\core\maps\Schema
                 case 'fullName':
                     $output[$prop] = $item->getFullName();
                     break;
+                case 'hasVerifiedOrcid':
+                    $output[$prop] = $item->hasVerifiedOrcid();
+                    break;
                 default:
                     $output[$prop] = $item->getData($prop);
                     break;
             }
         }
 
-        $output = $this->schemaService->addMissingMultilingualValues($this->schema, $output, $this->context->getSupportedSubmissionLocales());
+        $locales = Repo::submission()->get(Repo::publication()->get($item->getData('publicationId'))->getData('submissionId'))->getPublicationLanguages($this->context->getSupportedSubmissionMetadataLocales());
+
+        $output = $this->schemaService->addMissingMultilingualValues($this->schema, $output, $locales);
 
         ksort($output);
 

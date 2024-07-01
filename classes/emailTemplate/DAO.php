@@ -19,6 +19,7 @@ use APP\facades\Repo;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
+use Illuminate\Support\Str;
 use PKP\core\EntityDAO;
 use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
@@ -26,7 +27,6 @@ use PKP\db\XMLDAO;
 use PKP\facades\Locale;
 use PKP\site\Site;
 use PKP\site\SiteDAO;
-use Stringy\Stringy;
 
 /**
  * @template T of EmailTemplate
@@ -147,8 +147,7 @@ class DAO extends EntityDAO
     {
         return $query
             ->getQueryBuilder()
-            ->get()
-            ->count();
+            ->getCountForPagination();
     }
 
     /**
@@ -379,7 +378,11 @@ class DAO extends EntityDAO
                 ->exists();
 
             if (!$exists) {
-                throw new Exception('Tried to install email template as an alternate to `' . $alternateTo . '`, but no default template exists with this key.');
+                trigger_error(
+                    'Tried to install email template as an alternate to `' . $alternateTo . '`, but no default template exists with this key. Installing ' . $alternateTo . ' email template first',
+                    E_USER_WARNING
+                );
+                $this->installEmailTemplates(Repo::emailTemplate()->dao->getMainEmailTemplatesFilename(), [], $alternateTo);
             }
 
             DB::table($this->table)->insert([
@@ -388,56 +391,6 @@ class DAO extends EntityDAO
                 'alternate_to' => $attrs['alternateTo'],
             ]);
         }
-    }
-
-    /**
-     * Install email template localized data from an XML file.
-     *
-     * @deprecated Since OJS/OMP 3.2, this data should be supplied via the non-localized email template list and PO files. (pkp/pkp-lib#5461)
-     *
-     * @param string $templateDataFile Filename to install
-     * @param string $locale Locale of template(s) to install
-     * @param string|null $emailKey If specified, the key of the single template
-     * to install (otherwise all are installed)
-     *
-     * @return array|boolean
-     */
-    public function installEmailTemplateData(
-        string $templateDataFile,
-        string $locale,
-        ?string $emailKey = null
-    ): bool {
-        $xmlDao = new XMLDAO();
-        $data = $xmlDao->parse($templateDataFile);
-        if (!$data) {
-            return false;
-        }
-
-        foreach ($data->getChildren() as $emailNode) {
-            $subject = $emailNode->getChildValue('subject');
-            $body = $emailNode->getChildValue('body');
-
-            // Translate variable contents
-            foreach ([&$subject, &$body] as &$var) {
-                $var = preg_replace_callback('{{translate key="([^"]+)"}}', fn ($matches) => __($matches[1], [], $locale), $var);
-            }
-
-            if ($emailKey && $emailKey != $emailNode->getAttribute('key')) {
-                continue;
-            }
-            DB::table($this->defaultTable)
-                ->where('email_key', $emailNode->getAttribute('key'))
-                ->where('locale', $locale)
-                ->delete();
-
-            DB::table($this->defaultTable)->insert([
-                'email_key' => $emailNode->getAttribute('key'),
-                'locale' => $locale,
-                'subject' => $subject,
-                'body' => $body,
-            ]);
-        }
-        return true;
     }
 
     /**
@@ -478,11 +431,8 @@ class DAO extends EntityDAO
      */
     protected function getUniqueKey(EmailTemplate $emailTemplate): string
     {
-        $key = Stringy::create($emailTemplate->getLocalizedData('name'))
-            ->slugify()
-            ->regexReplace('[^a-z0-9\-\_.]', '')
-            ->truncate(30)
-            ->toString();
+        $key = (string) Str::of($emailTemplate->getLocalizedData('name'))
+            ->ascii()->kebab()->limit(30, '')->replaceMatches('[^a-z0-9\-\_.]', '');
 
         if (!$key) {
             $key = uniqid();

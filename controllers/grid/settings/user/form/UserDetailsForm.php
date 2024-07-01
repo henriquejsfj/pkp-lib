@@ -21,16 +21,16 @@ use APP\core\Application;
 use APP\facades\Repo;
 use APP\notification\NotificationManager;
 use APP\template\TemplateManager;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use PKP\core\Core;
 use PKP\core\PKPRequest;
-use PKP\core\PKPString;
 use PKP\facades\Locale;
 use PKP\identity\Identity;
 use PKP\mail\mailables\UserCreated;
 use PKP\notification\PKPNotification;
 use PKP\security\Validation;
-use PKP\session\SessionManager;
 use PKP\user\InterestManager;
 use PKP\user\User;
 use Symfony\Component\Mailer\Exception\TransportException;
@@ -58,7 +58,7 @@ class UserDetailsForm extends UserForm
         parent::__construct('controllers/grid/settings/user/form/userDetailsForm.tpl', $userId);
 
         if (isset($author)) {
-            $this->author = & $author;
+            $this->author = &$author;
         } else {
             $this->author = null;
         }
@@ -92,14 +92,14 @@ class UserDetailsForm extends UserForm
             $this->addCheck(new \PKP\form\validation\FormValidatorUsername($this, 'username', 'required', 'user.register.form.usernameAlphaNumeric'));
             $this->addCheck(new \PKP\form\validation\FormValidator($this, 'password', 'required', 'user.profile.form.passwordRequired'));
             $this->addCheck(new \PKP\form\validation\FormValidatorCustom($this, 'password', 'required', 'user.register.form.passwordLengthRestriction', function ($password) use ($form, $site) {
-                return $form->getData('generatePassword') || PKPString::strlen($password) >= $site->getMinPasswordLength();
+                return $form->getData('generatePassword') || Str::length($password) >= $site->getMinPasswordLength();
             }, [], false, ['length' => $site->getMinPasswordLength()]));
             $this->addCheck(new \PKP\form\validation\FormValidatorCustom($this, 'password', 'required', 'user.register.form.passwordsDoNotMatch', function ($password) use ($form) {
                 return $password == $form->getData('password2');
             }));
         } else {
             $this->addCheck(new \PKP\form\validation\FormValidatorCustom($this, 'password', 'optional', 'user.register.form.passwordLengthRestriction', function ($password) use ($form, $site) {
-                return $form->getData('generatePassword') || PKPString::strlen($password) >= $site->getMinPasswordLength();
+                return $form->getData('generatePassword') || Str::length($password) >= $site->getMinPasswordLength();
             }, [], false, ['length' => $site->getMinPasswordLength()]));
             $this->addCheck(new \PKP\form\validation\FormValidatorCustom($this, 'password', 'optional', 'user.register.form.passwordsDoNotMatch', function ($password) use ($form) {
                 return $password == $form->getData('password2');
@@ -122,7 +122,6 @@ class UserDetailsForm extends UserForm
             $user = Repo::user()->getByEmail($email, true);
             return !$user || $user->getId() == $currentUserId;
         }, [$this->userId]));
-        $this->addCheck(new \PKP\form\validation\FormValidatorORCID($this, 'orcid', 'optional', 'user.orcid.orcidInvalid'));
         $this->addCheck(new \PKP\form\validation\FormValidatorPost($this));
         $this->addCheck(new \PKP\form\validation\FormValidatorCSRF($this));
 
@@ -167,7 +166,6 @@ class UserDetailsForm extends UserForm
                 'email' => $user->getEmail(),
                 'userUrl' => $user->getUrl(),
                 'phone' => $user->getPhone(),
-                'orcid' => $user->getOrcid(),
                 'mailingAddress' => $user->getMailingAddress(),
                 'country' => $user->getCountry(),
                 'biography' => $user->getBiography(null), // Localized
@@ -188,7 +186,6 @@ class UserDetailsForm extends UserForm
                 'preferredPublicName' => $author->getPreferredPublicName(null), // Localized
                 'email' => $author->getEmail(),
                 'userUrl' => $author->getUrl(),
-                'orcid' => $author->getOrcid(),
                 'country' => $author->getCountry(),
                 'biography' => $author->getBiography(null), // Localized
             ];
@@ -263,7 +260,6 @@ class UserDetailsForm extends UserForm
             'email',
             'userUrl',
             'phone',
-            'orcid',
             'mailingAddress',
             'country',
             'biography',
@@ -286,7 +282,7 @@ class UserDetailsForm extends UserForm
     /**
      * Get all locale field names
      */
-    public function getLocaleFieldNames()
+    public function getLocaleFieldNames(): array
     {
         return ['biography', 'signature', 'affiliation', Identity::IDENTITY_SETTING_GIVENNAME, Identity::IDENTITY_SETTING_FAMILYNAME, 'preferredPublicName'];
     }
@@ -321,16 +317,10 @@ class UserDetailsForm extends UserForm
         $this->user->setEmail($this->getData('email'));
         $this->user->setUrl($this->getData('userUrl'));
         $this->user->setPhone($this->getData('phone'));
-        $this->user->setOrcid($this->getData('orcid'));
         $this->user->setMailingAddress($this->getData('mailingAddress'));
         $this->user->setCountry($this->getData('country'));
         $this->user->setBiography($this->getData('biography'), null); // Localized
         $this->user->setMustChangePassword($this->getData('mustChangePassword') ? 1 : 0);
-
-        // Users can never view/edit their own gossip fields
-        if (Repo::user()->canCurrentUserGossip($this->user->getId())) {
-            $this->user->setGossip($this->getData('gossip'));
-        }
 
         $site = $request->getSite();
         $availableLocales = $site->getSupportedLocales();
@@ -346,16 +336,20 @@ class UserDetailsForm extends UserForm
         parent::execute(...$functionParams);
 
         if ($this->user->getId() != null) {
+            // Users can never view/edit their own gossip fields
+            if (Repo::user()->canCurrentUserGossip($this->user->getId())) {
+                $this->user->setGossip($this->getData('gossip'));
+            }
+
             if ($this->getData('password') !== '') {
                 $this->user->setPassword(Validation::encryptCredentials($this->user->getUsername(), $this->getData('password')));
 
-                $sessionManager = SessionManager::getManager();
-                $sessionManager->invalidateSessions(
-                    $this->user->getId(),
-                    (int) $this->user->getId() === (int) $request->getUser()->getId()
-                        ? $sessionManager->getUserSession()->getId()
-                        : null
-                );
+                if ((int) $this->user->getId() === (int) $request->getUser()->getId()) {
+                    Application::get()->getRequest()->getSessionGuard()->updateUser($this->user);
+                    $this->user = Auth::logoutOtherDevices($this->getData('password'));
+                } else {
+                    $request->getSessionGuard()->invalidateOtherSessions($this->user->getId());
+                }
             }
 
             Repo::user()->edit($this->user);

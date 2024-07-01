@@ -148,6 +148,18 @@ msgstr "Attach Files"
 msgid "common.attachSelected"
 msgstr "Attach Selected"
 
+msgid "common.editorialMasthead"
+msgstr "Editorial Masthead"
+
+msgid "common.editorialMasthead.peerReviewers"
+msgstr "Peer Reviewers"
+
+msgid "common.editorialMasthead.peerReviewers.description"
+msgstr "The editors express their appreciation of the reviewers for {$year} listed below."
+
+msgid "common.editorialHistory"
+msgstr "Editorial History"
+
 msgid "common.name"
 msgstr "Name"
 
@@ -779,7 +791,7 @@ msgid "common.replaceFile"
 msgstr "Replace file"
 
 msgid "common.requiredField"
-msgstr "* Denotes required field"
+msgstr "Required fields are marked with an asterisk: <abbr class="required" title="required">*</abbr>"
 
 msgid "common.required"
 msgstr "Required"
@@ -1558,6 +1570,15 @@ msgstr "Step {$step}"
 msgid "navigation.submissions"
 msgstr "Submissions"
 
+msgid "navigation.dashboards"
+msgstr "Dashboards"
+
+msgid "navigation.reviewAssignments"
+msgstr "Review Assignments"
+
+msgid "navigation.mySubmissions"
+msgstr "My Submissions"
+
 msgid "navigation.system"
 msgstr "System"
 
@@ -1695,7 +1716,7 @@ msgid "search.cli.rebuildIndex.error"
 msgstr "error"
 
 msgid "search.cli.rebuildIndex.result"
-msgstr "{$numIndexed} articles indexed"
+msgstr "{$numIndexed} articles scheduled for indexation"
 
 msgid "search.coverage"
 msgstr "Coverage"
@@ -1838,6 +1859,12 @@ msgstr "Response Due Date"
 
 msgid "reviewer.submission.reviewDueDate"
 msgstr "Review Due Date"
+
+msgid "reviewer.submission.acceptedOn"
+msgstr "Review Accepted On"
+
+msgid "reviewer.submission.submittedOn"
+msgstr "Review Submitted On"
 
 msgid "submission.task.responseDueDate"
 msgstr "Response Due Date"
@@ -2046,6 +2073,12 @@ msgstr "Expand all"
 
 msgid "list.collapseAll"
 msgstr "Collapse all"
+
+msgid "showAll"
+msgstr "Show All"
+
+msgid "showLess"
+msgstr "Show Less"
 
 msgid "validation.invalidOption"
 msgstr "This is not a valid option."
@@ -2286,3 +2319,9 @@ msgstr "Author added."
 
 msgid "notification.editedAuthor"
 msgstr "Author edited."
+
+msgid "common.sandbox"
+msgstr "Application running in sandbox mode."
+
+msgid "common.fromUntil"
+msgstr "{$from} - {$until}"

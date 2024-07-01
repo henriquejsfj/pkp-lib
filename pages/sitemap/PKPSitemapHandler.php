@@ -26,7 +26,7 @@ use PKP\db\DAORegistry;
 use PKP\navigationMenu\NavigationMenuItem;
 use PKP\navigationMenu\NavigationMenuItemDAO;
 
-define('SITEMAP_XSD_URL', 'https://www.sitemaps.org/schemas/sitemap/0.9');
+define('SITEMAP_XSD_URL', 'http://www.sitemaps.org/schemas/sitemap/0.9');
 
 class PKPSitemapHandler extends Handler
 {
@@ -124,10 +124,6 @@ class PKPSitemapHandler extends Handler
         }
         // About: submissions
         $root->appendChild($this->_createUrlTree($doc, $request->url($context->getPath(), 'about', 'submissions')));
-        // About: editorial team
-        if (!empty($context->getData('editorialTeam'))) {
-            $root->appendChild($this->_createUrlTree($doc, $request->url($context->getPath(), 'about', 'editorialTeam')));
-        }
         // About: contact
         if (!empty($context->getData('mailingAddress')) || !empty($context->getData('contactName'))) {
             $root->appendChild($this->_createUrlTree($doc, $request->url($context->getPath(), 'about', 'contact')));

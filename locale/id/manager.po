@@ -234,7 +234,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1982,29 +1982,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "Mewajibkan penulis untuk menyarankan kata kunci sebelum naskahnya diterima."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Bahasa menunjukkan bahasa utama yang digunakan dalam naskah yang berupa kode "
-"bahasa (\"en\") dengan pilihan kode negara (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Aktifkan metadata bahasa"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"Jangan meminta penulis mencantumkan bahasa yang digunakan dalam naskah saat "
-"menyerahkannya."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Minta penulis untuk mencantumkan bahasa yang digunakan naskah saat "
-"mengirimnya ke jurnal."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Minta penulis untuk memasukkan bahasa yang digunakan dalam naskah sebelum "
-"menerima naskahnya."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Semua hak yang menyertai naskah, yang mungkin mencakupi Hak Kekayaan "
@@ -2352,16 +2329,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Tautan ini hanya akan ditampilkan jika Anda telah mengisi bagian Tentang "
 "Jurnal pada Pengaturan> Jurnal."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Tautan ke halaman yang menampilkan konten Tim Redaksi pada Pengaturan > "
-"Jurnal."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Tautan ini hanya akan ditampilkan jika Anda telah mengisi bagian Tim "
-"Editorial pada Pengaturan > Jurnal."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Tautan ke halaman yang menampilkan petunjuk pengiriman naskah."
@@ -3435,3 +3402,11 @@ msgstr ""
 #~ "Email ini dikirim oleh Editor untuk mengingatkan reviewer bahwa batas "
 #~ "reviewnya telah habis. Email ini digunakan ketika editor secara manual "
 #~ "mengirimkan pengingat kepada reviewer"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Mengharuskan Penulis untuk memberikan pernyataan Konflik Kepentingan dalam "
+"naskah mereka."
+
+msgid "manager.setup.masthead"
+msgstr "Tajuk"

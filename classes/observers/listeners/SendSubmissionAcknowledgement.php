@@ -33,7 +33,6 @@ use PKP\mail\mailables\SubmissionAcknowledgementOtherAuthors;
 use PKP\observers\events\SubmissionSubmitted;
 use PKP\security\Role;
 use PKP\stageAssignment\StageAssignment;
-use PKP\stageAssignment\StageAssignmentDAO;
 use PKP\user\User;
 
 abstract class SendSubmissionAcknowledgement
@@ -42,14 +41,16 @@ abstract class SendSubmissionAcknowledgement
 
     public function handle(SubmissionSubmitted $event)
     {
-        /** @var StageAssignmentDAO $stageAssignmentDao */
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
-        $result = $stageAssignmentDao->getBySubmissionAndRoleIds($event->submission->getId(), [Role::ROLE_ID_AUTHOR]);
-        $assignedUserIds = [];
-        while ($stageAssignment = $result->next()) {
-            /** @var StageAssignment $stageAssignment */
-            $assignedUserIds[] = $stageAssignment->getUserId();
+        if (!$event->context->getData('submissionAcknowledgement')) {
+            return;
         }
+
+        // Replaces StageAssignmentDAO::getBySubmissionAndRoleIds
+        $assignedUserIds = StageAssignment::withSubmissionIds([$event->submission->getId()])
+            ->withRoleIds([Role::ROLE_ID_AUTHOR])
+            ->get()
+            ->pluck('userId')
+            ->all();
 
         $submitterUsers = Repo::user()
             ->getCollector()
@@ -77,6 +78,10 @@ abstract class SendSubmissionAcknowledgement
                 $mailable,
                 $event->submission
             );
+        }
+
+        if ($event->context->getData('submissionAcknowledgement') !== 'allAuthors') {
+            return;
         }
 
         $submitterEmails = $submitterUsers->map(fn (User $user) => $user->getEmail());

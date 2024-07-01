@@ -18,8 +18,8 @@ namespace PKP\user\form;
 
 use APP\core\Application;
 use APP\facades\Repo;
-use PKP\session\SessionManager;
 use PKP\form\Form;
+use PKP\invitation\invitations\ChangeProfileEmailInvite;
 use PKP\user\User;
 
 abstract class BaseProfileForm extends Form
@@ -60,18 +60,23 @@ abstract class BaseProfileForm extends Form
         parent::execute(...$functionArgs);
 
         $request = Application::get()->getRequest();
-        $user = $request->getUser();
+        $user = $request->getUser(); // TODO:: ?? Why not $this->getUser()
         Repo::user()->edit($user);
 
         if ($functionArgs['emailUpdated'] ?? false) {
-            $sessionManager = SessionManager::getManager();
-            $session = $sessionManager->getUserSession();
+            $sessionGuard = Application::get()->getRequest()->getSessionGuard();
+            $sessionGuard->setUserDataToSession($user)->updateSession($user->getId());
+            $sessionGuard->invalidateOtherSessions($user->getId(), $request->getSession()->getId());
 
-            if ($session->getSessionVar('email')) {
-                $session->setSessionVar('email', $user->getEmail());
-            }
+            $invite = new ChangeProfileEmailInvite();
 
-            $sessionManager->invalidateSessions($user->getId(), $sessionManager->getUserSession()->getId());
+            $invite->initialize($user->getId());
+
+            $invite->newEmail = $functionArgs['emailUpdated'];
+
+            $invite->updatePayload();
+
+            $invite->invite();
         }
     }
 }

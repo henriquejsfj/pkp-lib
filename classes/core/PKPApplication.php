@@ -30,7 +30,7 @@ use PKP\config\Config;
 use PKP\db\DAORegistry;
 use PKP\facades\Locale;
 use PKP\security\Role;
-use PKP\session\SessionManager;
+use PKP\site\Version;
 use PKP\site\VersionDAO;
 use PKP\submission\RepresentationDAOInterface;
 
@@ -124,8 +124,7 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
     // Constant used in UsageStats for submission files that are not full texts
     public const ASSOC_TYPE_SUBMISSION_FILE_COUNTER_OTHER = 0x0000213;
 
-    public $enabledProducts = [];
-    public $allProducts;
+    public array $enabledProducts = [];
 
     /**
      * Constructor
@@ -137,7 +136,6 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
             class_alias('\PKP\config\Config', '\Config');
             class_alias('\PKP\core\Registry', '\Registry');
             class_alias('\PKP\core\Core', '\Core');
-            class_alias('\PKP\cache\CacheManager', '\CacheManager');
             class_alias('\PKP\handler\PKPHandler', '\PKPHandler');
             class_alias('\PKP\payment\QueuedPayment', '\QueuedPayment'); // QueuedPayment instances may be serialized
         }
@@ -188,8 +186,9 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
         }
 
         ini_set('display_errors', Config::getVar('debug', 'display_errors', ini_get('display_errors')));
-        if (!static::isInstalled()) {
-            SessionManager::disable();
+
+        if (!static::isInstalled() && !PKPSessionGuard::isSessionDisable()) {
+            PKPSessionGuard::disableSession();
         }
 
         Registry::set('application', $this);
@@ -306,9 +305,7 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
         $application = Application::get();
         $userAgent = $application->getName() . '/';
         if (static::isInstalled() && !static::isUpgrading()) {
-            /** @var \PKP\site\VersionDAO */
-            $versionDao = DAORegistry::getDAO('VersionDAO');
-            $currentVersion = $versionDao->getCurrentVersion();
+            $currentVersion = $application->getCurrentVersion();
             $userAgent .= $currentVersion->getVersionString();
         } else {
             $userAgent .= '?';
@@ -333,7 +330,7 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
      */
     public function getRequest()
     {
-        $request = & Registry::get('request', true, null); // Ref req'd
+        $request = &Registry::get('request', true, null); // Ref req'd
 
         if (is_null($request)) {
             // Implicitly set request by ref in the registry
@@ -350,7 +347,7 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
      */
     public function getDispatcher()
     {
-        $dispatcher = & Registry::get('dispatcher', true, null); // Ref req'd
+        $dispatcher = &Registry::get('dispatcher', true, null); // Ref req'd
         if (is_null($dispatcher)) {
             // Implicitly set dispatcher by ref in the registry
             $dispatcher = new Dispatcher();
@@ -450,13 +447,10 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
 
     /**
      * Return the current version of the application.
-     *
-     * @return \PKP\site\Version
      */
-    public function getCurrentVersion()
+    public function getCurrentVersion(): Version
     {
         $currentVersion = $this->getEnabledProducts('core');
-        assert(count($currentVersion)) == 1;
         return $currentVersion[$this->getName()];
     }
 
@@ -468,7 +462,6 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
     public function getDAOMap()
     {
         return [
-            'AnnouncementDAO' => 'PKP\announcement\AnnouncementDAO',
             'AnnouncementTypeDAO' => 'PKP\announcement\AnnouncementTypeDAO',
             'CitationDAO' => 'PKP\citation\CitationDAO',
             'ControlledVocabDAO' => 'PKP\controlledVocab\ControlledVocabDAO',
@@ -490,9 +483,7 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
             'NotificationSubscriptionSettingsDAO' => 'PKP\notification\NotificationSubscriptionSettingsDAO',
             'PluginGalleryDAO' => 'PKP\plugins\PluginGalleryDAO',
             'PluginSettingsDAO' => 'PKP\plugins\PluginSettingsDAO',
-            'PublicationDAO' => 'APP\publication\PublicationDAO',
             'QueuedPaymentDAO' => 'PKP\payment\QueuedPaymentDAO',
-            'ReviewAssignmentDAO' => 'PKP\submission\reviewAssignment\ReviewAssignmentDAO',
             'ReviewFilesDAO' => 'PKP\submission\ReviewFilesDAO',
             'ReviewFormDAO' => 'PKP\reviewForm\ReviewFormDAO',
             'ReviewFormElementDAO' => 'PKP\reviewForm\ReviewFormElementDAO',
@@ -500,9 +491,7 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
             'ReviewRoundDAO' => 'PKP\submission\reviewRound\ReviewRoundDAO',
             'RoleDAO' => 'PKP\security\RoleDAO',
             'ScheduledTaskDAO' => 'PKP\scheduledTask\ScheduledTaskDAO',
-            'SessionDAO' => 'PKP\session\SessionDAO',
             'SiteDAO' => 'PKP\site\SiteDAO',
-            'StageAssignmentDAO' => 'PKP\stageAssignment\StageAssignmentDAO',
             'SubEditorsDAO' => 'PKP\context\SubEditorsDAO',
             'SubmissionAgencyDAO' => 'PKP\submission\SubmissionAgencyDAO',
             'SubmissionAgencyEntryDAO' => 'PKP\submission\SubmissionAgencyEntryDAO',
@@ -511,15 +500,12 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
             'SubmissionDisciplineEntryDAO' => 'PKP\submission\SubmissionDisciplineEntryDAO',
             'SubmissionEmailLogDAO' => 'PKP\log\SubmissionEmailLogDAO',
             'QueryDAO' => 'PKP\query\QueryDAO',
-            'SubmissionLanguageDAO' => 'PKP\submission\SubmissionLanguageDAO',
-            'SubmissionLanguageEntryDAO' => 'PKP\submission\SubmissionLanguageEntryDAO',
             'SubmissionKeywordDAO' => 'PKP\submission\SubmissionKeywordDAO',
             'SubmissionKeywordEntryDAO' => 'PKP\submission\SubmissionKeywordEntryDAO',
             'SubmissionSubjectDAO' => 'PKP\submission\SubmissionSubjectDAO',
             'SubmissionSubjectEntryDAO' => 'PKP\submission\SubmissionSubjectEntryDAO',
             'TemporaryFileDAO' => 'PKP\file\TemporaryFileDAO',
             'TemporaryInstitutionsDAO' => 'PKP\statistics\TemporaryInstitutionsDAO',
-            'UserStageAssignmentDAO' => 'PKP\user\UserStageAssignmentDAO',
             'VersionDAO' => 'PKP\site\VersionDAO',
             'WorkflowStageDAO' => 'PKP\workflow\WorkflowStageDAO',
             'XMLDAO' => 'PKP\db\XMLDAO',
@@ -536,7 +522,7 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
      */
     public function getQualifiedDAOName($name)
     {
-        $map = & Registry::get('daoMap', true, $this->getDAOMap()); // Ref req'd
+        $map = &Registry::get('daoMap', true, $this->getDAOMap()); // Ref req'd
         if (isset($map[$name])) {
             return $map[$name];
         }
@@ -711,7 +697,6 @@ abstract class PKPApplication implements iPKPApplicationInfoProvider
     {
         return [
             'coverage',
-            'languages',
             'rights',
             'source',
             'subjects',

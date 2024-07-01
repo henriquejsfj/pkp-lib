@@ -23,6 +23,7 @@ use APP\facades\Repo;
 use APP\handler\Handler;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
+use Illuminate\Support\Str;
 use PKP\context\Context;
 use PKP\core\Dispatcher;
 use PKP\db\DAORegistry;
@@ -33,12 +34,11 @@ use PKP\security\authorization\DecisionWritePolicy;
 use PKP\security\authorization\internal\SubmissionRequiredPolicy;
 use PKP\security\authorization\UserRequiredPolicy;
 use PKP\security\Role;
-use PKP\stageAssignment\StageAssignmentDAO;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\Genre;
 use PKP\submission\GenreDAO;
 use PKP\submission\reviewRound\ReviewRound;
 use PKP\submission\reviewRound\ReviewRoundDAO;
-use Stringy\Stringy;
 
 class DecisionHandler extends Handler
 {
@@ -117,9 +117,15 @@ class DecisionHandler extends Handler
 
         // Don't allow a recommendation unless at least one deciding editor exists
         if (Repo::decision()->isRecommendation($this->decisionType->getDecision())) {
-            /** @var StageAssignmentDAO $stageAssignmentDao  */
-            $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
-            $assignedEditorIds = $stageAssignmentDao->getDecidingEditorIds($this->submission->getId(), $this->decisionType->getStageId());
+            // Replaces StageAssignmentDAO::getDecidingEditorIds
+            $assignedEditorIds = StageAssignment::withSubmissionIds([$this->submission->getId()])
+                ->withStageIds([$this->decisionType->getStageId()])
+                ->withRoleIds([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])
+                ->withRecommendOnly(false)
+                ->get()
+                ->pluck('userId')
+                ->all();
+
             if (!$assignedEditorIds) {
                 $request->getDispatcher()->handle404();
             }
@@ -149,7 +155,7 @@ class DecisionHandler extends Handler
             'fileGenres' => $this->getFileGenres($context),
             'keepWorkingLabel' => __('common.keepWorking'),
             'reviewRoundId' => $this->reviewRound ? $this->reviewRound->getId() : null,
-            'stageId' => $this->submission->getStageId(),
+            'stageId' => $this->submission->getData('stageId'),
             'stepErrorMessage' => __('editor.decision.stepError'),
             'steps' => $steps->getState(),
             'submissionUrl' => $dispatcher->url(
@@ -174,6 +180,7 @@ class DecisionHandler extends Handler
             ),
             'viewAllSubmissionsLabel' => __('submission.list.viewAllSubmissions'),
             'viewSubmissionLabel' => __('submission.list.viewSubmission'),
+            'viewSubmissionSummaryLabel' => __('submission.list.viewSubmissionSummary')
         ]);
 
         $templateMgr->assign([
@@ -200,7 +207,7 @@ class DecisionHandler extends Handler
     protected function getBreadcrumb(Submission $submission, Context $context, Request $request, Dispatcher $dispatcher)
     {
         $currentPublication = $submission->getCurrentPublication();
-        $submissionTitle = Stringy::create(
+        $submissionTitle = Str::of(
             join(
                 __('common.commaListSeparator'),
                 [
@@ -209,10 +216,7 @@ class DecisionHandler extends Handler
                 ]
             )
         );
-        if ($submissionTitle->length() > 50) {
-            $submissionTitle = $submissionTitle->safeTruncate(50)
-                ->append('...');
-        }
+        $submissionTitle = $submissionTitle->limit(50, '...');
 
         return [
             [
@@ -227,7 +231,7 @@ class DecisionHandler extends Handler
             ],
             [
                 'id' => 'submission',
-                'name' => $submissionTitle,
+                'name' => (string) $submissionTitle,
                 'format' => 'html',
                 'url' => $dispatcher->url(
                     $request,

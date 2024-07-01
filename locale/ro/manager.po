@@ -232,7 +232,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1998,29 +1998,6 @@ msgstr ""
 "Solicitați autorului să sugereze cuvintele cheie înainte de a accepta "
 "înregistrarea acestora."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Limba selectată indică limba primară de lucru folosind un cod de limbă "
-"(„en”) cu un cod de țară opțional („en_US”)."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Activați metadatele de limbă"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"Nu solicitați limbile de trimitere de la autor în timpul înregistrării de "
-"manuscris."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Solicitați autorului să indice limbile transmiterii în timpul înregistrării "
-"de manuscris."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Solicitați autorului să introducă limbile manuscrisului înainte de a accepta "
-"transmiterea."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Orice drepturi deținute asupra manuscrisului, care pot include drepturi de "
@@ -2376,15 +2353,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Acest link va fi afișat numai dacă ați completat secțiunea Despre jurnal sub "
 "Setări> Jurnal."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Link către o pagină care afișează conținutul Masthead în Setări> Jurnal."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Acest link va fi afișat numai dacă ați completat secțiunea Echipa editorială "
-"din Setări> Jurnal."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Link către pagina care afișează instrucțiuni de trimitere."
@@ -3502,3 +3470,11 @@ msgstr ""
 #~ "Acest email este trimis de un editor pentru a reaminti evaluatorului că "
 #~ "evaluarea sa trebuia trimisă. Acest email este utilizat atunci când un "
 #~ "editor trimite manual un memento evaluatorului"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Solicitați autorilor care înregistrează manuscrise să depună o declarație de "
+"interes (CI) odată cu transmiterea lor."
+
+msgid "manager.setup.masthead"
+msgstr "Masthead"

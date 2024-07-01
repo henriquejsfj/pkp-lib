@@ -1,19 +1,20 @@
 # Tormod Strømme <tormod.stromme@uib.no>, 2022.
+# Johanna Skaug <johanna.skaug@ub.uio.no>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:55+00:00\n"
-"PO-Revision-Date: 2022-08-17 15:57+0000\n"
-"Last-Translator: Tormod Strømme <tormod.stromme@uib.no>\n"
-"Language-Team: Norwegian Bokmål <http://translate.pkp.sfu.ca/projects/pkp-"
-"lib/submission/nb_NO/>\n"
-"Language: nb_NO\n"
+"PO-Revision-Date: 2024-05-08 12:02+0000\n"
+"Last-Translator: Johanna Skaug <johanna.skaug@ub.uio.no>\n"
+"Language-Team: Norwegian Bokmål <http://translate.pkp.sfu.ca/projects/"
+"pkp-lib/submission/nb_NO/>\n"
+"Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "author.editPublishedDisabled"
 msgstr ""
@@ -46,6 +47,8 @@ msgstr "Velg rollen som best beskriver ditt bidrag til denne innleveringen."
 
 msgid "submission.submit.managerUserGroupsDescription"
 msgstr ""
+"Velg en redaksjonell rolle dersom du selv ønsker å redigere og publisere "
+"innleveringen."
 
 msgid "submission.submit.submissionChecklist"
 msgstr "Sjekkliste"
@@ -57,7 +60,7 @@ msgstr ""
 "fortsetter."
 
 msgid "submission.submit.submissionChecklistConfirm"
-msgstr ""
+msgstr "Ja, innleveringen min oppfyller alle disse kriteriene."
 
 msgid "submission.submit.submissionComplete"
 msgstr "Innlevering fullført"
@@ -537,7 +540,7 @@ msgid "submission.coverage"
 msgstr "Informasjon om dekning"
 
 msgid "submission.details"
-msgstr ""
+msgstr "Detaljer om innleveringen"
 
 msgid "submission.done"
 msgstr "Ferdig"
@@ -598,6 +601,8 @@ msgstr "Slett loggføring"
 
 msgid "submission.event.decisionReviewerEmailSent"
 msgstr ""
+"En e-post om beslutningen ble sendt til {$recipientCount} fagfelle(r) med "
+"emnet {$subject}."
 
 msgid "submission.event.submissionSubmitted"
 msgstr "Første steg av innlevering ferdig."
@@ -657,9 +662,13 @@ msgstr "Fil med fagfellens revidering oppdatert"
 
 msgid "submission.event.reviewer.reviewerReminded"
 msgstr ""
+"{$senderName} sendte en påminnelse til {$recipientName} om vedkommenes "
+"fagfellevurdering."
 
 msgid "submission.event.reviewer.reviewerRemindedAuto"
 msgstr ""
+"En automatisk påminnelse ble sendt på e-post til {$recipientName} angående "
+"vedkommendes fagfellevurdering"
 
 msgid "submission.event.subjectPrefix"
 msgstr "En e-post ble sendt:"
@@ -690,8 +699,9 @@ msgstr ""
 msgid "submission.firstPublished"
 msgstr ""
 
+#, fuzzy
 msgid "submission.forTheEditors"
-msgstr ""
+msgstr "Til redaktørene"
 
 msgid "submission.galley"
 msgstr "Oppsett"
@@ -965,8 +975,9 @@ msgstr "Metadata for fagfellevurdering"
 msgid "submission.review"
 msgstr "Fagfellevurdering"
 
+#, fuzzy
 msgid "submission.reviewAndSubmit"
-msgstr ""
+msgstr "Gå gjennom og send inn"
 
 msgid "submission.reviewed"
 msgstr "Fagfellevurdert"
@@ -1452,10 +1463,10 @@ msgid "editor.submission.decision.decline.description"
 msgstr ""
 
 msgid "editor.submission.decision.decline.log"
-msgstr ""
+msgstr "{$editorName} avviste denne innleveringen."
 
 msgid "editor.submission.decision.decline.completed"
-msgstr ""
+msgstr "Innleveringen er blitt avvist"
 
 msgid "editor.submission.decision.decline.completed.description"
 msgstr ""
@@ -1485,7 +1496,7 @@ msgid "editor.submission.decision.newReviewRound.notifyAuthorsDescription"
 msgstr ""
 
 msgid "editor.submission.decision.promoteFiles.copyediting"
-msgstr ""
+msgstr "Velg filer som skal sendes til språkvask"
 
 msgid "editor.submission.decision.promoteFiles.review"
 msgstr ""
@@ -1551,7 +1562,7 @@ msgid "editor.submission.decision.sendExternalReview"
 msgstr ""
 
 msgid "editor.submission.decision.sendExternalReview.description"
-msgstr ""
+msgstr "Denne innleveringen er klar til å sendes til fagfelleurdering."
 
 msgid "editor.submission.decision.sendExternalReview.log"
 msgstr ""
@@ -2296,8 +2307,9 @@ msgstr "Oppnevn redaktør"
 msgid "submission.wizard.alreadySubmitted"
 msgstr ""
 
+#, fuzzy
 msgid "submission.wizard.beforeStart"
-msgstr ""
+msgstr "Før du begynner"
 
 msgid "submission.wizard.categories.description"
 msgstr ""
@@ -2306,31 +2318,43 @@ msgid "submission.wizard.changeSubmission"
 msgstr ""
 
 msgid "submission.wizard.completeSteps"
-msgstr ""
+msgstr "Fullfør stegene for å lage en innsendelse"
 
 msgid "submission.wizard.confirmSubmit"
 msgstr ""
+"Innleveringen, <strong>{$title}</strong>, vil bli sendt til "
+"<strong>{$context}</strong> for redaksjonell vurdering. Er du sikker på at "
+"du vil sende inn?"
 
+#, fuzzy
 msgid "submission.wizard.errors"
 msgstr ""
+"Det er en eller flere feil som må rettes før du kan sende inn. Gå gjennom "
+"opplysningene nedenfor og foreta de forespurte endringene."
 
 msgid "submission.wizard.validating"
 msgstr ""
 
+#, fuzzy
 msgid "submission.wizard.commentsForTheEditor.description"
 msgstr ""
+"Legg til informasjon som du mener vår redaksjon bør vite når de evaluerer "
+"innleveringen din."
 
 msgid "submission.wizard.confirm"
 msgstr ""
 
+#, fuzzy
 msgid "submission.wizard.title"
-msgstr ""
+msgstr "Innlevering"
 
+#, fuzzy
 msgid "submission.wizard.titleWithStep"
-msgstr ""
+msgstr "Innlevering: {$step}"
 
+#, fuzzy
 msgid "submission.wizard.noContributors"
-msgstr ""
+msgstr "Det er ikke lagt til noen bidragsytere til denne innleveringen."
 
 msgid "submission.wizard.missingContributorLanguage"
 msgstr ""
@@ -2354,7 +2378,7 @@ msgid "submission.wizard.sectionClosed"
 msgstr ""
 
 msgid "submission.wizard.start"
-msgstr ""
+msgstr "Start innlevering"
 
 msgid "submission.wizard.startingStatus"
 msgstr ""
@@ -2378,7 +2402,7 @@ msgid "catalog.sortBy.datePublishedDesc"
 msgstr "Publiseringsdato (nyeste først)"
 
 msgid "category.category"
-msgstr ""
+msgstr "Kategorier"
 
 msgid "category.coverImage"
 msgstr "Omslagsbilde"
@@ -2469,8 +2493,9 @@ msgstr "Bekreftelse"
 msgid "submission.wizard.submittingInLanguage"
 msgstr ""
 
+#, fuzzy
 msgid "submission.wizard.submittingToSection"
-msgstr ""
+msgstr "Innlevering til tidsskriftseksjon: <strong>{$section}</strong>."
 
 msgid "submission.wizard.submittingToSectionInLanguage"
 msgstr ""
@@ -2508,8 +2533,9 @@ msgstr ""
 msgid "submission.dataAvailability.tip"
 msgstr ""
 
+#, fuzzy
 msgid "submission.files.required.genre"
-msgstr ""
+msgstr "Du må laste opp minst en {$genre}-fil."
 
 msgid "submission.files.required.genres"
 msgstr ""
@@ -2541,3 +2567,5 @@ msgstr ""
 msgid "submission.submissionFile"
 msgstr "Innleveringsfil"
 
+msgid "submission.authors.label"
+msgstr "Forfattere"

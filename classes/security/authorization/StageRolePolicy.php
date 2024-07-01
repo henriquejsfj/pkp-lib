@@ -19,9 +19,8 @@ namespace PKP\security\authorization;
 
 use APP\core\Application;
 use APP\facades\Repo;
-use PKP\db\DAORegistry;
 use PKP\security\Role;
-use PKP\stageAssignment\StageAssignmentDAO;
+use PKP\stageAssignment\StageAssignment;
 
 class StageRolePolicy extends AuthorizationPolicy
 {
@@ -72,38 +71,38 @@ class StageRolePolicy extends AuthorizationPolicy
             if ($this->_allowRecommendOnly) {
                 return AuthorizationPolicy::AUTHORIZATION_PERMIT;
             }
-            $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-            $result = $stageAssignmentDao->getBySubmissionAndUserIdAndStageId(
-                $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION)->getId(),
-                Application::get()->getRequest()->getUser()->getId(),
-                $this->_stageId
-            );
-            while ($stageAssignment = $result->next()) {
-                $userGroup = Repo::userGroup()->get($stageAssignment->getUserGroupId());
-                if (in_array($userGroup->getRoleId(), $this->_roleIds) && !$stageAssignment->getRecommendOnly()) {
+
+            // Replaces StageAssignmentDAO::getBySubmissionAndUserIdAndStageId
+            $stageAssignments = StageAssignment::withSubmissionIds([$this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION)->getId()])
+                ->withStageIds([$this->_stageId])
+                ->withUserId(Application::get()->getRequest()->getUser()->getId())
+                ->get();
+
+            foreach ($stageAssignments as $stageAssignment) {
+                $userGroup = Repo::userGroup()->get($stageAssignment->userGroupId);
+                if (in_array($userGroup->getRoleId(), $this->_roleIds) && !$stageAssignment->recommendOnly) {
                     return AuthorizationPolicy::AUTHORIZATION_PERMIT;
                 }
             }
         }
 
         // A manager is granted access when they are not assigned in any other role
-        if (empty($userAccessibleStages) && count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN], $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES)))) {
+        if (count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN], $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES)))) {
             if ($this->_allowRecommendOnly) {
                 return AuthorizationPolicy::AUTHORIZATION_PERMIT;
             }
-            // Managers may have a stage assignment but no $userAccessibleStages, so they will
-            // not be caught by the earlier code that checks stage assignments.
-            $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-            $result = $stageAssignmentDao->getBySubmissionAndUserIdAndStageId(
-                $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION)->getId(),
-                Application::get()->getRequest()->getUser()->getId(),
-                $this->_stageId
-            );
+            // Check stage assignments of a user with a managerial role
+            // Replaces StageAssignmentDAO::getBySubmissionAndUserIdAndStageId
+            $stageAssignments = StageAssignment::withSubmissionIds([$this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION)->getId()])
+                ->withStageIds([$this->_stageId])
+                ->withUserId(Application::get()->getRequest()->getUser()->getId())
+                ->get();
+
             $noResults = true;
-            while ($stageAssignment = $result->next()) {
+            foreach ($stageAssignments as $stageAssignment) {
                 $noResults = false;
-                $userGroup = Repo::userGroup()->get($stageAssignment->getUserGroupId());
-                if ($userGroup->getRoleId() == Role::ROLE_ID_MANAGER && !$stageAssignment->getRecommendOnly()) {
+                $userGroup = Repo::userGroup()->get($stageAssignment->userGroupId);
+                if ($userGroup->getRoleId() == Role::ROLE_ID_MANAGER && !$stageAssignment->recommendOnly) {
                     return AuthorizationPolicy::AUTHORIZATION_PERMIT;
                 }
             }

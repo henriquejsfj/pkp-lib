@@ -110,7 +110,7 @@ abstract class PKPStatsEditorialQueryBuilder
             $q->where('s.date_submitted', '<=', $this->dateEnd);
         }
 
-        return $q->count();
+        return $q->getCountForPagination();
     }
 
     /**
@@ -184,7 +184,7 @@ abstract class PKPStatsEditorialQueryBuilder
     {
         return $this->_getObject()
             ->whereIn('s.status', (array) $status)
-            ->count();
+            ->getCountForPagination();
     }
 
     /**
@@ -199,7 +199,7 @@ abstract class PKPStatsEditorialQueryBuilder
         return $this->_getObject()
             ->where('s.status', '=', PKPSubmission::STATUS_QUEUED)
             ->whereIn('s.stage_id', $stages)
-            ->count();
+            ->getCountForPagination();
     }
 
     /**
@@ -234,7 +234,7 @@ abstract class PKPStatsEditorialQueryBuilder
             }
         }
 
-        return $q->count();
+        return $q->getCountForPagination();
     }
 
     /**
@@ -389,7 +389,7 @@ abstract class PKPStatsEditorialQueryBuilder
         $q = $this->_getBaseQuery();
 
         // Exclude incomplete submissions
-        $q->where('s.submission_progress', '=', 0);
+        $q->where('s.submission_progress', '=', '');
 
         // Exclude submissions when the date_submitted is later
         // than the first date_published. This prevents imported
@@ -460,7 +460,7 @@ abstract class PKPStatsEditorialQueryBuilder
             ->where(DB::raw('CAST(s.date_submitted AS DATE)'), '>', DB::raw('pi.date_published'))
             ->when($this->dateStart, fn (Builder $q) => $q->where('s.date_submitted', '>=', $this->dateStart))
             ->when($this->dateEnd, fn (Builder $q) => $q->where('s.date_submitted', '<=', $this->dateEnd))
-            ->count();
+            ->getCountForPagination();
     }
 
     /**
@@ -472,10 +472,10 @@ abstract class PKPStatsEditorialQueryBuilder
     public function countInProgress()
     {
         return $this->_getBaseQuery()
-            ->where('s.submission_progress', '<>', 0)
+            ->where('s.submission_progress', '<>', '')
             ->when($this->dateStart, fn (Builder $q) => $q->where('s.date_submitted', '>=', $this->dateStart))
             ->when($this->dateEnd, fn (Builder $q) => $q->where('s.date_submitted', '<=', $this->dateEnd))
-            ->count();
+            ->getCountForPagination();
     }
 
     /**

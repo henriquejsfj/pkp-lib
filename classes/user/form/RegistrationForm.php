@@ -28,9 +28,9 @@ use PKP\core\Core;
 use PKP\db\DAORegistry;
 use PKP\facades\Locale;
 use PKP\form\Form;
+use PKP\orcid\OrcidManager;
 use PKP\security\Role;
 use PKP\security\Validation;
-use PKP\session\SessionManager;
 use PKP\site\Site;
 use PKP\user\InterestManager;
 use PKP\user\User;
@@ -118,6 +118,23 @@ class RegistrationForm extends Form
             'siteWidePrivacyStatement' => $site->getData('privacyStatement'),
         ]);
 
+        // FIXME: ORCID OAuth assumes a context so ORCID profile information cannot be filled from the site index
+        //        registration page.
+        if ($request->getContext() !== null && OrcidManager::isEnabled()) {
+            $targetOp = 'register';
+            $templateMgr->assign([
+                'orcidEnabled' => true,
+                'targetOp' => $targetOp,
+                'orcidUrl' => OrcidManager::getOrcidUrl(),
+                'orcidOAuthUrl' => OrcidManager::buildOAuthUrl('authorizeOrcid', ['targetOp' => $targetOp]),
+                'orcidIcon' => OrcidManager::getIcon(),
+            ]);
+        } else {
+            $templateMgr->assign([
+                'orcidEnabled' => false,
+            ]);
+        }
+
         return parent::fetch($request, $template, $display);
     }
 
@@ -150,6 +167,7 @@ class RegistrationForm extends Form
             'country',
             'interests',
             'emailConsent',
+            'orcid',
             'privacyConsent',
             'readerGroup',
             'reviewerGroup',
@@ -238,6 +256,12 @@ class RegistrationForm extends Form
         $user->setCountry($this->getData('country'));
         $user->setAffiliation($this->getData('affiliation'), $currentLocale);
 
+        // FIXME: ORCID OAuth and assignment to users assumes a context so we currently ignore
+        //        ability to assign ORCIDs at the site-level registration page
+        if ($request->getContext() !== null && OrcidManager::isEnabled()) {
+            $user->setOrcid($this->getData('orcid'));
+        }
+
         if ($sitePrimaryLocale != $currentLocale) {
             $user->setGivenName($this->getData('givenName'), $sitePrimaryLocale);
             $user->setFamilyName($this->getData('familyName'), $sitePrimaryLocale);
@@ -263,16 +287,14 @@ class RegistrationForm extends Form
             return false;
         }
 
-        // Associate the new user with the existing session
-        $sessionManager = SessionManager::getManager();
-        $session = $sessionManager->getUserSession();
-        $session->setSessionVar('username', $user->getUsername());
+        $request->getSession()->put('username', $user->getUsername());
+        $request->getSessionGuard()->updateSession($user->getId());
 
         // Save the selected roles or assign the Reader role if none selected
         if ($request->getContext() && !$this->getData('reviewerGroup')) {
             $defaultReaderGroup = Repo::userGroup()->getByRoleIds([Role::ROLE_ID_READER], $request->getContext()->getId(), true)->first();
             if ($defaultReaderGroup) {
-                Repo::userGroup()->assignUserToGroup($user->getId(), $defaultReaderGroup->getId(), $request->getContext()->getId());
+                Repo::userGroup()->assignUserToGroup($user->getId(), $defaultReaderGroup->getId());
             }
         } else {
             $userFormHelper = new UserFormHelper();

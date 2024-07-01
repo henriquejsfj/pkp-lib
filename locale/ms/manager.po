@@ -234,7 +234,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1994,25 +1994,6 @@ msgstr ""
 "Memerlukan pengarang untuk mencadangkan kata kunci sebelum menerima "
 "penyerahannya."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Bahasa menunjukkan bahasa utama kerja menggunakan kod bahasa (\"ms\") dengan "
-"kod negara pilihan (\"ms_MS\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Dayakan metadata bahasa"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Jangan minta bahasa penyerahan daripada pengarang semasa penyerahan."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Minta pengarang menyatakan bahasa penyerahan semasa penyerahan."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Memerlukan pengarang untuk memasukkan bahasa penyerahan sebelum menerima "
-"penyerahan mereka."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Sebarang hak yang dipegang atas penyerahan, yang mungkin termasuk Hak Harta "
@@ -2354,15 +2335,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Pautan ini hanya akan dipaparkan jika anda telah mengisi bahagian Mengenai "
 "Jurnal di bawah Tetapan > Jurnal."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Pautan ke halaman yang memaparkan kandungan Masthead dalam Tetapan > Jurnal."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Pautan ini hanya akan dipaparkan jika anda telah mengisi bahagian Pasukan "
-"Editorial di bawah Tetapan > Jurnal."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Pautan ke halaman yang memaparkan arahan penyerahan."
@@ -3441,3 +3413,11 @@ msgstr ""
 #~ msgstr ""
 #~ "E-mel ini dihantar oleh Editor Bahagian untuk mengingatkan pengulas "
 #~ "bahawa ulasan tamat."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Wajib mengemukakan Pengarang untuk mengemukakan pernyataan Konflik "
+"Kepentingan dengan penyerahannya."
+
+msgid "manager.setup.masthead"
+msgstr "Tajuk"

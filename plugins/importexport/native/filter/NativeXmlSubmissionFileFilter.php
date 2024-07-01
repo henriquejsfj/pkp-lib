@@ -120,7 +120,7 @@ class NativeXmlSubmissionFileFilter extends NativeImportFilter
 
         $submissionFile = Repo::submissionFile()->dao->newDataObject();
         $submissionFile->setData('submissionId', $submission->getId());
-        $submissionFile->setData('locale', $submission->getLocale());
+        $submissionFile->setData('locale', $submission->getData('locale'));
         $submissionFile->setData('fileStage', $stageId);
         $submissionFile->setData('createdAt', Core::getCurrentDate());
         $submissionFile->setData('updatedAt', Core::getCurrentDate());
@@ -332,6 +332,8 @@ class NativeXmlSubmissionFileFilter extends NativeImportFilter
                 $submissionDir . '/' . uniqid() . '.' . $node->getAttribute('extension')
             );
             $deployment->setFileDBId($node->getAttribute('id'), $newFileId);
+            $fileManager = new FileManager();
+            $fileManager->deleteByPath($temporaryFilename);
         }
 
         return $newFileId;

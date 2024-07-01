@@ -22,7 +22,7 @@
 		</tab>
 		<tab id="roles" label="{translate key="manager.roles"}">
 			{help file="users-and-roles" section="roles" class="pkp_help_tab"}
-			{capture assign=rolesUrl}{url router=\PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.settings.roles.UserGroupGridHandler" op="fetchGrid" escape=false}{/capture}
+			{capture assign=rolesUrl}{url router=PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.settings.roles.UserGroupGridHandler" op="fetchGrid" escape=false}{/capture}
 			{load_url_in_div id="roleGridContainer" url=$rolesUrl}
 		</tab>
 		{if $enableBulkEmails}
@@ -49,6 +49,12 @@
 				@set="set"
 			/>
 		</tab>
+        <tab id="orcidSettings" label="{translate key="orcid.displayName"}">
+            <pkp-form
+                    v-bind="components.orcidSettings"
+                    @set="set"
+            />
+        </tab>
 		{call_hook name="Template::Settings::access"}
 	</tabs>
 {/block}

@@ -35,10 +35,9 @@ use PKP\notification\PKPNotification;
 use PKP\plugins\Hook;
 use PKP\security\Role;
 use PKP\security\Validation;
-use PKP\stageAssignment\StageAssignmentDAO;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\PKPSubmission;
 use PKP\submission\reviewAssignment\ReviewAssignment;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
 use Symfony\Component\Mailer\Exception\TransportException;
 
 class ReviewerAction
@@ -58,7 +57,6 @@ class ReviewerAction
         bool $decline,
         ?string $emailText = null
     ): void {
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
         $reviewer = Repo::user()->get($reviewAssignment->getReviewerId());
         if (!isset($reviewer)) {
             return;
@@ -91,12 +89,12 @@ class ReviewerAction
                 }
             }
 
-            $reviewAssignment->setDateReminded(null);
-            $reviewAssignment->setReminderWasAutomatic(0);
-            $reviewAssignment->setDeclined($decline);
-            $reviewAssignment->setDateConfirmed(Core::getCurrentDate());
-            $reviewAssignment->stampModified();
-            $reviewAssignmentDao->updateObject($reviewAssignment);
+            Repo::reviewAssignment()->edit($reviewAssignment, [
+                'dateReminded' => null,
+                'reminderWasAutomatic' => 0,
+                'declined' => $decline,
+                'dateConfirmed' => Core::getCurrentDate(),
+            ]);
 
             // Add log
             $eventLog = Repo::eventLog()->newDataObject([
@@ -137,16 +135,19 @@ class ReviewerAction
         $mailable->replyTo($reviewer->getEmail(), $reviewer->getFullName());
 
         // Get editorial contact name
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-        $stageAssignments = $stageAssignmentDao->getBySubmissionAndStageId($submission->getId(), $reviewAssignment->getStageId());
+        // Replaces StageAssignmentDAO::getBySubmissionAndStageId
+        $stageAssignments = StageAssignment::withSubmissionIds([$submission->getId()])
+            ->withStageIds([$reviewAssignment->getStageId()])
+            ->get();
+
         $recipients = [];
-        while ($stageAssignment = $stageAssignments->next()) {
-            $userGroup = Repo::userGroup()->get($stageAssignment->getUserGroupId());
+        foreach ($stageAssignments as $stageAssignment) {
+            $userGroup = Repo::userGroup()->get($stageAssignment->userGroupId);
             if (!in_array($userGroup->getRoleId(), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])) {
                 continue;
             }
 
-            $recipients[] = Repo::user()->get($stageAssignment->getUserId());
+            $recipients[] = Repo::user()->get($stageAssignment->userId);
         }
 
         // Create dummy user if no one assigned

@@ -107,6 +107,9 @@ msgstr "Type"
 msgid "manager.announcements.form.typeIdValid"
 msgstr "Please select a valid announcement type."
 
+msgid "manager.announcements.notEnabled"
+msgstr "You must <a href=\"#announcements/announcement-settings\">enable announcements</a>."
+
 msgid "manager.announcements.noneCreated"
 msgstr "No announcements have been created."
 
@@ -256,7 +259,7 @@ msgstr "View Record"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Successful Registration Message"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI(s) successfully updated"
 
 msgid "manager.dois.registration.depositDois"
@@ -577,8 +580,17 @@ msgstr "No users were found."
 msgid "manager.groups.title"
 msgstr "Title"
 
+msgid "manager.image"
+msgstr "Image"
+
 msgid "manager.importExport"
 msgstr "Import/Export Data"
+
+msgid "manager.language.websiteLanguages"
+msgstr "Website Languages"
+
+msgid "manager.language.submissionLanguages"
+msgstr "Submission Languages"
 
 msgid "manager.language.ui"
 msgstr "UI"
@@ -586,8 +598,20 @@ msgstr "UI"
 msgid "manager.language.submissions"
 msgstr "Submissions"
 
+msgid "manager.language.gridAction.addLangauage"
+msgstr "Add/Remove Languages"
+
 msgid "manager.language.forms"
 msgstr "Forms"
+
+msgid "manager.language.submissionMetadata"
+msgstr "Metadata"
+
+msgid "manager.language.submission.form.description"
+msgstr "Select submission and metadata languages."
+
+msgid "manager.language.submission.from.error"
+msgstr "At least one locale needs to be selected."
 
 msgid "manager.language.reloadLocalizedDefaultSettings"
 msgstr "Reload defaults"
@@ -1238,6 +1262,12 @@ msgstr ""
 "Present a link to <button type=\"button\">how to ensure all files are "
 "anonymized</button> during upload"
 
+msgid "manager.setup.reviewOptions.numReviewersPerSubmission"
+msgstr "Recommended Reviewers Number"
+
+msgid "manager.setup.reviewOptions.numReviewersPerSubmission.description"
+msgstr "Sufficient number of reviewers needed per submission to make recommendation before making a decision"
+
 msgid "manager.setup.sponsors.note"
 msgstr "Sponsor Relationship and Policy Description"
 
@@ -1625,6 +1655,12 @@ msgstr ""
 "The language setting could not be saved. At least one language must be "
 "enabled for each option"
 
+msgid "notification.defaultLocaleSettingsCannotBeSaved"
+msgstr "The language setting could not be saved. All options need to be enabled."
+
+msgid "notification.submissionLocales"
+msgstr "Submission locales updated."
+
 msgid "notification.editedUser"
 msgstr "User edited."
 
@@ -1665,6 +1701,9 @@ msgstr "Payment Method"
 
 msgid "manager.paymentMethod.currency"
 msgstr "Currency"
+
+msgid "settings.roles.masthead"
+msgstr "Consider role in masthead list"
 
 msgid "settings.roles.roleOptions"
 msgstr "Role Options"
@@ -1820,6 +1859,9 @@ msgstr "Yes, require submitting authors to upload one or more of these files."
 
 msgid "manager.setup.genres.submitRequired.no"
 msgstr "No, allow new submissions without these files."
+
+msgid "manager.setup.appearance.editorialMasthead.description"
+msgstr "Define the order of editorial masthead roles for public display."
 
 msgid "manager.settings.wizard"
 msgstr "Settings Wizard"
@@ -2035,27 +2077,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "Require the author to suggest keywords before accepting their submission."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Language indicates the work's primary language using a language code (\"en"
-"\") with an optional country code (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Enable language metadata"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"Do not request the submission's languages from the author during submission."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Ask the author to indicate the submission's languages during submission."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Require the author to enter the submission's languages before accepting "
-"their submission."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Any rights held over the submission, which may include Intellectual Property "
@@ -2269,6 +2290,9 @@ msgstr ""
 msgid "plugins.importexport.native.error.submissionFileWithoutRevision"
 msgstr "The submission file {$id} was skipped because it does not have a valid revision."
 
+msgid "plugins.importexport.native.error.submissionFileInvalidFileStage"
+msgstr "The submission file {$id} was skipped because it does not have a valid file stage."
+
 msgid "plugins.importexport.native.error.submissionFileRevisionMissing"
 msgstr "The revision {$revision} of the submission file {$id} was skipped because the file was not found at the path \"{$path}\"."
 
@@ -2361,11 +2385,12 @@ msgstr "A URL must be provided"
 msgid "manager.navigationMenus.form.conditionalDisplay"
 msgstr "Learn more about when this menu item will be displayed or hidden."
 
+#, fuzzy
 msgid "manager.navigationMenus.form.submenuWarning"
 msgstr ""
 "When a menu item opens a submenu, it's link can not be followed on all "
 "devices. For example, if you have an \"About\" item which opens a submenu "
-"with \"Contact\" and \"Editorial Team\", the \"About\" link may not be "
+"with \"Contact\" and \"Editorial Masthead\", the \"About\" link may not be "
 "reachable on all devices. In the default menu, this is handled by creating a "
 "second menu item, \"About the Journal\", which appears in the submenu."
 
@@ -2397,13 +2422,8 @@ msgstr ""
 "This link will only be displayed if you have filled out the About the "
 "Journal section under Settings > Journal."
 
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr "Link to a page displaying the Masthead content in Settings > Journal."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"This link will only be displayed if you have filled out the Editorial Team "
-"section under Settings > Journal."
+msgid "manager.navigationMenus.editorialMasthead.description"
+msgstr "Link to a page displaying all active editorial masthead services."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Link to the page displaying submission instructions."
@@ -3528,3 +3548,15 @@ msgstr "Assign Editor"
 
 msgid "mailable.submissionNeedsEditor.name"
 msgstr "Submission Needs Editor"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr "Require submitting Authors to file a Competing Interest (CI) statement with their submission."
+
+msgid "manager.setup.masthead"
+msgstr "Masthead"
+
+msgid "manager.setup.editorialMasthead.order.reviewers.description"
+msgstr "Reviewers will be displayed in a standardized format to maintain uniformity and ensure easy discoverability in this section."
+
+msgid "mailable.changeProfileEmailInvitationNotify.name"
+msgstr "Change Email Address Invitation"

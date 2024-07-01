@@ -21,14 +21,13 @@ use APP\observers\events\UsageEvent;
 use APP\statistics\StatisticsHelper;
 use APP\submission\Submission;
 use Illuminate\Events\Dispatcher;
-use PKP\cache\FileCache;
 use PKP\file\PrivateFileManager;
 use PKP\plugins\Hook;
 
 class LogUsageEvent
 {
-    public FileCache $geoDataCache;
-    public FileCache $institutionDataCache;
+    public array $geoDataCache;
+    public array $institutionDataCache;
 
     /**
      * Maps methods with correspondent events to listen
@@ -132,9 +131,6 @@ class LogUsageEvent
         // Hash the IP
         $ip = $request->getRemoteAddr();
         $hashedIp = StatisticsHelper::hashIp($ip, $salt);
-        if ($hashedIp === null) {
-            error_log('UsageEventLog: the IP cound not be hashed.');
-        }
 
         $site = $request->getSite();
         $context = $usageEvent->context;

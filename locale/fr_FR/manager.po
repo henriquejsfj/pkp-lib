@@ -1,15 +1,16 @@
 # Martin Brändle <martin.braendle@uzh.ch>, 2022.
 # Stefan Schneider <mail@stefan-schneider.at>, 2023.
 # Rudy Hahusseau <rudy.hahusseau@univ-lorraine.fr>, 2023.
-# Germán Huélamo Bautista <germanhuelamo@gmail.com>, 2023.
+# Germán Huélamo Bautista <germanhuelamo@gmail.com>, 2023, 2024.
 # Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>, 2023.
+# Rodolphe Lemétayer <rlemetayer@protonmail.com>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:49+00:00\n"
-"PO-Revision-Date: 2023-09-22 13:06+0000\n"
-"Last-Translator: Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>\n"
+"PO-Revision-Date: 2024-06-21 19:40+0000\n"
+"Last-Translator: Rodolphe Lemétayer <rlemetayer@protonmail.com>\n"
 "Language-Team: French <http://translate.pkp.sfu.ca/projects/pkp-lib/manager/"
 "fr_FR/>\n"
 "Language: fr_FR\n"
@@ -17,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "manager.website.information"
 msgstr "Renseignements"
@@ -266,7 +267,7 @@ msgstr "Afficher l'enregistrement"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Message d'enregistrement réussi"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI mis à jour avec succès"
 
 msgid "manager.dois.registration.depositDois"
@@ -1091,13 +1092,13 @@ msgstr ""
 "de le téléverser à nouveau."
 
 msgid "manager.setup.notifications"
-msgstr "Notification d'une soumission par auteur"
+msgstr "Notification de la soumission d'un·e auteur·e"
 
 msgid "manager.setup.notifications.copySpecifiedAddress"
 msgstr "Envoyer une copie à cette adresse courriel"
 
 msgid "manager.setup.notifyAllAuthors"
-msgstr "Informer les auteur·rice·s"
+msgstr "Informer les auteur·e·s"
 
 msgid "manager.setup.notifyAllAuthors.description"
 msgstr ""
@@ -1106,14 +1107,12 @@ msgstr ""
 
 msgid "manager.setup.notifyAllAuthors.allAuthors"
 msgstr ""
-"Envoyer une notification par courriel à tous les auteur·rice·s de la "
-"soumission."
+"Envoyer une notification par courriel à tous les auteur·e·s de la soumission."
 
 msgid "manager.setup.notifyAllAuthors.assignedAuthors"
 msgstr ""
-"Envoyer un courriel uniquement aux auteur·rice·s qui participent au flux "
-"éditorial. Il s'agit habituellement de l'auteur·rice qui a fait la "
-"soumission."
+"Envoyer un courriel uniquement aux auteur·e·s qui participent au flux "
+"éditorial. Il s'agit habituellement de l'auteur·e qui a fait la soumission."
 
 msgid "manager.setup.submissionsNotifications"
 msgstr "Notifications"
@@ -1288,8 +1287,8 @@ msgstr "Rappel d'évaluation"
 
 msgid "manager.setup.reviewOptions.reminders.submit.description"
 msgstr ""
-"Envoyer un rappel si un(e) évaluateur(trice) n'a pas soumis de "
-"recommandation dans le délai indiqué (en jours)."
+"Envoyer un courriel de rappel si l'évaluation n'a pas été reçue dans le "
+"délai indiqué (en jours)."
 
 msgid "manager.setup.reviewOptions.reviewMode"
 msgstr "Mode d'évaluation par défaut"
@@ -1336,13 +1335,13 @@ msgstr "Le thème que vous avez sélectionné n'est pas installé ou activé."
 msgid "manager.setup.workflow.beginSubmissionHelp.description"
 msgstr ""
 "Le texte suivant est présenté avant de commencer une soumission. Il explique "
-"brièvement le processus de soumission afin que les auteur·rice·s sachent à "
-"quoi s'attendre."
+"brièvement le processus de soumission afin que les auteur·e·s sachent à quoi "
+"s'attendre."
 
 msgid "manager.setup.workflow.uploadFilesHelp.description"
 msgstr ""
 "Le texte suivant est présenté à l'étape du téléversement des fichiers. "
-"Expliquez brièvement quels sont les fichiers que les auteur·rice·s doivent "
+"Expliquez brièvement quels sont les fichiers que les auteur·e·s doivent "
 "joindre à leur soumission."
 
 msgid "manager.setup.workflow.contributorsHelp.description"
@@ -1353,23 +1352,23 @@ msgstr ""
 
 msgid "manager.setup.workflow.detailsHelp.description"
 msgstr ""
-"Le texte suivant est présenté à l'étape des détails, lorsque l'auteur·rice "
-"doit fournir le titre, le résumé et les mots-clés de la soumission."
+"Le texte suivant est présenté à l'étape des détails, lorsque l'auteur·e doit "
+"fournir le titre, le résumé et les mots-clés de la soumission."
 
 msgid "manager.setup.workflow.forTheEditorsHelp.description"
 msgstr ""
 "Le texte suivant est présenté à l'étape « Pour les éditeurs », au cours de "
-"laquelle il est demandé aux auteur·rice·s de fournir des métadonnées telles "
-"que des mots-clés, des commentaires et d'autres détails pour faciliter la "
+"laquelle il est demandé aux auteur·e·s de fournir des métadonnées telles que "
+"des mots-clés, des commentaires et d'autres détails pour faciliter la "
 "révision éditoriale."
 
 msgid "manager.setup.workflow.reviewHelp.description"
 msgstr ""
 "Le texte suivant est présenté à la dernière étape de la soumission, lorsque "
-"les auteur·rice·s doivent réviser toutes informations fournies."
+"les auteur·e·s doivent réviser toutes informations fournies."
 
 msgid "manager.setup.workflow.guidance"
-msgstr "Directives aux auteur·rice·s"
+msgstr "Directives aux auteur·e·s"
 
 msgid "manager.setup.submissionPreparationChecklist"
 msgstr "Liste de vérification de la soumission"
@@ -2160,29 +2159,6 @@ msgstr ""
 "Exiger de l'auteure ou de l'auteur qu'il suggère des mots-clés avant "
 "d'accepter la soumission."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"La langue indique la langue principale du travail à l'aide d'un code de "
-"langue (« fr ») avec un code de pays facultatif (« fr_FR »)."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Activer la métadonnée de langue"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"Ne pas demander les langues de soumission à l'auteur ou l'auteure lors de la "
-"soumission."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Demander à l'auteure ou l'auteur qu'il indique les langues du document lors "
-"de la soumission."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Exiger de l'auteure ou de l'auteur qu'il entre les langues du document avant "
-"d'accepter la soumission."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Tous les droits détenus sur la soumission, qui peuvent inclure les droits de "
@@ -2357,17 +2333,17 @@ msgstr ""
 
 msgid "manager.setup.metadata.dataAvailability.noRequest"
 msgstr ""
-"Ne pas demander à l'auteur·rice une déclaration de disponibilité de données "
+"Ne pas demander à l'auteur·e une déclaration de disponibilité de données "
 "lors de la soumission."
 
 msgid "manager.setup.metadata.dataAvailability.request"
 msgstr ""
-"Demander à l'auteur·rice une déclaration de disponibilité de données lors de "
-"la soumission."
+"Demander à l'auteur·e une déclaration de disponibilité de données lors de la "
+"soumission."
 
 msgid "manager.setup.metadata.dataAvailability.require"
 msgstr ""
-"Exiger de l'auteur·rice une déclaration de disponibilité de données avant "
+"Exiger de l'auteur·e une déclaration de disponibilité de données avant "
 "d'accepter la soumission."
 
 msgid "plugins.importexport.common.validationErrors"
@@ -2567,16 +2543,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Ce lien ne sera affiché que si vous avez rempli la section \"À propos\", "
 "située sous Paramètres> Revue."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Lien vers une page affichant le contenu du Bloc générique dans "
-"Paramètres>Revue."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Ce lien sera seulement affiché si vous avez rempli la section \"Bloc-"
-"générique\" dans Paramètres>Revue."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Lien vers la page affichant les instructions de soumission."
@@ -2999,7 +2965,7 @@ msgstr ""
 "évaluateur·rice·s sont cachés pour préserver l'anonymat des évaluations"
 
 msgid "emailTemplate.variable.authorsWithAffiliation"
-msgstr "Les noms et affiliations des auteur·rice·s de la soumission."
+msgstr "Les noms et affiliations des auteur·e·s de la soumission."
 
 msgid "emailTemplate.variable.context.passwordLostUrl"
 msgstr "L'URL d'une page où l'utilisateur peut récupérer un mot de passe perdu"
@@ -3085,22 +3051,22 @@ msgid "emailTemplate.variable.reviewType.doubleAnonymous"
 msgstr ""
 "Cette revue effectue une évaluation par les pairs à double anonymat. Les "
 "évaluateur·rice·s ne verront aucune information d'identification vous "
-"concernant, ni concernant vos co-auteur·rice·s. De même, vous ne saurez pas "
-"qui a évalué votre soumission et vous n'aurez pas de contact direct avec les "
+"concernant, ni concernant vos co-auteur·e·s. De même, vous ne saurez pas qui "
+"a évalué votre soumission et vous n'aurez pas de contact direct avec les "
 "évaluateur·rice·s."
 
 msgid "emailTemplate.variable.reviewType.anonymous"
 msgstr ""
 "Ce journal procède à une évaluation par les pairs avec anonymat des "
-"évaluateur·rice·s. Votre nom et les noms des co-auteur·rice·s seront "
-"visibles par les évaluateur·rice·s. Toutefois, l'identité des "
-"évaluateur·rice·s restera anonyme."
+"évaluateur·rice·s. Votre nom et les noms des co-auteur·e·s seront visibles "
+"par les évaluateur·rice·s. Toutefois, l'identité des évaluateur·rice·s "
+"restera anonyme."
 
 msgid "emailTemplate.variable.reviewType.open"
 msgstr ""
 "Ce journal procède à une évaluation par les pairs ouverte. Les "
 "évaluateur·rice·s verront votre nom et votre affiliation, ainsi que les noms "
-"et affiliations de vos co-auteur·rice·s. De même, vous verrez les noms et "
+"et affiliations de vos co-auteur·e·s. De même, vous verrez les noms et "
 "affiliations des évaluateur·rice·s."
 
 msgid "emailTemplate.variable.sender.senderName"
@@ -3142,7 +3108,7 @@ msgid "emailTemplate.variable.submission.authors"
 msgstr "Les noms complets des auteurs"
 
 msgid "emailTemplate.variable.submission.authorSubmissionUrl"
-msgstr "L'URL de la soumission pour les auteur·rice·s"
+msgstr "L'URL de la soumission pour les auteur·e·s"
 
 msgid "emailTemplate.variable.submission.submissionUrl"
 msgstr "L'URL de la soumission dans le backend éditorial"
@@ -3155,8 +3121,8 @@ msgstr "L'URL de la soumission dans l'assistant de soumission"
 
 msgid "emailTemplate.variable.submission.submittingAuthorName"
 msgstr ""
-"Les noms des auteur·rice·s qui participent au flux éditorial. Il s'agit "
-"habituellement de l'auteur·rice qui a fait la soumission"
+"Les noms des auteur·e·s qui participent au flux éditorial. Il s'agit "
+"habituellement de l'auteur·e qui a fait la soumission"
 
 msgid "emailTemplate.variable.passwordResetUrl"
 msgstr ""
@@ -3221,8 +3187,8 @@ msgstr "Le lien vers la page de l'activité éditoriale"
 
 msgid "mailable.reviewerReinstate.description"
 msgstr ""
-"Cet e-mail est envoyé lorsqu'un évaluateur qui n'était pas assigné est "
-"réintégré par un éditeur."
+"Ce courriel est envoyé lorsqu'une évaluatrice ou un évaluateur qui n'était "
+"pas assigné est réintégré par un éditeur."
 
 msgid "mailable.reviewerResendRequest.description"
 msgstr ""
@@ -3246,19 +3212,18 @@ msgstr ""
 "l'adresse de courriel."
 
 msgid "mailable.decision.notifyOtherAuthors.name"
-msgstr "Informer les autres auteur·rice·s"
+msgstr "Informer les autres auteur·e·s"
 
 msgid "mailable.decision.notifyOtherAuthors.description"
 msgstr ""
-"Ce courriel est envoyé aux auteur·rice·s d'une soumission qui ne participent "
+"Ce courriel est envoyé aux auteur·e·s d'une soumission qui ne participent "
 "pas au flux éditorial afin de les informer qu'une décision a été prise. Il "
-"s'agit habituellement de toutes les autres personnes sauf l'auteur·rice qui "
-"a fait la soumission."
+"s'agit habituellement de toutes les autres personnes sauf l'auteur·e qui a "
+"fait la soumission."
 
 msgid "mailable.decision.notifyOtherAuthors.variable.message.description"
 msgstr ""
-"Une copie du courriel qui a été envoyé à l'auteur·rice qui a fait la "
-"soumission"
+"Une copie du courriel qui a été envoyé à l'auteur·e qui a fait la soumission"
 
 msgid "mailable.decision.notifyReviewer.name"
 msgstr "Informer les évaluateurs·rices de la décision"
@@ -3298,7 +3263,7 @@ msgstr "Soumission acceptée"
 
 msgid "mailable.decision.accept.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que sa soumission a été acceptée pour "
+"Ce courriel informe l'auteur·e que sa soumission a été acceptée pour "
 "publication."
 
 msgid "mailable.decision.backToCopyediting.notifyAuthor.name"
@@ -3306,7 +3271,7 @@ msgstr "Soumission renvoyée à l'étape d'édition"
 
 msgid "mailable.decision.backToCopyediting.notifyAuthor.description"
 msgstr ""
-"Ce courriel notifie l'auteur·rice que sa soumission a été renvoyée à l'étape "
+"Ce courriel notifie l'auteur·e que sa soumission a été renvoyée à l'étape "
 "d'édition."
 
 msgid "mailable.decision.backFromCopyediting.notifyAuthor.name"
@@ -3314,23 +3279,23 @@ msgstr "Soumission renvoyée de l'étape d'édition"
 
 msgid "mailable.decision.backFromCopyediting.notifyAuthor.description"
 msgstr ""
-"Ce courriel notifie l'auteur·rice que sa soumission a été renvoyée de "
-"l'étape d'édition."
+"Ce courriel notifie l'auteur·e que sa soumission a été renvoyée de l'étape "
+"d'édition."
 
 msgid "mailable.decision.cancelReviewRound.notifyAuthor.name"
 msgstr "Cycle d'évaluation annulé"
 
 msgid "mailable.decision.cancelReviewRound.notifyAuthor.description"
 msgstr ""
-"Ce courriel notifie l'auteur·rice qu'un cycle d'évaluation de sa soumission "
-"a été annulé."
+"Ce courriel notifie l'auteur·e qu'un cycle d'évaluation de sa soumission a "
+"été annulé."
 
 msgid "mailable.decision.decline.notifyAuthor.name"
 msgstr "Soumission refusée"
 
 msgid "mailable.decision.decline.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que sa soumission a été refusée après "
+"Ce courriel informe l'auteur·e que sa soumission a été refusée après "
 "évaluation par les pairs."
 
 msgid "mailable.decision.initialDecline.notifyAuthor.name"
@@ -3341,7 +3306,7 @@ msgstr "Un nouveau cycle d'évaluation a été lancé"
 
 msgid "mailable.decision.newReviewRound.notifyAuthor.description"
 msgstr ""
-"Ce courriel notifie l'auteur·rice qu'un nouveau cycle d'évaluation de sa "
+"Ce courriel notifie l'auteur·e qu'un nouveau cycle d'évaluation de sa "
 "soumission a été lancé."
 
 msgid "mailable.decision.requestRevisions.notifyAuthor.name"
@@ -3349,7 +3314,7 @@ msgstr "Révisions demandées"
 
 msgid "mailable.decision.requestRevisions.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice de la décision de demander des révisions "
+"Ce courriel informe l'auteur·e de la décision de demander des révisions "
 "suite à l'évaluation par les pairs."
 
 msgid "mailable.decision.resubmit.notifyAuthor.name"
@@ -3357,15 +3322,15 @@ msgstr "Soumettre à nouveau pour évaluation"
 
 msgid "mailable.decision.resubmit.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice de la décision de « réviser et resoumettre "
-"» concernant sa soumission."
+"Ce courriel informe l'auteur·e de la décision de « réviser et resoumettre » "
+"concernant sa soumission."
 
 msgid "mailable.decision.revertDecline.notifyAuthor.name"
 msgstr "Rétablir une soumission refusée"
 
 msgid "mailable.decision.revertDecline.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que la décision de refuser sa soumission "
+"Ce courriel informe l'auteur·e que la décision de refuser sa soumission "
 "après évaluation par les pairs a été annulée."
 
 msgid "mailable.decision.revertInitialDecline.notifyAuthor.name"
@@ -3373,15 +3338,15 @@ msgstr "Rétablir une soumission refusée sans évaluation"
 
 msgid "mailable.decision.revertInitialDecline.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que la décision de refuser sa soumission "
-"sans évaluation a été annulée."
+"Ce courriel informe l'auteur·e que la décision de refuser sa soumission sans "
+"évaluation a été annulée."
 
 msgid "mailable.decision.sendExternalReview.notifyAuthor.name"
 msgstr "Envoyé pour évaluation externe"
 
 msgid "mailable.decision.sendExternalReview.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que sa soumission a été envoyée à l'étape "
+"Ce courriel informe l'auteur·e que sa soumission a été envoyée à l'étape "
 "d'évaluation."
 
 msgid "mailable.decision.sendToProduction.notifyAuthor.name"
@@ -3389,16 +3354,16 @@ msgstr "Envoyé en production"
 
 msgid "mailable.decision.sendToProduction.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que sa soumission a été envoyée à l'étape "
-"de production."
+"Ce courriel informe l'auteur·e que sa soumission a été envoyée à l'étape de "
+"production."
 
 msgid "mailable.decision.skipReview.notifyAuthor.name"
 msgstr "Soumission acceptée (sans évaluation)"
 
 msgid "mailable.decision.skipReview.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que sa soumission a été envoyée "
-"directement à l'étape d'édition et ne sera pas évaluée par les pairs."
+"Ce courriel informe l'auteur·e que sa soumission a été envoyée directement à "
+"l'étape d'édition et ne sera pas évaluée par les pairs."
 
 msgid "mailable.decision.recommendation.notifyEditors.name"
 msgstr "Recommandation émise"
@@ -3539,8 +3504,8 @@ msgstr "Soumission incomplète sauvegardée"
 
 msgid "mailable.submissionSavedForLater.description"
 msgstr ""
-"Un courriel automatique envoyé aux auteur·rice·s lorsqu'ils sauvegardent "
-"leur soumission pour la compléter plus tard"
+"Un courriel automatique envoyé aux auteur·e·s lorsqu'ils sauvegardent leur "
+"soumission pour la compléter plus tard"
 
 msgid "mailable.submissionAck.name"
 msgstr "Confirmation de soumission"
@@ -3553,7 +3518,7 @@ msgstr ""
 "soumission à travers le processus éditorial."
 
 msgid "mailable.submissionAckNotAuthor.name"
-msgstr "Confirmation de soumission (autres auteur·rice·s)"
+msgstr "Confirmation de soumission (autres auteur·e·s)"
 
 msgid "mailable.submissionAckNotAuthor.description"
 msgstr ""
@@ -3633,7 +3598,7 @@ msgstr "Soumission renvoyée à l'étape d'évaluation"
 
 msgid "mailable.decision.backToReview.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que sa soumission a été renvoyée à l'étape "
+"Ce courriel informe l'auteur·e que sa soumission a été renvoyée à l'étape "
 "d'évaluation."
 
 msgid "mailable.decision.backToSubmission.notifyAuthor.name"
@@ -3641,8 +3606,8 @@ msgstr "Soumission renvoyée à l'étape de soumission"
 
 msgid "mailable.decision.backToSubmission.notifyAuthor.description"
 msgstr ""
-"Ce courriel informe l'auteur·rice que sa soumission a été renvoyée à l'étape "
-"de soumission."
+"Ce courriel informe l'auteur·e que sa soumission a été renvoyée à l'étape de "
+"soumission."
 
 msgid "manager.manageEmails"
 msgstr "Gérer les courriels"
@@ -3700,18 +3665,17 @@ msgid "manager.submissionAck.off"
 msgstr "Ne pas envoyer de courriels."
 
 msgid "manager.submissionAck.submittingAuthor"
-msgstr ""
-"Envoyer des courriels uniquement à l'auteur·rice qui a fait la soumission."
+msgstr "Envoyer des courriels uniquement à l'auteur·e qui a fait la soumission."
 
 msgid "manager.submissionAck.allAuthors"
-msgstr "Envoyer des courriels à tou·te·s les auteur·rice·s."
+msgstr "Envoyer des courriels à tou·te·s les auteur·e·s."
 
 msgid "manager.editorialDecisions"
 msgstr "Décisions éditoriales"
 
 msgid "manager.editorialDecisions.description"
 msgstr ""
-"Configurer les courriels envoyés aux auteur·rice·s lorsqu'une décision "
+"Configurer les courriels envoyés aux auteur·e·s lorsqu'une décision "
 "éditoriale a été prise."
 
 msgid "manager.forEditors"
@@ -3738,14 +3702,14 @@ msgstr "Ne pas envoyer de courriel aux éditeur·rice·s."
 
 msgid "manager.submitWithCategories.description"
 msgstr ""
-"Faut-il demander à l'auteur·rice d'une nouvelle soumission de choisir une "
+"Faut-il demander à l'auteur·e d'une nouvelle soumission de choisir une "
 "catégorie ?"
 
 msgid "manager.submitWithCategories.yes"
 msgstr "Oui, ajoutez un champ « catégories » à l'assistant de soumission."
 
 msgid "manager.submitWithCategories.no"
-msgstr "Non, ne pas montrer ce champ aux auteur·rice·s."
+msgstr "Non, ne pas montrer ce champ aux auteur·e·s."
 
 msgid "mailable.copyeditRequest.name"
 msgstr "Demande d'édition"
@@ -3769,7 +3733,7 @@ msgid "mailable.reviewEdit.name"
 msgstr "Évaluation modifiée"
 
 msgid "mailable.submissionAckOtherAuthors.name"
-msgstr "Remerciements aux autres auteur·rice·s de la soumission"
+msgstr "Remerciements aux autres auteur·e·s de la soumission"
 
 msgid "mailable.editorAssigned.name"
 msgstr "Éditeur·rice désigné·e (automatique)"
@@ -3907,3 +3871,118 @@ msgstr ""
 
 msgid "emailTemplate.variable.activateUrl"
 msgstr "Le lien pour valider un compte de messagerie"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Les auteurs soumissionnaires doivent déposer une déclaration de conflits "
+"d'intérêts (CI) avec leur soumission."
+
+msgid "manager.setup.masthead"
+msgstr "Bloc générique"
+
+msgid "plugins.importexport.native.error.submissionFileInvalidFileStage"
+msgstr ""
+"Le fichier de soumission {$id} a été ignoré car il n'a pas un stade de "
+"fichier valide."
+
+msgid "manager.highlights.add"
+msgstr "Surligner"
+
+msgid "manager.highlights.delete"
+msgstr "Supprimer le surlignage"
+
+msgid "manager.highlights.edit"
+msgstr "Modifier le surlignage"
+
+msgid "manager.highlights.image"
+msgstr "Image"
+
+msgid "manager.highlights.urlText"
+msgstr "Étiquette du bouton"
+
+msgid "manager.highlights.confirmDelete"
+msgstr ""
+"Êtes-vous sûr de vouloir supprimer {$title} ? Cette action ne peut être "
+"annulée."
+
+msgid "manager.highlights.url.description"
+msgstr ""
+"L'URL complète, y compris https://, pour le bouton dans l'élément surligné."
+
+msgid "manager.highlights.urlText.description"
+msgstr ""
+"L'étiquette, telle que « En savoir plus », du bouton dans le surlignage."
+
+msgid "manager.image"
+msgstr "Image"
+
+msgid "manager.statistics.counterR5Report.settings.excludeMonthlyDetails"
+msgstr "Exclure les détails mensuels"
+
+msgid "manager.statistics.counterR5Report.settings.date.startDate.description"
+msgstr ""
+"La date doit être au format AAAA-MM-JJ ou AAAA-MM. La date la plus ancienne "
+"possible est {$earliestDate}."
+
+msgid "manager.statistics.counterR5Report.settings.date.endDate.description"
+msgstr ""
+"La date doit être au format AAAA-MM-JJ ou AAAA-MM. La dernière date possible "
+"est {$lastDate}."
+
+msgid "manager.announcements.notEnabled"
+msgstr ""
+"Vous devez <a href=\"#announcements/announcement-settings\">activer les "
+"annonces</a>."
+
+msgid "manager.statistics.counterR5Report.settings.startDate"
+msgstr "Date de début"
+
+msgid "manager.statistics.counterR5Reports.description"
+msgstr ""
+"Consultez <a href=\"https://cop5.projectcounter.org/en/5.0.3/04-reports/index"
+".html\" target=\"_new\">la documentation de COUNTER 5.0.3</a> pour plus "
+"d'informations sur chaque rapport."
+
+msgid "manager.statistics.counterR5Reports.usageNotPossible"
+msgstr "Il n'y a pas encore de statistiques d'utilisation de COUNTER R5."
+
+msgid "manager.statistics.counterR5Reports"
+msgstr "Rapports de COUNTER R5"
+
+msgid "manager.statistics.counterR5"
+msgstr "COUNTER R5"
+
+msgid "manager.statistics.counterR5Report.settings.endDate"
+msgstr "Date de fin"
+
+msgid "manager.statistics.counterR5Report.settings.wrongDateFormat"
+msgstr "Le format de la date n'est pas valide."
+
+msgid "manager.statistics.counterR5Report.settings.customerId"
+msgstr "Identifiant du client"
+
+msgid "manager.statistics.counterR5Report.settings.metricType"
+msgstr "Type de métrique"
+
+msgid "manager.statistics.counterR5Report.settings.attributesToShow"
+msgstr "Attributs à afficher"
+
+msgid "manager.statistics.counterR5Report.settings.yop"
+msgstr "Année de publication"
+
+msgid "manager.statistics.counterR5Report.settings.date.yop.description"
+msgstr ""
+"Une liste ou une plage d'années de publication à renvoyer dans la réponse au "
+"format aaaa|aaaa|aaaa-aaaa."
+
+msgid "manager.statistics.counterR5Report.settings.wrongYOPFormat"
+msgstr "Le format de l'année de publication n'est pas valide."
+
+msgid "manager.statistics.counterR5Report.settings.itemId"
+msgstr "Identifiant de soumission"
+
+msgid "manager.statistics.counterR5Report.settings.wrongItemId"
+msgstr "L'identifiant de la soumission n'existe pas."
+
+msgid "manager.statistics.counterR5Report.settings"
+msgstr "Paramètres du rapport"

@@ -21,11 +21,12 @@ use APP\core\Application;
 use APP\core\Request;
 use APP\facades\Repo;
 use APP\template\TemplateManager;
+use Illuminate\Support\Str;
 use PKP\config\Config;
 use PKP\core\Dispatcher;
-use PKP\core\PKPString;
 use PKP\core\Registry;
 use PKP\db\DBResultRange;
+use PKP\core\PKPSessionGuard;
 use PKP\security\authorization\AllowedHostsPolicy;
 use PKP\security\authorization\AuthorizationDecisionManager;
 use PKP\security\authorization\AuthorizationPolicy;
@@ -33,7 +34,6 @@ use PKP\security\authorization\HttpsPolicy;
 use PKP\security\authorization\RestrictedSiteAccessPolicy;
 use PKP\security\authorization\UserRolesRequiredPolicy;
 use PKP\security\Validation;
-use PKP\session\SessionManager;
 
 class PKPHandler
 {
@@ -329,7 +329,7 @@ class PKPHandler
 
         // Ensure the allowed hosts setting, when provided, is respected.
         $this->addPolicy(new AllowedHostsPolicy($request), true);
-        if (!SessionManager::isDisabled()) {
+        if (!PKPSessionGuard::isSessionDisable()) {
             // Add user roles in authorized context.
             $user = $request->getUser();
             if ($user instanceof \PKP\user\User) {
@@ -382,7 +382,7 @@ class PKPHandler
     {
         // FIXME: for backwards compatibility only - remove when request/router refactoring complete
         if (!isset($request)) {
-            $request = & Registry::get('request');
+            $request = &Registry::get('request');
             if (Config::getVar('debug', 'deprecation_warnings')) {
                 trigger_error('Deprecated call without request object.');
             }
@@ -429,7 +429,7 @@ class PKPHandler
             // and human readable component id.
             // Example: "grid.citation.CitationGridHandler"
             // becomes "grid-citation-citationgrid"
-            $componentId = str_replace('.', '-', PKPString::strtolower(PKPString::substr($componentId, 0, -7)));
+            $componentId = (string) Str::of($componentId)->substr(0, -7)->lower()->replace('.', '-');
             $this->setId($componentId);
         } elseif ($router instanceof \PKP\core\APIRouter) {
             $this->setId($router->getEntity());
@@ -463,9 +463,9 @@ class PKPHandler
 
                 if ($request->getUserVar('clearPageContext')) {
                     // Explicitly clear the old page context
-                    $session->unsetSessionVar("page-{$contextHash}");
+                    $session->forget("page-{$contextHash}");
                 } else {
-                    $oldPage = $session->getSessionVar("page-{$contextHash}");
+                    $oldPage = $session->get("page-{$contextHash}");
                     if (is_numeric($oldPage)) {
                         $pageNum = $oldPage;
                     }
@@ -476,7 +476,7 @@ class PKPHandler
             if ($session && $contextData !== null) {
                 // Store the page number
                 $contextHash = self::hashPageContext($request, $contextData);
-                $session->setSessionVar("page-{$contextHash}", $pageNum);
+                $session->put("page-{$contextHash}", $pageNum);
             }
         }
 
@@ -515,7 +515,7 @@ class PKPHandler
     {
         // FIXME: for backwards compatibility only - remove
         if (!isset($request)) {
-            $request = & Registry::get('request');
+            $request = &Registry::get('request');
             if (Config::getVar('debug', 'deprecation_warnings')) {
                 trigger_error('Deprecated call without request object.');
             }

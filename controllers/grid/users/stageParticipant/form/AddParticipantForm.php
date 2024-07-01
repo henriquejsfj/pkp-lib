@@ -20,11 +20,9 @@ use APP\core\Application;
 use APP\facades\Repo;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
-use PKP\db\DAORegistry;
 use PKP\security\Role;
 use PKP\stageAssignment\StageAssignment;
-use PKP\stageAssignment\StageAssignmentDAO;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
+use PKP\submission\reviewAssignment\ReviewAssignment;
 use PKP\userGroup\relationships\UserGroupStage;
 use PKP\userGroup\UserGroup;
 
@@ -58,7 +56,7 @@ class AddParticipantForm extends PKPStageParticipantNotifyForm
         $this->_submission = $submission;
         $this->_stageId = $stageId;
         $this->_assignmentId = $assignmentId;
-        $this->_contextId = $submission->getContextId();
+        $this->_contextId = $submission->getData('contextId');
 
         // add checks in addition to anything that the Notification form may apply.
         // FIXME: should use a custom validator to check that the userId belongs to this group.
@@ -155,13 +153,13 @@ class AddParticipantForm extends PKPStageParticipantNotifyForm
             'recommendOnlyUserGroupIds' => Repo::userGroup()->getCollector()
                 ->filterByContextIds([$request->getContext()->getId()])
                 ->filterByIsRecommendOnly()
-                ->getMany()
+                ->getIds()
                 ->toArray(),
             'notPossibleEditSubmissionMetadataPermissionChange' => $this->_managerGroupIds,
             'permitMetadataEditUserGroupIds' => Repo::userGroup()->getCollector()
                 ->filterByContextIds([$request->getContext()->getId()])
                 ->filterByPermitMetadataEdit(true)
-                ->getMany()
+                ->getIds()
                 ->toArray(),
             'submissionId' => $this->getSubmission()->getId(),
             'userGroupId' => '',
@@ -169,27 +167,23 @@ class AddParticipantForm extends PKPStageParticipantNotifyForm
         ]);
 
         if ($this->_assignmentId) {
-            /** @var StageAssignmentDAO $stageAssignmentDao */
-            $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
+            $stageAssignment = StageAssignment::find($this->_assignmentId);
 
-            /** @var StageAssignment $stageAssignment */
-            $stageAssignment = $stageAssignmentDao->getById($this->_assignmentId);
-
-            $currentUser = Repo::user()->get($stageAssignment->getUserId());
+            $currentUser = Repo::user()->get($stageAssignment->userId);
 
             /** @var UserGroup $userGroup */
-            $userGroup = Repo::userGroup()->get($stageAssignment->getUserGroupId());
+            $userGroup = Repo::userGroup()->get($stageAssignment->userGroupId);
 
             $templateMgr->assign([
                 'assignmentId' => $this->_assignmentId,
                 'currentUserName' => $currentUser->getFullName(),
                 'currentUserGroup' => $userGroup->getLocalizedName(),
-                'userGroupId' => $stageAssignment->getUserGroupId(),
-                'userIdSelected' => $stageAssignment->getUserId(),
-                'currentAssignmentRecommendOnly' => $stageAssignment->getRecommendOnly(),
-                'currentAssignmentPermitMetadataEdit' => $stageAssignment->getCanChangeMetadata(),
-                'isChangePermitMetadataAllowed' => $this->_isChangePermitMetadataAllowed($userGroup, $stageAssignment->getUserId()),
-                'isChangeRecommendOnlyAllowed' => $this->_isChangeRecommendOnlyAllowed($userGroup, $stageAssignment->getUserId()),
+                'userGroupId' => $stageAssignment->userGroupId,
+                'userIdSelected' => $stageAssignment->userId,
+                'currentAssignmentRecommendOnly' => $stageAssignment->recommendOnly,
+                'currentAssignmentPermitMetadataEdit' => $stageAssignment->canChangeMetadata,
+                'isChangePermitMetadataAllowed' => $this->_isChangePermitMetadataAllowed($userGroup, $stageAssignment->userId),
+                'isChangeRecommendOnlyAllowed' => $this->_isChangeRecommendOnlyAllowed($userGroup, $stageAssignment->userId),
             ]);
         }
 
@@ -197,16 +191,19 @@ class AddParticipantForm extends PKPStageParticipantNotifyForm
         // If submission is in review, add a list of reviewer Ids that should not be
         // assigned as participants because they have anonymous peer reviews in progress
         $anonymousReviewerIds = [];
-        if (in_array($this->getSubmission()->getStageId(), [WORKFLOW_STAGE_ID_INTERNAL_REVIEW, WORKFLOW_STAGE_ID_EXTERNAL_REVIEW])) {
+        if (in_array($this->getSubmission()->getData('stageId'), [WORKFLOW_STAGE_ID_INTERNAL_REVIEW, WORKFLOW_STAGE_ID_EXTERNAL_REVIEW])) {
             $anonymousReviewMethods = [
                 \PKP\submission\reviewAssignment\ReviewAssignment::SUBMISSION_REVIEW_METHOD_ANONYMOUS,
                 \PKP\submission\reviewAssignment\ReviewAssignment::SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS
             ];
-            $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
-            $reviewAssignments = $reviewAssignmentDao->getBySubmissionId($this->getSubmission()->getId());
-            $anonymousReviews = array_filter($reviewAssignments, function ($reviewAssignment) use ($anonymousReviewMethods) {
-                return in_array($reviewAssignment->getReviewMethod(), $anonymousReviewMethods) && !$reviewAssignment->getDeclined();
-            });
+
+            $anonymousReviews = Repo::reviewAssignment()->getCollector()
+                ->filterBySubmissionIds([$this->getSubmission()->getId()])
+                ->getMany()
+                ->filter(fn (ReviewAssignment $reviewAssignment) =>
+                    in_array($reviewAssignment->getReviewMethod(), $anonymousReviewMethods) && !$reviewAssignment->getDeclined())
+                ->toArray();
+
             $anonymousReviewerIds = array_map(function ($reviewAssignment) {
                 return $reviewAssignment->getReviewerId();
             }, $anonymousReviews);
@@ -253,8 +250,6 @@ class AddParticipantForm extends PKPStageParticipantNotifyForm
      */
     public function execute(...$functionParams)
     {
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-
         $submission = $this->getSubmission();
         $userGroup = Repo::userGroup()->get((int) $this->getData('userGroupId'));
         $userId = (int) $this->getData('userId');
@@ -266,25 +261,31 @@ class AddParticipantForm extends PKPStageParticipantNotifyForm
             $updated = false;
 
             if ($this->_assignmentId) {
-                /** @var StageAssignment $stageAssignment */
-                $stageAssignment = $stageAssignmentDao->getById($this->_assignmentId);
+                $stageAssignment = StageAssignment::find($this->_assignmentId);
 
                 if ($stageAssignment) {
-                    $stageAssignment->setRecommendOnly($recommendOnly);
-                    $stageAssignment->setCanChangeMetadata($canChangeMetadata);
-                    $stageAssignmentDao->updateObject($stageAssignment);
+                    $stageAssignment->recommendOnly = $recommendOnly;
+                    $stageAssignment->canChangeMetadata = $canChangeMetadata;
+                    $stageAssignment->save();
                     $updated = true;
                 }
             }
 
             if (!$updated) {
                 // insert the assignment
-                $stageAssignment = $stageAssignmentDao->build($submission->getId(), $userGroup->getId(), $userId, $recommendOnly, $canChangeMetadata);
+                $stageAssignment = Repo::stageAssignment()
+                    ->build(
+                        $submission->getId(), 
+                        $userGroup->getId(), 
+                        $userId, 
+                        $recommendOnly, 
+                        $canChangeMetadata
+                    );
             }
         }
 
         parent::execute(...$functionParams);
-        return [$userGroup->getId(), $userId, $stageAssignment->getId()];
+        return [$userGroup->getId(), $userId, $stageAssignment->id];
     }
 
     /**

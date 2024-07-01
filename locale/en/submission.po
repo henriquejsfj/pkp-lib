@@ -39,6 +39,12 @@ msgstr "Authors"
 msgid "submission.submit.availableUserGroups"
 msgstr "Submit As"
 
+msgid "submission.authors.label"
+msgstr "Authors"
+
+msgid "submission.author.list"
+msgstr "Submission Author List"
+
 msgid "submission.submit.availableUserGroupsDescription"
 msgstr "Select the role that best describes your contribution to this submission."
 
@@ -2067,6 +2073,10 @@ msgstr "View All Submissions"
 msgid "submission.list.viewSubmission"
 msgstr "View Submission"
 
+msgid "submission.list.viewSubmissionSummary"
+msgstr "View Submission Summary"
+
+
 msgid "submission.list.reviewsCompleted"
 msgstr "Assigned reviews completed"
 
@@ -2323,4 +2333,100 @@ msgstr "Version {$version}"
 
 msgid "submission.submissionFile"
 msgstr "Submission File"
+
+msgid "submission.dashboard.view.assigned"
+msgstr "Assigned to me"
+
+msgid "submission.dashboard.view.active"
+msgstr "Active submissions"
+
+msgid "submission.dashboard.view.needsEditor"
+msgstr "Needs editor"
+
+msgid "submission.dashboard.view.initialReview"
+msgstr "All in desk/initial review"
+
+msgid "submission.dashboard.view.reviewExternal"
+msgstr "All in peer review"
+
+msgid "submission.dashboard.view.needsReviewer"
+msgstr "Needs reviewers"
+
+msgid "submission.dashboard.view.awaitingReviews"
+msgstr "Awaiting reviews"
+
+msgid "submission.dashboard.view.reviewsSubmitted"
+msgstr "Reviews submitted"
+
+msgid "submission.dashboard.view.copyediting"
+msgstr "All in copyediting"
+
+msgid "submission.dashboard.view.production"
+msgstr "All in production"
+
+msgid "submission.dashboard.view.scheduled"
+msgstr "Scheduled for publication"
+
+msgid "submission.dashboard.view.published"
+msgstr "Published"
+
+msgid "submission.dashboard.view.declined"
+msgstr "Declined"
+
+msgid "submission.dashboard.view.revisionsRequested"
+msgstr "Revisions requested"
+
+msgid "submission.dashboard.view.revisionsSubmitted"
+msgstr "Revisions submitted"
+
+msgid "submission.dashboard.view.incompleteSubmissions"
+msgstr "Incomplete submissions"
+
+msgid "submission.dashboard.view.reviewerAssignmentsAll"
+msgstr "All assignments"
+
+msgid "submission.dashboard.view.reviewerAssignmentsPending"
+msgstr "Pending"
+
+msgid "submission.dashboard.view.reviewerAssignmentsFinished"
+msgstr "Completed / Declined"
+
+msgid "submission.dashboard.view.reviewAssignments.all"
+msgstr "All assignments"
+
+msgid "submission.dashboard.view.reviewAssignments.pending"
+msgstr "Pending"
+
+msgid "submission.dashboard.view.reviewAssignments.archived"
+msgstr "Completed / Declined"
+
+msgid "publication.jats"
+msgstr "JATS XML"
+
+msgid "publication.jats.confirmDeleteFileTitle"
+msgstr "Confirm deleting JATS XML"
+
+msgid "publication.jats.confirmDeleteFileMessage"
+msgstr "You are about to remove the existing JATS XML File from this publication. Are you sure?"
+
+msgid "publication.jats.confirmDeleteFileButton"
+msgstr "Delete JATS File"
+
+msgid "publication.jats.autoCreatedMessage"
+msgstr "This JATS file is generated automatically by the submission metadata"
+
+msgid "publication.jats.lastModified"
+msgstr "Last Modification at {$modificationDate} by {$username}"
+
+msgid "publication.jats.defaultContentCreationError"
+msgstr "An error occured when trying to create the default JATS content. Please make sure that the JatsTemplate plugin is installed."
+
+msgid "submission.files.content.error"
+msgstr "The content of the submission file '{$fileName}' could not be retrieved."
+
+msgid "author.competingInterests"
+msgstr "Competing Interests"
+
+msgid "author.competingInterests.description"
+msgstr "Please disclose any competing interests this author may have with the research subject."
 

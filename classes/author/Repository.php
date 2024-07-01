@@ -99,8 +99,8 @@ class Repository
     public function validate($author, $props, Submission $submission, Context $context)
     {
         $schemaService = Services::get('schema');
-        $allowedLocales = $context->getSupportedSubmissionLocales();
         $primaryLocale = $submission->getData('locale');
+        $allowedLocales = $submission->getPublicationLanguages($context->getSupportedSubmissionMetadataLocales());
 
         $validator = ValidatorFactory::make(
             $props,
@@ -140,7 +140,7 @@ class Repository
             $errors = $schemaService->formatValidationErrors($validator->errors());
         }
 
-        Hook::call('Author::validate', [$errors, $author, $props, $allowedLocales, $primaryLocale]);
+        Hook::call('Author::validate', [&$errors, $author, $props, $allowedLocales, $primaryLocale]);
 
         return $errors;
     }
@@ -158,6 +158,8 @@ class Repository
             $nextSeq = $this->dao->getNextSeq($author->getData('publicationId'));
             $author->setData('seq', $nextSeq);
         }
+
+        Hook::call('Author::add::before', [$author]);
 
         $authorId = $this->dao->insert($author);
         $author = Repo::author()->get($authorId);

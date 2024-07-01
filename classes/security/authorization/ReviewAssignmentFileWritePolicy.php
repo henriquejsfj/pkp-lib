@@ -19,11 +19,10 @@ namespace PKP\security\authorization;
 
 use APP\core\Application;
 use APP\core\Request;
+use APP\facades\Repo;
 use PKP\core\PKPRequest;
-use PKP\db\DAORegistry;
 use PKP\security\Role;
 use PKP\submission\reviewAssignment\ReviewAssignment;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
 
 class ReviewAssignmentFileWritePolicy extends AuthorizationPolicy
 {
@@ -67,9 +66,7 @@ class ReviewAssignmentFileWritePolicy extends AuthorizationPolicy
             return AuthorizationPolicy::AUTHORIZATION_DENY;
         }
 
-        /** @var ReviewAssignmentDAO */
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO');
-        $reviewAssignment = $reviewAssignmentDao->getById($this->_reviewAssignmentId);
+        $reviewAssignment = Repo::reviewAssignment()->get($this->_reviewAssignmentId, $submission->getId());
 
         if (!($reviewAssignment instanceof ReviewAssignment)) {
             return AuthorizationPolicy::AUTHORIZATION_DENY;
@@ -82,7 +79,7 @@ class ReviewAssignmentFileWritePolicy extends AuthorizationPolicy
         }
 
         // Managers can write review attachments when they are not assigned to a submission
-        if (empty($stageAssignments) && count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN], $userRoles))) {
+        if (empty($assignedStages) && count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN], $userRoles))) {
             $this->addAuthorizedContextObject(Application::ASSOC_TYPE_REVIEW_ASSIGNMENT, $reviewAssignment);
             return AuthorizationPolicy::AUTHORIZATION_PERMIT;
         }

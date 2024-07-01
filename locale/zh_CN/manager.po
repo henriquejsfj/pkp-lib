@@ -230,7 +230,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1853,21 +1853,6 @@ msgstr ""
 msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.require"
-msgstr "要求作者在接受提交之前输入提交的语言。"
-
 msgid "manager.setup.metadata.rights.description"
 msgstr "提交内容所拥有的任何权利，包括知识产权（IPR），版权和各种产权。"
 
@@ -2145,12 +2130,6 @@ msgid "manager.navigationMenus.about.description"
 msgstr "链接到在“设置”>“期刊”中显示“关于期刊”内容的页面"
 
 msgid "manager.navigationMenus.about.conditionalWarning"
-msgstr ""
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
 msgstr ""
 
 msgid "manager.navigationMenus.submissions.description"
@@ -3226,3 +3205,9 @@ msgstr ""
 #~ msgid "emails.reviewRemind.body"
 #~ msgstr ""
 #~ "这封电子邮件是由区段编辑发出，提醒一位审查人他们的审查工作已经到期。"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr "要求投稿作者提供一个利益冲突（CI）的文字声明。"
+
+msgid "manager.setup.masthead"
+msgstr "刊头"

@@ -459,11 +459,6 @@ msgstr "Search submissions, ID, authors, keywords, etc."
 msgid "editor.submission.days"
 msgstr "Days"
 
-msgid "editor.submission.daysInStage"
-msgstr "Days in Stage"
-
-msgid "editor.submission.viewSummary"
-msgstr "Summary"
 
 msgid "editor.article.reviewForms"
 msgstr "Review Forms"
@@ -568,6 +563,9 @@ msgstr "Average days to complete review"
 
 msgid "reviewer.list.neverAssigned"
 msgstr "Never assigned"
+
+msgid "reviewer.list.reviewerSameInstitution"
+msgstr "Same institution as author"
 
 msgid "reviewer.list.reassign"
 msgstr "Reassign"

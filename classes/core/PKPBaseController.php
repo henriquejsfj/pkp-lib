@@ -33,7 +33,6 @@ use PKP\security\authorization\HttpsPolicy;
 use PKP\security\authorization\PolicySet;
 use PKP\security\authorization\RestrictedSiteAccessPolicy;
 use PKP\security\authorization\UserRolesRequiredPolicy;
-use PKP\session\SessionManager;
 use PKP\statistics\PKPStatisticsHelper;
 use PKP\validation\ValidatorFactory;
 use ReflectionFunction;
@@ -210,7 +209,6 @@ abstract class PKPBaseController extends Controller
      */
     public function &getAuthorizedContextObject(int $assocType): mixed
     {
-        assert($this->_authorizationDecisionManager instanceof AuthorizationDecisionManager);
         return $this->_authorizationDecisionManager->getAuthorizedContextObject($assocType);
     }
 
@@ -224,7 +222,6 @@ abstract class PKPBaseController extends Controller
      */
     public function &getAuthorizedContext(): array
     {
-        assert($this->_authorizationDecisionManager instanceof AuthorizationDecisionManager);
         return $this->_authorizationDecisionManager->getAuthorizedContext();
     }
 
@@ -332,16 +329,13 @@ abstract class PKPBaseController extends Controller
 
         // Ensure the allowed hosts setting, when provided, is respected.
         $this->addPolicy(new AllowedHostsPolicy($request), true);
-        if (!SessionManager::isDisabled()) {
+        if (!PKPSessionGuard::isSessionDisable()) {
             // Add user roles in authorized context.
             $user = $request->getUser();
             if ($user instanceof \PKP\user\User) {
                 $this->addPolicy(new UserRolesRequiredPolicy($request), true);
             }
         }
-
-        // Make sure that we have a valid decision manager instance.
-        assert($this->_authorizationDecisionManager instanceof AuthorizationDecisionManager);
 
         $router = $request->getRouter();
         if ($router instanceof \PKP\core\PKPPageRouter) {

@@ -18,8 +18,11 @@
 namespace PKP\db;
 
 use APP\submission\DAO;
+use Countable;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Enumerable;
+use PKP\core\DataObject;
 use PKP\core\ItemIterator;
 use ReflectionClass;
 
@@ -46,7 +49,7 @@ class DAOResultFactory extends ItemIterator
     public $records;
 
     /**
-     * @var string|null Fetch SQL
+     * @var string|Builder|null Fetch SQL
      */
     public $sql;
 
@@ -76,8 +79,8 @@ class DAOResultFactory extends ItemIterator
      * @param object $dao DAO class for factory
      * @param string $functionName The function to call on $dao to create an object
      * @param array $idFields an array of primary key field names that uniquely identify a result row in the record set. Should be data object _data array key, not database column name
-     * @param string $sql Optional SQL query used to generate paged result set. Necessary when total row counts will be needed (e.g. when paging). WARNING: New code should not use this.
-     * @param array $params Optional parameters for SQL query used to generate paged result set. Necessary when total row counts will be needed (e.g. when paging). WARNING: New code should not use this.
+     * @param string|Builder|null $sql Optional SQL query used to generate paged result set. Necessary when total row counts will be needed (e.g. when paging). WARNING: New code should not use this.
+     * @param array $params Optional parameters for SQL query used to generate paged result set. Necessary when total row counts will be needed (e.g. when paging), only used when the $sql argument is a string. WARNING: New code should not use this.
      * @param ?DBResultRange $rangeInfo Optional pagination information. WARNING: New code should not use this.
      */
     public function __construct($records, $dao, $functionName, $idFields = [], $sql = null, $params = [], $rangeInfo = null)
@@ -104,10 +107,8 @@ class DAOResultFactory extends ItemIterator
 
     /**
      * Return the object representing the next row.
-     *
-     * @return ?T
      */
-    public function next()
+    public function next(): ?DataObject
     {
         if ($this->records == null) {
             return $this->records;
@@ -137,7 +138,7 @@ class DAOResultFactory extends ItemIterator
     /**
      * @copydoc ItemIterator::count()
      */
-    public function getCount()
+    public function getCount(): int
     {
         if ($this->sql === null) {
             throw new \Exception('DAOResultFactory instances cannot be counted unless supplied in constructor (DAO ' . $this->dao::class . ')!');
@@ -151,20 +152,17 @@ class DAOResultFactory extends ItemIterator
     /**
      * Return the next row, with key.
      *
-     * @param null|mixed $idField
-     *
      * @return ?array{mixed,T} ($key, $value)
      */
-    public function nextWithKey($idField = null)
+    public function nextWithKey(mixed $idField = null): array
     {
         $result = $this->next();
         if ($idField) {
-            assert($result instanceof \PKP\core\DataObject);
+            assert($result instanceof DataObject);
             $key = $result->getData($idField);
         } elseif (empty($this->idFields)) {
             $key = null;
         } else {
-            assert($result instanceof \PKP\core\DataObject && is_array($this->idFields));
             $key = '';
             foreach ($this->idFields as $idField) {
                 assert(!is_null($result->getData($idField)));
@@ -180,9 +178,8 @@ class DAOResultFactory extends ItemIterator
     /**
      * Get the page number of a set that this iterator represents.
      *
-     * @return int
      */
-    public function getPage()
+    public function getPage(): int
     {
         return $this->rangeInfo->getPage();
     }
@@ -190,34 +187,28 @@ class DAOResultFactory extends ItemIterator
     /**
      * Get the total number of pages in this set.
      *
-     * @return int
      */
-    public function getPageCount()
+    public function getPageCount(): int
     {
         return ceil($this->getCount() / $this->rangeInfo->getCount());
     }
 
     /**
      * Return a boolean indicating whether or not we've reached the end of results
-     *
-     * @return bool
      */
-    public function eof()
+    public function eof(): bool
     {
         if ($this->records == null) {
             return true;
         }
-        /** @var DAOResultIterator */
-        $records = $this->records;
-        return !$records->valid();
+
+        return $this->records instanceof Countable ? !count($this->records) : !$this->records->valid();
     }
 
     /**
      * Return true iff the result list was empty.
-     *
-     * @return bool
      */
-    public function wasEmpty()
+    public function wasEmpty(): bool
     {
         return $this->getCount() === 0;
     }
@@ -227,7 +218,7 @@ class DAOResultFactory extends ItemIterator
      *
      * @return T[]
      */
-    public function toArray()
+    public function toArray(): array
     {
         $returner = [];
         while ($row = $this->next()) {
@@ -238,10 +229,8 @@ class DAOResultFactory extends ItemIterator
 
     /**
      * Return an Iterator for this DAOResultFactory.
-     *
-     * @return DAOResultIterator<T>
      */
-    public function toIterator()
+    public function toIterator(): \Iterator
     {
         return new DAOResultIterator($this);
     }
@@ -251,7 +240,7 @@ class DAOResultFactory extends ItemIterator
      *
      * @return array<array-key,T>
      */
-    public function toAssociativeArray($idField = 'id')
+    public function toAssociativeArray($idField = 'id'): array
     {
         $returner = [];
         while ($row = $this->next()) {

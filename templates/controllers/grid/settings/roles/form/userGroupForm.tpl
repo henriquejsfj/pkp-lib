@@ -22,7 +22,7 @@
 	{rdelim});
 </script>
 
-<form class="pkp_form" id="userGroupForm" method="post" action="{url router=\PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.settings.roles.UserGroupGridHandler" op="updateUserGroup"}">
+<form class="pkp_form" id="userGroupForm" method="post" action="{url router=PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.settings.roles.UserGroupGridHandler" op="updateUserGroup"}">
 	{csrf}
 	{include file="controllers/notification/inPlaceNotification.tpl" notificationId="userGroupFormNotification"}
 
@@ -56,6 +56,7 @@
 				{fbvElement type="checkbox" name="permitSelfRegistration" id="permitSelfRegistration" checked=$permitSelfRegistration label="settings.roles.permitSelfRegistration"}
 				{fbvElement type="checkbox" name="recommendOnly" id="recommendOnly" checked=$recommendOnly label="settings.roles.recommendOnly"}
 				{fbvElement type="checkbox" name="permitMetadataEdit" id="permitMetadataEdit" checked=$permitMetadataEdit label="settings.roles.permitMetadataEdit"}
+				{fbvElement type="checkbox" name="masthead" id="masthead" checked=$masthead label="settings.roles.masthead"}
 			{/fbvFormSection}
 		{/fbvFormArea}
 	</div>

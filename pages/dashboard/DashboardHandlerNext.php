@@ -20,21 +20,31 @@ use APP\facades\Repo;
 use APP\handler\Handler;
 use APP\template\TemplateManager;
 use PKP\components\forms\dashboard\SubmissionFilters;
+use PKP\controllers\grid\users\reviewer\PKPReviewerGridHandler;
 use PKP\core\JSONMessage;
 use PKP\core\PKPApplication;
 use PKP\core\PKPRequest;
-use PKP\db\DAORegistry;
+use PKP\decision\Decision;
 use PKP\plugins\Hook;
 use PKP\security\authorization\PKPSiteAccessPolicy;
 use PKP\security\Role;
-use PKP\submission\Collector as SubmissionCollector;
-use PKP\submission\GenreDAO;
-use PKP\submission\PKPSubmission;
+use PKP\submission\DashboardView;
+use PKP\submission\reviewAssignment\ReviewAssignment;
+use PKP\submission\reviewRound\ReviewRound;
+use PKP\submissionFile\SubmissionFile;
 
 define('SUBMISSIONS_LIST_ACTIVE', 'active');
 define('SUBMISSIONS_LIST_ARCHIVE', 'archive');
 define('SUBMISSIONS_LIST_MY_QUEUE', 'myQueue');
 define('SUBMISSIONS_LIST_UNASSIGNED', 'unassigned');
+
+enum DashboardPage: string
+{
+    case EditorialDashboard = 'editorialDashboard';
+    case MyReviewAssignments = 'myReviewAssignments';
+    case MySubmissions = 'mySubmissions';
+}
+
 
 class DashboardHandlerNext extends Handler
 {
@@ -43,16 +53,43 @@ class DashboardHandlerNext extends Handler
 
     public int $perPage = 30;
 
+    /** Identify in which context is looking at the submissions */
+    public DashboardPage $dashboardPage;
+
+    /**
+     * editorial, review_assignments
+     */
+    public array $selectedRoleIds = [];
     /**
      * Constructor
      */
-    public function __construct()
+    public function __construct(DashboardPage $dashboardPage)
     {
         parent::__construct();
 
+        $this->dashboardPage = $dashboardPage;
+
+        if($this->dashboardPage === DashboardPage::EditorialDashboard) {
+            $this->selectedRoleIds = [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT];
+        } elseif($this->dashboardPage === DashboardPage::MyReviewAssignments) {
+            $this->selectedRoleIds = [Role::ROLE_ID_REVIEWER];
+        } else {
+            $this->selectedRoleIds = [Role::ROLE_ID_AUTHOR];
+        }
+
         $this->addRoleAssignment(
-            [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_AUTHOR, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_ASSISTANT],
-            ['index', 'tasks', 'myQueue', 'unassigned', 'active', 'archives']
+            [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT],
+            ['index', 'editorial']
+        );
+
+        $this->addRoleAssignment(
+            Role::ROLE_ID_REVIEWER,
+            ['reviewAssignments']
+        );
+
+        $this->addRoleAssignment(
+            Role::ROLE_ID_AUTHOR,
+            ['mySubmissions']
         );
     }
 
@@ -84,7 +121,6 @@ class DashboardHandlerNext extends Handler
         $this->setupTemplate($request);
 
         $userRoles = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES);
-        $apiUrl = $dispatcher->url($request, PKPApplication::ROUTE_API, $context->getPath(), '_submissions');
 
         $sections = Repo::section()
             ->getCollector()
@@ -103,67 +139,136 @@ class DashboardHandlerNext extends Handler
             $categories
         );
 
-        $collector = Repo::submission()
-            ->getCollector()
-            ->filterByContextIds([(int) $request->getContext()->getId()])
-            ->filterByStatus([PKPSubmission::STATUS_QUEUED]);
 
-        if (empty(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN], $userRoles))) {
-            $collector->assignedTo([(int) $request->getUser()->getId()]);
-        }
+        $selectRevisionDecisionForm = new \PKP\components\forms\decision\SelectRevisionDecisionForm();
+        $selectRevisionRecommendationForm = new \PKP\components\forms\decision\SelectRevisionRecommendationForm();
 
-        $userGroups = Repo::userGroup()
-            ->getCollector()
-            ->filterByContextIds([$context->getId()])
-            ->getMany();
-
-        /** @var GenreDAO $genreDao */
-        $genreDao = DAORegistry::getDAO('GenreDAO');
-        $genres = $genreDao->getByContextId($context->getId())->toArray();
 
         $templateMgr->setState([
-            'apiUrl' => $apiUrl,
-            'assignParticipantUrl' => $dispatcher->url(
-                $request,
-                Application::ROUTE_COMPONENT,
-                null,
-                'grid.users.stageParticipant.StageParticipantGridHandler',
-                'addParticipant',
-                null,
-                [
-                    'submissionId' => '__id__',
-                    'stageId' => '__stageId__',
-                ]
-            ),
-            'count' => $this->perPage,
-            'currentViewId' => 'active',
-            'filtersForm' => $filtersForm->getConfig(),
-            'i18nReviewRound' => __('common.reviewRoundNumber'),
-            'i18nShowingXofX' => __('common.showingXofX'),
-            'submissions' => Repo::submission()
-                ->getSchemaMap()
-                ->mapManyToSubmissionsList(
-                    $collector->limit($this->perPage)->getMany(),
-                    $userGroups,
-                    $genres
-                )
-                ->values(),
-            'submissionsMax' => $collector->limit(null)->getCount(),
-            'views' => $this->getViews(),
+            'pageInitConfig' => [
+                'selectRevisionDecisionForm' => $selectRevisionDecisionForm->getConfig(),
+                'selectRevisionRecommendationForm' => $selectRevisionRecommendationForm->getConfig(),
+                'dashboardPage' => $this->dashboardPage,
+                'countPerPage' => $this->perPage,
+                'filtersForm' => $filtersForm->getConfig(),
+                'views' => $this->getViews(),
+                'columns' => $this->getColumns(),
+            ]
         ]);
 
         $templateMgr->assign([
-            'columns' => $this->getColumns(),
-            'pageComponent' => 'SubmissionsPage',
+            'pageComponent' => 'PageOJS',
             'pageTitle' => __('navigation.submissions'),
             'pageWidth' => TemplateManager::PAGE_WIDTH_FULL,
         ]);
 
+
+        class_exists(\APP\components\forms\publication\AssignToIssueForm::class); // Force define of FORM_ASSIGN_TO_ISSUE
+        class_exists(\APP\components\forms\publication\PublishForm::class); // Force define of FORM_PUBLISH
+
         $templateMgr->setConstants([
             'STAGE_STATUS_SUBMISSION_UNASSIGNED' => Repo::submission()::STAGE_STATUS_SUBMISSION_UNASSIGNED,
+            'REVIEW_ASSIGNMENT_STATUS_DECLINED' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_DECLINED,
+            'REVIEW_ASSIGNMENT_STATUS_AWAITING_RESPONSE' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_AWAITING_RESPONSE,
+            'REVIEW_ASSIGNMENT_STATUS_RESPONSE_OVERDUE' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_RESPONSE_OVERDUE,
+            'REVIEW_ASSIGNMENT_STATUS_REVIEW_OVERDUE' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_REVIEW_OVERDUE,
+            'REVIEW_ASSIGNMENT_STATUS_ACCEPTED' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_ACCEPTED,
+            'REVIEW_ASSIGNMENT_STATUS_RECEIVED' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_RECEIVED,
+            'REVIEW_ASSIGNMENT_STATUS_COMPLETE' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_COMPLETE,
+            'REVIEW_ASSIGNMENT_STATUS_THANKED' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_THANKED,
+            'REVIEW_ASSIGNMENT_STATUS_CANCELLED' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_CANCELLED,
+            'REVIEW_ASSIGNMENT_STATUS_REQUEST_RESEND' => ReviewAssignment::REVIEW_ASSIGNMENT_STATUS_REQUEST_RESEND,
+            'REVIEW_ROUND_STATUS_REVISIONS_REQUESTED' => ReviewRound::REVIEW_ROUND_STATUS_REVISIONS_REQUESTED,
+            'REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW' => ReviewRound::REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW,
+            'REVIEW_ROUND_STATUS_SENT_TO_EXTERNAL' => ReviewRound::REVIEW_ROUND_STATUS_SENT_TO_EXTERNAL,
+            'REVIEW_ROUND_STATUS_ACCEPTED' => ReviewRound::REVIEW_ROUND_STATUS_ACCEPTED,
+            'REVIEW_ROUND_STATUS_DECLINED' => ReviewRound::REVIEW_ROUND_STATUS_DECLINED,
+            'REVIEW_ROUND_STATUS_PENDING_REVIEWERS' => ReviewRound::REVIEW_ROUND_STATUS_PENDING_REVIEWERS,
+            'REVIEW_ROUND_STATUS_PENDING_REVIEWS' => ReviewRound::REVIEW_ROUND_STATUS_PENDING_REVIEWS,
+            'REVIEW_ROUND_STATUS_REVIEWS_READY' => ReviewRound::REVIEW_ROUND_STATUS_REVIEWS_READY,
+            'REVIEW_ROUND_STATUS_REVIEWS_COMPLETED' => ReviewRound::REVIEW_ROUND_STATUS_REVIEWS_COMPLETED,
+            'REVIEW_ROUND_STATUS_REVIEWS_OVERDUE' => ReviewRound::REVIEW_ROUND_STATUS_REVIEWS_OVERDUE,
+            'REVIEW_ROUND_STATUS_REVISIONS_SUBMITTED' => ReviewRound::REVIEW_ROUND_STATUS_REVISIONS_SUBMITTED,
+            'REVIEW_ROUND_STATUS_PENDING_RECOMMENDATIONS' => ReviewRound::REVIEW_ROUND_STATUS_PENDING_RECOMMENDATIONS,
+            'REVIEW_ROUND_STATUS_RECOMMENDATIONS_READY' => ReviewRound::REVIEW_ROUND_STATUS_RECOMMENDATIONS_READY,
+            'REVIEW_ROUND_STATUS_RECOMMENDATIONS_COMPLETED' => ReviewRound::REVIEW_ROUND_STATUS_RECOMMENDATIONS_COMPLETED,
+            'REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED' => ReviewRound::REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED,
+            'REVIEW_ROUND_STATUS_RETURNED_TO_REVIEW' => ReviewRound::REVIEW_ROUND_STATUS_RETURNED_TO_REVIEW,
+            'SUBMISSION_REVIEW_METHOD_ANONYMOUS' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_ANONYMOUS,
+            'SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS,
+            'SUBMISSION_REVIEW_METHOD_OPEN' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_OPEN,
+
+            'SUBMISSION_REVIEWER_RECOMMENDATION_ACCEPT' => ReviewAssignment::SUBMISSION_REVIEWER_RECOMMENDATION_ACCEPT,
+            'SUBMISSION_REVIEWER_RECOMMENDATION_PENDING_REVISIONS' => ReviewAssignment::SUBMISSION_REVIEWER_RECOMMENDATION_PENDING_REVISIONS,
+            'SUBMISSION_REVIEWER_RECOMMENDATION_RESUBMIT_HERE' => ReviewAssignment::SUBMISSION_REVIEWER_RECOMMENDATION_RESUBMIT_HERE,
+            'SUBMISSION_REVIEWER_RECOMMENDATION_RESUBMIT_ELSEWHERE' => ReviewAssignment::SUBMISSION_REVIEWER_RECOMMENDATION_RESUBMIT_ELSEWHERE,
+            'SUBMISSION_REVIEWER_RECOMMENDATION_DECLINE' => ReviewAssignment::SUBMISSION_REVIEWER_RECOMMENDATION_DECLINE,
+            'SUBMISSION_REVIEWER_RECOMMENDATION_SEE_COMMENTS' => ReviewAssignment::SUBMISSION_REVIEWER_RECOMMENDATION_SEE_COMMENTS,
+
+            'DECISION_ACCEPT' => Decision::ACCEPT,
+            'DECISION_DECLINE' => Decision::DECLINE,
+            'DECISION_CANCEL_REVIEW_ROUND' => Decision::CANCEL_REVIEW_ROUND,
+            'DECISON_PENDING_REVISIONS' => Decision::PENDING_REVISIONS,
+            'DECISION_EXTERNAL_REVIEW' => Decision::EXTERNAL_REVIEW,
+            'DECISION_SKIP_EXTERNAL_REVIEW' => Decision::SKIP_EXTERNAL_REVIEW,
+            'DECISION_INITIAL_DECLINE' => Decision::INITIAL_DECLINE,
+            'DECISION_SEND_TO_PRODUCTION' => Decision::SEND_TO_PRODUCTION,
+            'DECISION_BACK_FROM_COPYEDITING' => Decision::BACK_FROM_COPYEDITING,
+
+            'SUBMISSION_FILE_SUBMISSION' => SubmissionFile::SUBMISSION_FILE_SUBMISSION,
+            'SUBMISSION_FILE_REVIEW_FILE' => SubmissionFile::SUBMISSION_FILE_REVIEW_FILE,
+            'SUBMISSION_FILE_REVIEW_REVISION' => SubmissionFile::SUBMISSION_FILE_REVIEW_REVISION,
+            'SUBMISSION_FILE_FINAL' => SubmissionFile::SUBMISSION_FILE_FINAL,
+            'SUBMISSION_FILE_REVIEW_ATTACHMENT' => SubmissionFile::SUBMISSION_FILE_REVIEW_ATTACHMENT,
+            'SUBMISSION_FILE_COPYEDIT' => SubmissionFile::SUBMISSION_FILE_COPYEDIT,
+            'SUBMISSION_FILE_PRODUCTION_READY' => SubmissionFile::SUBMISSION_FILE_PRODUCTION_READY,
+            'SUBMISSION_FILE_PROOF' => SubmissionFile::SUBMISSION_FILE_PROOF,
+            'FORM_ASSIGN_TO_ISSUE' => FORM_ASSIGN_TO_ISSUE,
+            'FORM_PUBLISH' => FORM_PUBLISH,
+
+            'REVIEWER_SELECT_ADVANCED_SEARCH' => PKPReviewerGridHandler::REVIEWER_SELECT_ADVANCED_SEARCH,
+
+            'ROLE_ID_AUTHOR' => Role::ROLE_ID_AUTHOR,
+
+            // ASSOC
+            'ASSOC_TYPE_REVIEW_ASSIGNMENT' => PKPApplication::ASSOC_TYPE_REVIEW_ASSIGNMENT
         ]);
 
         $templateMgr->display('dashboard/editors.tpl');
+    }
+
+
+    /**
+     * Display about index page.
+     *
+     * @param PKPRequest $request
+     * @param array $args
+     */
+    public function editorial($args, $request)
+    {
+        return $this->index($args, $request);
+    }
+
+    /**
+     * Display Review Assignments page.
+     *
+     * @param PKPRequest $request
+     * @param array $args
+     */
+    public function reviewAssignments($args, $request)
+    {
+        return $this->index($args, $request);
+    }
+
+    /**
+     * Display My Submissions page.
+     *
+     * @param PKPRequest $request
+     * @param array $args
+     */
+    public function mySubmissions($args, $request)
+    {
+        return $this->index($args, $request);
     }
 
     /**
@@ -193,144 +298,12 @@ class DashboardHandlerNext extends Handler
         $context = $request->getContext();
         $user = $request->getUser();
         $userRoles = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES);
+        $dashboardViews = Repo::submission()->getDashboardViews($context, $user, $this->selectedRoleIds);
+        $viewsData = $dashboardViews->map(fn (DashboardView $dashboardView) => $dashboardView->getData())->values()->toArray();
 
-        $views = [
-            [
-                'id' => 'assigned-to-me',
-                'name' => 'Assigned to me',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStatus([PKPSubmission::STATUS_QUEUED])
-                    ->assignedTo([$user->getId()])
-                    ->getCount(),
-                'op' => 'assigned',
-                'queryParams' => [
-                    'status' => [PKPSubmission::STATUS_QUEUED],
-                ]
-            ],
-            [
-                'id' => 'active',
-                'name' => 'Active Submissions',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStatus([PKPSubmission::STATUS_QUEUED])
-                    ->getCount(),
-                'queryParams' => [
-                    'status' => [PKPSubmission::STATUS_QUEUED],
-                ]
-            ],
-            [
-                'id' => 'needs-editor',
-                'name' => 'Needs editor',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->assignedTo(SubmissionCollector::UNASSIGNED)
-                    ->filterByStatus([PKPSubmission::STATUS_QUEUED])
-                    ->getCount(),
-                'queryParams' => [
-                    'assignedTo' => SubmissionCollector::UNASSIGNED,
-                    'status' => [PKPSubmission::STATUS_QUEUED],
-                ]
-            ],
-            [
-                'id' => 'needs-reviewers',
-                'name' => 'Needs reviewers',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStageIds([WORKFLOW_STAGE_ID_INTERNAL_REVIEW, WORKFLOW_STAGE_ID_EXTERNAL_REVIEW])
-                    ->isReviewedBy(SubmissionCollector::UNASSIGNED)
-                    ->getCount(),
-            ],
-            [
-                'id' => 'initial-review',
-                'name' => 'All in desk/initial review',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStageIds([WORKFLOW_STAGE_ID_SUBMISSION])
-                    ->filterByStatus([PKPSubmission::STATUS_QUEUED])
-                    ->getCount(),
-                'queryParams' => [
-                    'stageIds' => [WORKFLOW_STAGE_ID_SUBMISSION],
-                    'status' => [PKPSubmission::STATUS_QUEUED],
-                ]
-            ],
-            [
-                'id' => 'external-review',
-                'name' => 'All in peer review',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStageIds([WORKFLOW_STAGE_ID_EXTERNAL_REVIEW])
-                    ->filterByStatus([PKPSubmission::STATUS_QUEUED])
-                    ->getCount(),
-                'queryParams' => [
-                    'stageIds' => [WORKFLOW_STAGE_ID_EXTERNAL_REVIEW],
-                    'status' => [PKPSubmission::STATUS_QUEUED],
-                ]
-            ],
-            [
-                'id' => 'copyediting',
-                'name' => 'All in copyediting',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStageIds([WORKFLOW_STAGE_ID_EDITING])
-                    ->filterByStatus([PKPSubmission::STATUS_QUEUED])
-                    ->getCount(),
-                'queryParams' => [
-                    'stageIds' => [WORKFLOW_STAGE_ID_EDITING],
-                    'status' => [PKPSubmission::STATUS_QUEUED],
-                ]
-            ],
-            [
-                'id' => 'production',
-                'name' => 'All in production',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStageIds([WORKFLOW_STAGE_ID_PRODUCTION])
-                    ->filterByStatus([PKPSubmission::STATUS_QUEUED])
-                    ->getCount(),
-                'queryParams' => [
-                    'stageIds' => [WORKFLOW_STAGE_ID_PRODUCTION],
-                    'status' => [PKPSubmission::STATUS_QUEUED],
-                ]
-            ],
-            [
-                'id' => 'scheduled',
-                'name' => 'Scheduled for publication',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStatus([PKPSubmission::STATUS_SCHEDULED])
-                    ->getCount(),
-                'queryParams' => [
-                    'status' => [PKPSubmission::STATUS_SCHEDULED],
-                ]
-            ],
-            [
-                'id' => 'published',
-                'name' => 'Published',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStatus([PKPSubmission::STATUS_PUBLISHED])
-                    ->getCount(),
-                'queryParams' => [
-                    'status' => [PKPSubmission::STATUS_PUBLISHED],
-                ]
-            ],
-            [
-                'id' => 'declined',
-                'name' => 'Declined',
-                'count' => Repo::submission()->getCollector()
-                    ->filterByContextIds([$context->getId()])
-                    ->filterByStatus([PKPSubmission::STATUS_DECLINED])
-                    ->getCount(),
-                'queryParams' => [
-                    'status' => [PKPSubmission::STATUS_DECLINED],
-                ]
-            ],
-        ];
+        Hook::call('Dashboard::views', [&$viewsData, $userRoles]);
 
-        Hook::call('Dashboard::views', [&$views, $userRoles]);
-
-        return $views;
+        return $viewsData;
     }
 
     /**
@@ -338,20 +311,36 @@ class DashboardHandlerNext extends Handler
      *
      * @hook Dashboard::columns [[&$columns, $userRoles]]
      */
-    protected function getColumns(): array
+    public function getColumns(): array
     {
-        $columns = [
-            $this->createColumn('id', __('common.id'), 'dashboard/column-id.tpl', true),
-            $this->createColumn('title', __('navigation.submissions'), 'dashboard/column-title.tpl'),
-            $this->createColumn('stage', __('workflow.stage'), 'dashboard/column-stage.tpl'),
-            $this->createColumn('days', __('editor.submission.days'), 'dashboard/column-days.tpl'),
-            $this->createColumn('activity', __('stats.editorialActivity'), 'dashboard/column-activity.tpl'),
-            $this->createColumn(
-                'actions',
-                '<span class="-screenReader">' . __('admin.jobs.list.actions') . '</span>',
-                'dashboard/column-actions.tpl'
-            ),
-        ];
+        $columns = [];
+
+        if($this->dashboardPage === DashboardPage::MyReviewAssignments) {
+            $columns = [
+                $this->createColumn('id', __('common.id'), 'CellReviewAssignmentId', true),
+                $this->createColumn('title', __('navigation.submissions'), 'CellReviewAssignmentTitle'),
+                $this->createColumn('activity', __('stats.editorialActivity'), 'CellReviewAssignmentActivity'),
+                $this->createColumn('actions', __('admin.jobs.list.actions'), 'CellReviewAssignmentActions')
+            ];
+        } elseif($this->dashboardPage === DashboardPage::MySubmissions) {
+
+            $columns = [
+                $this->createColumn('id', __('common.id'), 'CellSubmissionId', true),
+                $this->createColumn('title', __('navigation.submissions'), 'CellSubmissionTitle'),
+                $this->createColumn('stage', __('workflow.stage'), 'CellSubmissionStage'),
+                $this->createColumn('activity', __('stats.editorialActivity'), 'CellSubmissionActivity'),
+                $this->createColumn('actions', __('admin.jobs.list.actions'), 'CellSubmissionActions')
+            ];
+        } else {
+            $columns = [
+                $this->createColumn('id', __('common.id'), 'CellSubmissionId', true),
+                $this->createColumn('title', __('navigation.submissions'), 'CellSubmissionTitle'),
+                $this->createColumn('stage', __('workflow.stage'), 'CellSubmissionStage'),
+                $this->createColumn('days', __('editor.submission.days'), 'CellSubmissionDays'),
+                $this->createColumn('activity', __('stats.editorialActivity'), 'CellSubmissionActivity'),
+                $this->createColumn('actions', __('admin.jobs.list.actions'), 'CellSubmissionActions')
+            ];
+        }
 
         $userRoles = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES);
 
@@ -363,13 +352,13 @@ class DashboardHandlerNext extends Handler
     /**
      * Creates a new table column
      */
-    protected function createColumn(string $id, string $header, string $template, bool $sortable = false): object
+    protected function createColumn(string $id, string $header, string $componentName, bool $sortable = false): object
     {
-        return new class ($id, $header, $template, $sortable) {
+        return new class ($id, $header, $componentName, $sortable) {
             public function __construct(
                 public string $id,
                 public string $header,
-                public string $template,
+                public string $componentName,
                 public bool $sortable,
             ) {
             }

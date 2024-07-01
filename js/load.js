@@ -10,9 +10,14 @@
 
 // Vue lib and custom mixins
 import {createApp} from 'vue';
+import * as vue from 'vue';
+
+import {createPinia} from 'pinia';
 import GlobalMixins from '@/mixins/global.js';
 import VueAnnouncer from '@vue-a11y/announcer';
 import FloatingVue from 'floating-vue';
+
+import PrimeVue from 'primevue/config';
 
 import VueScrollTo from 'vue-scrollto';
 import emitter from 'tiny-emitter/instance';
@@ -24,6 +29,7 @@ import localizeMoment from '@/mixins/localizeMoment.js';
 // Global components of UI Library
 import Badge from '@/components/Badge/Badge.vue';
 import Dropdown from '@/components/Dropdown/Dropdown.vue';
+import DropdownActions from '@/components/DropdownActions/DropdownActions.vue';
 import Icon from '@/components/Icon/Icon.vue';
 import Notification from '@/components/Notification/Notification.vue';
 import Panel from '@/components/Panel/Panel.vue';
@@ -74,6 +80,7 @@ import FieldControlledVocab from '@/components/Form/fields/FieldControlledVocab.
 import FieldHtml from '@/components/Form/fields/FieldHtml.vue';
 import FieldMetadataSetting from '@/components/Form/fields/FieldMetadataSetting.vue';
 import FieldOptions from '@/components/Form/fields/FieldOptions.vue';
+import FieldOrcid from "@/components/Form/fields/FieldOrcid.vue";
 import FieldPreparedContent from '@/components/Form/fields/FieldPreparedContent.vue';
 import FieldPubId from '@/components/Form/fields/FieldPubId.vue';
 import FieldRadioInput from '@/components/Form/fields/FieldRadioInput.vue';
@@ -89,6 +96,7 @@ import FieldText from '@/components/Form/fields/FieldText.vue';
 import FieldTextarea from '@/components/Form/fields/FieldTextarea.vue';
 import FieldUpload from '@/components/Form/fields/FieldUpload.vue';
 import FieldUploadImage from '@/components/Form/fields/FieldUploadImage.vue';
+import FieldSlider from '@/components/Form/fields/FieldSlider.vue';
 
 // Panel components from UI Library
 import ListPanel from '@/components/ListPanel/ListPanel.vue';
@@ -96,9 +104,121 @@ import ListPanel from '@/components/ListPanel/ListPanel.vue';
 // Helper for initializing and tracking Vue controllers
 import VueRegistry from './classes/VueRegistry.js';
 
+// Register global components
+VueRegistry.registerComponent('Badge', Badge);
+VueRegistry.registerComponent('PkpBadge', Badge);
+VueRegistry.registerComponent('Dropdown', Dropdown);
+VueRegistry.registerComponent('PkpDropdown', Dropdown);
+VueRegistry.registerComponent('DropdownActions', DropdownActions);
+VueRegistry.registerComponent('Icon', Icon);
+VueRegistry.registerComponent('PkpIcon', Icon);
+VueRegistry.registerComponent('Notification', Notification);
+VueRegistry.registerComponent('PkpNotification', Notification);
+VueRegistry.registerComponent('Panel', Panel);
+VueRegistry.registerComponent('PkpPanel', Panel);
+VueRegistry.registerComponent('PanelSection', PanelSection);
+VueRegistry.registerComponent('PkpPanelSection', PanelSection);
+VueRegistry.registerComponent('PkpButton', PkpButton);
+VueRegistry.registerComponent('PkpHeader', PkpHeader);
+VueRegistry.registerComponent('Spinner', Spinner);
+VueRegistry.registerComponent('PkpSpinner', Spinner);
+VueRegistry.registerComponent('Step', Step);
+VueRegistry.registerComponent('PkpStep', Step);
+VueRegistry.registerComponent('Steps', Steps);
+VueRegistry.registerComponent('PkpSteps', Steps);
+VueRegistry.registerComponent('Tab', Tab);
+VueRegistry.registerComponent('PkpTab', Tab);
+VueRegistry.registerComponent('Tabs', Tabs);
+VueRegistry.registerComponent('PkpTabs', Tabs);
+
+// Register other components
+VueRegistry.registerComponent('PkpActionPanel', ActionPanel);
+VueRegistry.registerComponent('PkpButtonRow', ButtonRow);
+VueRegistry.registerComponent('PkpDoughnutChart', DoughnutChart);
+VueRegistry.registerComponent('PkpLineChart', LineChart);
+VueRegistry.registerComponent('PkpComposer', Composer);
+VueRegistry.registerComponent('PkpDateRange', DateRange);
+VueRegistry.registerComponent('PkpFile', File);
+VueRegistry.registerComponent('PkpFileAttacher', FileAttacher);
+VueRegistry.registerComponent('PkpFileUploader', FileUploader);
+VueRegistry.registerComponent('PkpFileUploadProgress', FileUploadProgress);
+VueRegistry.registerComponent('PkpFilter', PkpFilter);
+VueRegistry.registerComponent('PkpFilterAutosuggest', FilterAutosuggest);
+VueRegistry.registerComponent('PkpFilterSlider', FilterSlider);
+VueRegistry.registerComponent(
+	'PkpFilterSliderMultirange',
+	FilterSliderMultirange,
+);
+VueRegistry.registerComponent('PkpList', List);
+VueRegistry.registerComponent('PkpListItem', ListItem);
+VueRegistry.registerComponent('PkpModal', Modal);
+VueRegistry.registerComponent('PkpMultilingualProgress', MultilingualProgress);
+VueRegistry.registerComponent('PkpOrderer', Orderer);
+VueRegistry.registerComponent('PkpPagination', Pagination);
+VueRegistry.registerComponent('PkpProgressBar', ProgressBar);
+VueRegistry.registerComponent('PkpSearch', Search);
+VueRegistry.registerComponent('PkpTable', Table);
+VueRegistry.registerComponent('PkpTableCell', TableCell);
+VueRegistry.registerComponent('PkpTooltip', Tooltip);
+
+// Register Form components
+VueRegistry.registerComponent('PkpForm', Form);
+VueRegistry.registerComponent('PkpFieldArchivingPn', FieldArchivingPn);
+VueRegistry.registerComponent(
+	'PkpFieldAutosuggestPreset',
+	FieldAutosuggestPreset,
+);
+VueRegistry.registerComponent('PkpFieldBase', FieldBase);
+VueRegistry.registerComponent('PkpFieldBaseAutosuggest', FieldBaseAutosuggest);
+VueRegistry.registerComponent('PkpFieldColor', FieldColor);
+VueRegistry.registerComponent('PkpFieldControlledVocab', FieldControlledVocab);
+VueRegistry.registerComponent('PkpFieldHtml', FieldHtml);
+VueRegistry.registerComponent('PkpFieldOrcid', FieldOrcid);
+VueRegistry.registerComponent('PkpFieldMetadataSetting', FieldMetadataSetting);
+VueRegistry.registerComponent('PkpFieldOptions', FieldOptions);
+VueRegistry.registerComponent('PkpFieldPreparedContent', FieldPreparedContent);
+VueRegistry.registerComponent('PkpFieldPubId', FieldPubId);
+VueRegistry.registerComponent('PkpFieldRadioInput', FieldRadioInput);
+VueRegistry.registerComponent('PkpFieldRichText', FieldRichText);
+VueRegistry.registerComponent('PkpFieldRichTextarea', FieldRichTextarea);
+VueRegistry.registerComponent('PkpFieldSelect', FieldSelect);
+VueRegistry.registerComponent('PkpFieldSelectIssue', FieldSelectIssue);
+VueRegistry.registerComponent('PkpFieldSelectIssues', FieldSelectIssues);
+VueRegistry.registerComponent(
+	'PkpFieldSelectSubmissions',
+	FieldSelectSubmissions,
+);
+VueRegistry.registerComponent('PkpFieldSelectUsers', FieldSelectUsers);
+VueRegistry.registerComponent(
+	'PkpFieldShowEnsuringLink',
+	FieldShowEnsuringLink,
+);
+VueRegistry.registerComponent('PkpFieldText', FieldText);
+VueRegistry.registerComponent('PkpFieldTextarea', FieldTextarea);
+VueRegistry.registerComponent('PkpFieldUpload', FieldUpload);
+VueRegistry.registerComponent('PkpFieldUploadImage', FieldUploadImage);
+VueRegistry.registerComponent('PkpFieldSlider', FieldSlider);
+
+// Required by the URN plugin, to be migrated at some point to pkp prefix
+VueRegistry.registerComponent('field-text', FieldText);
+VueRegistry.registerComponent('field-pub-id', FieldPubId);
+
+// Register ListPanel
+VueRegistry.registerComponent('PkpListPanel', ListPanel);
+
+const pinia = createPinia();
+
 function pkpCreateVueApp(createAppArgs) {
 	// Initialize Vue
 	const vueApp = createApp(createAppArgs);
+	vueApp.use(pinia);
+	vueApp.use(PrimeVue, {
+		unstyled: true,
+	});
+
+	// https://github.com/vuejs/pinia/discussions/1197
+	// to be able globally share stores
+	vueApp.config.globalProperties.$store = {};
 
 	// For compatibility with vue2 to preserve spaces between html tags
 	vueApp.config.compilerOptions.whitespace = 'preserve';
@@ -119,98 +239,22 @@ function pkpCreateVueApp(createAppArgs) {
 
 	vueApp.mixin(GlobalMixins);
 
-	// Register global components
-	vueApp.component('Badge', Badge);
-	vueApp.component('PkpBadge', Badge);
-	vueApp.component('Dropdown', Dropdown);
-	vueApp.component('PkpDropdown', Dropdown);
-	vueApp.component('Icon', Icon);
-	vueApp.component('PkpIcon', Icon);
-	vueApp.component('Notification', Notification);
-	vueApp.component('PkpNotification', Notification);
-	vueApp.component('Panel', Panel);
-	vueApp.component('PkpPanel', Panel);
-	vueApp.component('PanelSection', PanelSection);
-	vueApp.component('PkpPanelSection', PanelSection);
-	vueApp.component('PkpButton', PkpButton);
-	vueApp.component('PkpHeader', PkpHeader);
-	vueApp.component('Spinner', Spinner);
-	vueApp.component('PkpSpinner', Spinner);
-	vueApp.component('Step', Step);
-	vueApp.component('PkpStep', Step);
-	vueApp.component('Steps', Steps);
-	vueApp.component('PkpSteps', Steps);
-	vueApp.component('Tab', Tab);
-	vueApp.component('PkpTab', Tab);
-	vueApp.component('Tabs', Tabs);
-	vueApp.component('PkpTabs', Tabs);
-
-	// Register other components
-	vueApp.component('PkpActionPanel', ActionPanel);
-	vueApp.component('PkpButtonRow', ButtonRow);
-	vueApp.component('PkpDoughnutChart', DoughnutChart);
-	vueApp.component('PkpLineChart', LineChart);
-	vueApp.component('PkpComposer', Composer);
-	vueApp.component('PkpDateRange', DateRange);
-	vueApp.component('PkpFile', File);
-	vueApp.component('PkpFileAttacher', FileAttacher);
-	vueApp.component('PkpFileUploader', FileUploader);
-	vueApp.component('PkpFileUploadProgress', FileUploadProgress);
-	vueApp.component('PkpFilter', PkpFilter);
-	vueApp.component('PkpFilterAutosuggest', FilterAutosuggest);
-	vueApp.component('PkpFilterSlider', FilterSlider);
-	vueApp.component('PkpFilterSliderMultirange', FilterSliderMultirange);
-	vueApp.component('PkpList', List);
-	vueApp.component('PkpListItem', ListItem);
-	vueApp.component('PkpModal', Modal);
-	vueApp.component('PkpMultilingualProgress', MultilingualProgress);
-	vueApp.component('PkpOrderer', Orderer);
-	vueApp.component('PkpPagination', Pagination);
-	vueApp.component('PkpProgressBar', ProgressBar);
-	vueApp.component('PkpSearch', Search);
-	vueApp.component('PkpTable', Table);
-	vueApp.component('PkpTableCell', TableCell);
-	vueApp.component('PkpTooltip', Tooltip);
-
-	// Register Form components
-	vueApp.component('PkpForm', Form);
-	vueApp.component('PkpFieldArchivingPn', FieldArchivingPn);
-	vueApp.component('PkpFieldAutosuggestPreset', FieldAutosuggestPreset);
-	vueApp.component('PkpFieldBase', FieldBase);
-	vueApp.component('PkpFieldBaseAutosuggest', FieldBaseAutosuggest);
-	vueApp.component('PkpFieldColor', FieldColor);
-	vueApp.component('PkpFieldControlledVocab', FieldControlledVocab);
-	vueApp.component('PkpFieldHtml', FieldHtml);
-	vueApp.component('PkpFieldMetadataSetting', FieldMetadataSetting);
-	vueApp.component('PkpFieldOptions', FieldOptions);
-	vueApp.component('PkpFieldPreparedContent', FieldPreparedContent);
-	vueApp.component('PkpFieldPubId', FieldPubId);
-	vueApp.component('PkpFieldRadioInput', FieldRadioInput);
-	vueApp.component('PkpFieldRichText', FieldRichText);
-	vueApp.component('PkpFieldRichTextarea', FieldRichTextarea);
-	vueApp.component('PkpFieldSelect', FieldSelect);
-	vueApp.component('PkpFieldSelectIssue', FieldSelectIssue);
-	vueApp.component('PkpFieldSelectIssues', FieldSelectIssues);
-	vueApp.component('PkpFieldSelectSubmissions', FieldSelectSubmissions);
-	vueApp.component('PkpFieldSelectUsers', FieldSelectUsers);
-	vueApp.component('PkpFieldShowEnsuringLink', FieldShowEnsuringLink);
-	vueApp.component('PkpFieldText', FieldText);
-	vueApp.component('PkpFieldTextarea', FieldTextarea);
-	vueApp.component('PkpFieldUpload', FieldUpload);
-	vueApp.component('PkpFieldUploadImage', FieldUploadImage);
-
-	// Required by the URN plugin, to be migrated at some point to pkp prefix
-	vueApp.component('field-text', FieldText);
-	vueApp.component('field-pub-id', FieldPubId);
-
-	// Register ListPanel
-	vueApp.component('PkpListPanel', ListPanel);
+	// register all global components
+	const allGlobalComponents = VueRegistry.getAllComponents();
+	Object.keys(allGlobalComponents).forEach((componentName) => {
+		vueApp.component(componentName, allGlobalComponents[componentName]);
+	});
 
 	return vueApp;
 }
 
 export default {
 	Vue: pkpCreateVueApp({}),
+	// making vue functions available via pkp.modules.vue for plugins
+	// especially useful when using composition api
+	modules: {
+		vue,
+	},
 	pkpCreateVueApp,
 	createApp,
 	registry: VueRegistry,
