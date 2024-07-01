@@ -23,6 +23,7 @@ use APP\facades\Repo;
 use APP\file\PublicFileManager;
 use APP\handler\Handler;
 use APP\template\TemplateManager;
+use PKP\components\forms\announcement\PKPAnnouncementForm;
 use PKP\components\forms\context\PKPDoiRegistrationSettingsForm;
 use PKP\components\forms\context\PKPEmailSetupForm;
 use PKP\components\forms\context\PKPInformationForm;
@@ -197,6 +198,7 @@ class ManagementHandler extends Handler
         $announcementSettingsForm = new \PKP\components\forms\context\PKPAnnouncementSettingsForm($contextApiUrl, $locales, $context);
         $appearanceAdvancedForm = new \APP\components\forms\context\AppearanceAdvancedForm($contextApiUrl, $locales, $context, $baseUrl, $temporaryFileApiUrl, $publicFileApiUrl);
         $appearanceSetupForm = new \APP\components\forms\context\AppearanceSetupForm($contextApiUrl, $locales, $context, $baseUrl, $temporaryFileApiUrl, $publicFileApiUrl);
+        $appearanceMastheadForm = new \PKP\components\forms\context\PKPAppearanceMastheadForm($contextApiUrl, $locales, $context);
         $informationForm = $this->getInformationForm($contextApiUrl, $locales, $context, $publicFileApiUrl);
         $listsForm = new \PKP\components\forms\context\PKPListsForm($contextApiUrl, $locales, $context);
         $privacyForm = new \PKP\components\forms\context\PKPPrivacyForm($contextApiUrl, $locales, $context, $publicFileApiUrl);
@@ -213,6 +215,7 @@ class ManagementHandler extends Handler
             FORM_ANNOUNCEMENT_SETTINGS => $announcementSettingsForm->getConfig(),
             FORM_APPEARANCE_ADVANCED => $appearanceAdvancedForm->getConfig(),
             FORM_APPEARANCE_SETUP => $appearanceSetupForm->getConfig(),
+            FORM_APPEARANCE_MASTHEAD => $appearanceMastheadForm->getConfig(),
             FORM_LISTS => $listsForm->getConfig(),
             FORM_PRIVACY => $privacyForm->getConfig(),
             FORM_THEME => $themeForm->getConfig(),
@@ -354,7 +357,13 @@ class ManagementHandler extends Handler
 
         $locales = $this->getSupportedFormLocales($context);
 
-        $announcementForm = new \PKP\components\forms\announcement\PKPAnnouncementForm($apiUrl, $locales, $request->getContext());
+        $announcementForm = new PKPAnnouncementForm(
+            $apiUrl,
+            $locales,
+            Repo::announcement()->getFileUploadBaseUrl($context),
+            $this->getTemporaryFileApiUrl($context),
+            $request->getContext()
+        );
 
         $collector = Repo::announcement()
             ->getCollector()
@@ -461,9 +470,13 @@ class ManagementHandler extends Handler
         $apiUrl = $this->getContextApiUrl($request);
         $notifyUrl = $dispatcher->url($request, PKPApplication::ROUTE_API, $context->getPath(), '_email');
 
+        $locales = $this->getSupportedFormLocales($context);
+
         $userAccessForm = new \APP\components\forms\context\UserAccessForm($apiUrl, $context);
         $isBulkEmailsEnabled = in_array($context->getId(), (array) $request->getSite()->getData('enableBulkEmails'));
         $notifyUsersForm = $isBulkEmailsEnabled ? new PKPNotifyUsersForm($notifyUrl, $context) : null;
+        // TODO: See if it needs locales
+        $orcidSettingsForm = new \PKP\components\forms\context\OrcidSettingsForm($apiUrl, $locales, $context);
 
         $templateMgr->assign([
             'pageComponent' => 'AccessPage',
@@ -479,6 +492,7 @@ class ManagementHandler extends Handler
             'components' => [
                 FORM_USER_ACCESS => $userAccessForm->getConfig(),
                 PKPNotifyUsersForm::FORM_NOTIFY_USERS => $notifyUsersForm ? $notifyUsersForm->getConfig() : null,
+                $orcidSettingsForm->id => $orcidSettingsForm->getConfig(),
             ],
         ]);
 

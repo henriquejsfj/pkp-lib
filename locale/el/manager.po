@@ -237,7 +237,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -2025,28 +2025,6 @@ msgstr ""
 "Απαιτείστε από τον συγγραφέα να προτείνει λέξεις-κλειδιά πριν αποδεχτείτε "
 "την υποβολή του."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Η Γλώσσα υποδεικνύει την κύρια γλώσσα του έργου χρησιμοποιώντας έναν κωδικό "
-"γλώσσας (\"en\") με έναν προαιρετικό κωδικό χώρας (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Ενεργοποίηση μεταδεδομένων γλώσσας"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"Μην ζητήσετε τις γλώσσες της υποβολής από τον συντάκτη κατά την υποβολή."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Ζητήστε από τον συγγραφέα να δηλώσει τις γλώσσες της υποβολής κατά την "
-"υποβολή."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Απαιτήστε από τον συγγραφέα να εισαγάγει τις γλώσσες της υποβολής πριν "
-"αποδεχτείτε την υποβολή τους."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Οποιαδήποτε δικαιώματα διατηρούνται κατά την υποβολή, τα οποία μπορεί να "
@@ -2386,16 +2364,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Αυτός ο σύνδεσμος θα εμφανιστεί μόνο αν έχετε συμπληρώσει την ενότητα "
 "\"Σχετικά με το Περιοδικό\" στις Ρυθμίσεις > Περιοδικό."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Σύνδεση σε μια σελίδα που εμφανίζει το περιεχόμενο του Κύριου Τίτλου στις "
-"Ρυθμίσεις > Περιοδικό."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Αυτός ο σύνδεσμος θα εμφανιστεί μόνο αν έχετε συμπληρώσει την ενότητα "
-"\"Ομάδα Συντακτών\" στις Ρυθμίσεις > Περιοδικό."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Σύνδεση με τη σελίδα που εμφανίζει τις οδηγίες υποβολής."
@@ -3514,3 +3482,11 @@ msgstr ""
 #~ msgstr ""
 #~ "Το παρόν μήνυμα αποστέλλεται από τον Επιμελητή Ενότητας στον Αξιολογητή, "
 #~ "ως υπενθύμιση ότι η αξιολόγηση εκκρεμεί."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Απαιτείται από τους Συγγραφείς να καταθέτουν Δήλωση Αντικρουόμενων "
+"Συμφερόντων μαζί με την υποβολή."
+
+msgid "manager.setup.masthead"
+msgstr "Κύριος τίτλος"

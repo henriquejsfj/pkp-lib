@@ -48,6 +48,12 @@
 				"date:Y-m-d H:i:s"
 			]
 		},
+		"editorAssigned": {
+			"type": "boolean",
+			"description": "Whether deciding editor has been assigned to the submission.",
+			"readOnly": true,
+			"apiSummary": true
+		},
 		"id": {
 			"type": "integer",
 			"description": "The id of this submission.",
@@ -68,7 +74,7 @@
 			"description": "The primary language of this submission.",
 			"apiSummary": true,
 			"validation": [
-				"regex:/^([a-z]{2})((_[A-Z]{2})?)(@[a-z]{0,})?$/"
+				"regex:/^([A-Za-z]{2,4})(?<sc>[_-]([A-Za-z]{4,5}|[0-9]{4}))?([_-]([A-Za-z]{2}|[0-9]{3}))?(@[a-z]{2,30}(?&sc)?)?$/"
 			]
 		},
 		"publications": {
@@ -79,6 +85,15 @@
 			"items": {
 				"$ref": "#/definitions/Publication"
 			}
+		},
+		"recommendationsIn": {
+			"type": "boolean",
+			"description": "Whether all recommending editors have submitted a recommendation.",
+			"apiSummary": true,
+			"readOnly": true,
+			"validation": [
+				"nullable"
+			]
 		},
 		"reviewRounds": {
 			"type": "array",
@@ -102,7 +117,17 @@
 						"type": "integer",
 						"readOnly": true
 					},
+					"dateAssigned": {
+						"type": "integer",
+						"validation": [
+							"date|Y-m-d H:i:s"
+						]
+					},
 					"status": {
+						"type": "integer",
+						"readOnly": true
+					},
+					"statusId": {
 						"type": "integer",
 						"readOnly": true
 					},
@@ -125,11 +150,37 @@
 					"round": {
 						"type": "integer"
 					},
+					"reviewerFullName": {
+						"type": "string",
+						"readOnly": true
+					},
 					"reviewRoundId": {
 						"type": "integer"
+					},
+					"reviewMethod": {
+						"type": "string",
+						"readOnly": true
 					}
 				}
 			}
+		},
+		"reviewersNotAssigned": {
+			"type": "boolean",
+			"description": "Whether all needed reviewers are assigned to the submission. Related to the `numReviewersPerSubmission` context setting.",
+			"apiSummary": true,
+			"readOnly": true
+		},
+		"revisionsRequested": {
+			"type": "boolean",
+			"description": "There is a revisions requested decision in the current review round and no revisions have been uploaded to that round.",
+			"apiSummary": true,
+			"readOnly": true
+		},
+		"revisionsSubmitted": {
+			"type": "boolean",
+			"description": "There is a revisions requested decision in the current review round and 1 or more revision files have been uploaded to that round.",
+			"apiSummary": true,
+			"readOnly": true
 		},
 		"stageId": {
 			"type": "integer",

@@ -256,7 +256,7 @@ msgstr "Pogledajte zapis"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Poruka o uspješnoj registraciji"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI je uspješno ažuriran"
 
 msgid "manager.dois.registration.depositDois"
@@ -2067,23 +2067,6 @@ msgstr ""
 "Zatražite od autora da predloži ključne riječi prije nego što prihvati "
 "njihovo podnošenje."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Jezik označava primarni jezik djela upotrebom jezičnog koda (\"hr\") s "
-"neobaveznim kodom zemlje (\"he_HR\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Omogući jezične metapodatke"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Prilikom podnošenja ne tražite jezik autora."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Zatražite od autora informacije o jeziku prilikom podnošenja."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr "Zamolite autora da tijekom slanja navede jezike podneska."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Sva prava nad podneskom, koja mogu uključivati prava intelektualnog "
@@ -2424,15 +2407,6 @@ msgstr ""
 msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Ova će poveznica biti prikazana samo ako ste ispunili odjeljak O časopisu "
-"pod Postavke > Časopis."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Poveznica za stranicu koja prikazuje sadržaj Impresuma u Postavke > Časopis."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Ova poveznica bit će prikazana samo ako ste ispunili odjeljak Urednički tim "
 "pod Postavke > Časopis."
 
 msgid "manager.navigationMenus.submissions.description"
@@ -3610,3 +3584,11 @@ msgstr "Potreban je urednik podneska"
 #~ msgstr ""
 #~ "Stavka koja 1) ima DOI dodijeljene za sve omogućene vrste DOI i 2) nije "
 #~ "objavljena"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Zahtijevaj od autora da prilikom prijave svog rukopisa ispune izjavu o "
+"sukobu interesa."
+
+msgid "manager.setup.masthead"
+msgstr "Impresum"

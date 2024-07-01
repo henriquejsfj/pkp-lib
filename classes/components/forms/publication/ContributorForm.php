@@ -18,11 +18,13 @@ namespace PKP\components\forms\publication;
 use APP\facades\Repo;
 use APP\submission\Submission;
 use PKP\components\forms\FieldOptions;
+use PKP\components\forms\FieldOrcid;
 use PKP\components\forms\FieldRichTextarea;
 use PKP\components\forms\FieldSelect;
 use PKP\components\forms\FieldText;
 use PKP\components\forms\FormComponent;
 use PKP\context\Context;
+use PKP\orcid\OrcidManager;
 use PKP\security\Role;
 use PKP\userGroup\UserGroup;
 use Sokil\IsoCodes\IsoCodesFactory;
@@ -94,11 +96,24 @@ class ContributorForm extends FormComponent
             ]))
             ->addField(new FieldText('url', [
                 'label' => __('user.url'),
-            ]))
-            ->addField(new FieldText('orcid', [
+            ]));
+
+        if (OrcidManager::isEnabled()) {
+            $this->addField(new FieldOrcid('orcid', [
                 'label' => __('user.orcid'),
-            ]))
-            ->addField(new FieldRichTextarea('biography', [
+                'tooltip' => __('orcid.about.orcidExplanation'),
+            ]), [FIELD_POSITION_AFTER, 'url']);
+        }
+
+
+        if ($context->getSetting('requireAuthorCompetingInterests')) {
+            $this->addField(new FieldRichTextarea('competingInterests', [
+                'label' => __('author.competingInterests'),
+                'description' => __('author.competingInterests.description'),
+                'isMultilingual' => true,
+            ]));
+        }
+        $this->addField(new FieldRichTextarea('biography', [
                 'label' => __('user.biography'),
                 'isMultilingual' => true,
             ]))

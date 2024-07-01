@@ -1,15 +1,16 @@
 # Nicolas Dickner <dickner.nicolas@uqam.ca>, 2022, 2023.
 # Marie-Hélène Vézina [UdeMontréal] <marie-helene.vezina@umontreal.ca>, 2022, 2023.
 # Germán Huélamo Bautista <germanhuelamo@gmail.com>, 2023.
-# Pierre Lasou <pierre.lasou@bibl.ulaval.ca>, 2023.
+# Pierre Lasou <pierre.lasou@bibl.ulaval.ca>, 2023, 2024.
 # Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>, 2023.
+# "Marie-Hélène Vézina [UdeMontréal]" <marie-helene.vezina@umontreal.ca>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-15T13:36:56-07:00\n"
-"PO-Revision-Date: 2023-09-22 13:06+0000\n"
-"Last-Translator: Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>\n"
+"PO-Revision-Date: 2024-03-13 17:13+0000\n"
+"Last-Translator: Pierre Lasou <pierre.lasou@bibl.ulaval.ca>\n"
 "Language-Team: French (Canada) <http://translate.pkp.sfu.ca/projects/pkp-lib/"
 "manager/fr_CA/>\n"
 "Language: fr_CA\n"
@@ -17,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 # localization file for fr_CA. Last revision 2019-10-23T01:54:57 by Marie-Hélène Vézina, Bibliothèques, Université de Montréal.
 msgid "manager.website.information"
@@ -266,7 +267,7 @@ msgstr "Afficher la notice"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Message d'enregistrement réussi"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI(s) actualisé(s) avec succès"
 
 msgid "manager.dois.registration.depositDois"
@@ -1359,13 +1360,12 @@ msgstr ""
 "Le texte suivant est présenté à l'étape des détails, lorsque l'auteur-e doit "
 "fournir le titre, le résumé et les mots-clés de la soumission."
 
-#, fuzzy
 msgid "manager.setup.workflow.forTheEditorsHelp.description"
 msgstr ""
 "Ce qui suit est montré aux auteurs-trices pendant l'étape \"Pour les "
-"rédacteur\", lorsqu'il leur est demandé de fournir des métadonnées comme les "
-"mots clés, les commentaires aux rédacteurs ou tout autre détail pouvant "
-"aider dans l'évaluation éditoriale."
+"rédacteur\", lorsqu'il leur est demandé de fournir des métadonnées, les "
+"commentaires aux rédacteurs ou tout autre détail pouvant aider dans "
+"l'évaluation éditoriale."
 
 msgid "manager.setup.workflow.reviewHelp.description"
 msgstr ""
@@ -1382,8 +1382,8 @@ msgid "manager.setup.submissionPreparationChecklistDescription"
 msgstr ""
 "Lors d'une soumission à la revue, on demande d'abord aux auteurs-es de "
 "s'assurer que toutes les conditions requises pour soumettre un article sont "
-"remplies. Tous les éléments de la liste devront être cochés avant que les "
-"auteurs-es puissent entamer la procédure de soumission."
+"remplies. Tous les éléments de la liste devront être approuvés par les "
+"auteurs-es afin de poursuivre la procédure de soumission."
 
 msgid "manager.sections.form.deactivateSection"
 msgstr ""
@@ -2168,29 +2168,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "Obliger l'auteur-e à suggérer des mots-clés avant d'accepter sa soumission."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"La langue indique la langue principale de l'œuvre à l'aide d'un code de "
-"langue (« en ») avec, facultativement, un code de pays (« en_US »)."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Activer la métadonnée « Langue »"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"Ne pas demander la,les langue-s du document à l'auteur-e pendant la "
-"soumission."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Demander à l'auteur-e d'indiquer la,les langues du document soumis au moment "
-"de la soumission."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Obliger l'auteur-e à entrer la,les langue-s du document soumis avant "
-"d'accepter sa soumission."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Tous les droits détenus sur la soumission, lesquels peuvent inclure les "
@@ -2551,16 +2528,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Ce lien ne sera affiché que si vous avez rempli la section « À propos », "
 "située sous Paramètres > Revue."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Lien vers une page affichant le contenu du « Bloc-générique » dans "
-"Paramètres > Revue."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Ce lien sera seulement affiché si vous avez rempli la section « Bloc-"
-"générique » dans Paramètres > Revue."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Lien vers la page affichant les instructions de soumission."
@@ -3619,16 +3586,18 @@ msgstr "Ce courriel est envoyé lorsqu'une nouvelle annonce est créée."
 msgid "mailable.statisticsReportNotify.name"
 msgstr "Notification sur les rapports statistiques"
 
+#, fuzzy
 msgid "mailable.editReviewNotify.name"
-msgstr ""
+msgstr "Avis de modification d'une évaluation"
 
 msgid "mailable.editReviewNotify.description"
 msgstr ""
 "Ce courriel notifie automatiquement l'évaluateur-trice lorsque les détails "
 "de son assignation ont été modifiés."
 
+#, fuzzy
 msgid "mailable.reviewCompleteNotifyEditors.name"
-msgstr ""
+msgstr "Évaluation complétée"
 
 #, fuzzy
 msgid "mailable.reviewCompleteNotifyEditors.description"
@@ -3834,3 +3803,22 @@ msgid "plugins.importexport.common.error.publicationCoverImageMissing"
 msgstr ""
 "L'image de couverture de la publication {$id} n'a pas été exportée, son "
 "fichier n'a pu être trouvé à l'adresse: \"{$path}\"."
+
+msgid "manager.highlights.confirmDelete"
+msgstr ""
+"Êtes-vous certain.e de vouloir supprimer {$title}? Cette action est "
+"irréversible."
+
+msgid "manager.highlights.image"
+msgstr "Image"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Les auteurs-es soumissionnaires doivent déposer une déclaration de conflits "
+"d'intérêts avec leur soumission."
+
+msgid "manager.statistics.counterR5"
+msgstr "Counter R5"
+
+msgid "manager.setup.masthead"
+msgstr "Bloc générique"

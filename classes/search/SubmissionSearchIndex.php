@@ -17,8 +17,8 @@
 namespace PKP\search;
 
 use APP\submission\Submission;
+use Illuminate\Support\Str;
 use PKP\config\Config;
-use PKP\core\PKPString;
 
 abstract class SubmissionSearchIndex
 {
@@ -45,22 +45,31 @@ abstract class SubmissionSearchIndex
             $text = join("\n", $text);
         }
 
-        // Remove punctuation
-        $text = PKPString::regexp_replace('/[!"\#\$%\'\(\)\.\?@\[\]\^`\{\}~]/', '', $text);
-        $text = PKPString::regexp_replace('/[\+,:;&\/<=>\|\\\]/', ' ', $text);
-        $text = PKPString::regexp_replace('/[\*]/', $allowWildcards ? '%' : ' ', $text);
-        $text = PKPString::strtolower($text);
+        if (!strlen($text ?? '')) {
+            return [];
+        }
+
+        // Attempts to fix bad UTF-8 characters
+        $previous = mb_substitute_character();
+        mb_substitute_character('none');
+        $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
+        mb_substitute_character($previous);
+
+        // Removes all control (C) characters, marks (M), punctuations (P), symbols (S) and separators (Z) except "*" (which is addressed below)
+        $text = preg_replace('/(?!\*)[\\p{C}\\p{M}\\p{P}\\p{S}\\p{Z}]+/u', ' ', $text);
+        $text = preg_replace('/[\*]/u', $allowWildcards ? '%' : ' ', $text);
+        $text = Str::lower($text);
 
         // Split into words
-        $words = PKPString::regexp_split('/\s+/', $text);
+        $words = preg_split('/\s+/u', $text);
 
         // FIXME Do not perform further filtering for some fields, e.g., author names?
 
         $keywords = [];
         foreach ($words as $word) {
             // Ignores: stop words, short words (when $allowShortWords is false) and words composed solely of numbers (when $allowNumericWords is false)
-            if (empty($stopwords[$word]) && ($allowShortWords || PKPString::strlen($word) >= $minLength) && ($allowNumericWords || !is_numeric($word))) {
-                $keywords[] = PKPString::substr($word, 0, static::SEARCH_KEYWORD_MAX_LENGTH);
+            if (empty($stopwords[$word]) && ($allowShortWords || Str::length($word) >= $minLength) && ($allowNumericWords || !is_numeric($word))) {
+                $keywords[] = Str::substr($word, 0, static::SEARCH_KEYWORD_MAX_LENGTH);
             }
         }
         return $keywords;

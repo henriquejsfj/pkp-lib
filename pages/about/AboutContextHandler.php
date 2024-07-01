@@ -20,8 +20,13 @@ use APP\core\Application;
 use APP\facades\Repo;
 use APP\handler\Handler;
 use APP\template\TemplateManager;
+use DateTime;
+use PKP\facades\Locale;
+use PKP\plugins\Hook;
 use PKP\security\authorization\ContextRequiredPolicy;
 use PKP\security\Role;
+use PKP\userGroup\relationships\enums\UserUserGroupStatus;
+use PKP\userGroup\relationships\UserUserGroup;
 
 class AboutContextHandler extends Handler
 {
@@ -54,16 +59,147 @@ class AboutContextHandler extends Handler
     }
 
     /**
-     * Display editorialTeam page.
+     * Display editorial masthead page.
      *
      * @param array $args
      * @param \PKP\core\PKPRequest $request
+     *
+     * @hook AboutContextHandler::editorialMasthead [[$mastheadRoles, $mastheadUsers, $reviewers, $previousYear]]
      */
-    public function editorialTeam($args, $request)
+    public function editorialMasthead($args, $request)
     {
+        $context = $request->getContext();
+
+        $savedMastheadUserGroupIdsOrder = (array) $context->getData('mastheadUserGroupIds');
+
+        $collector = Repo::userGroup()->getCollector();
+        $allMastheadUserGroups = $collector
+            ->filterByContextIds([$context->getId()])
+            ->filterByMasthead(true)
+            ->filterExcludeRoles([Role::ROLE_ID_REVIEWER])
+            ->orderBy($collector::ORDERBY_ROLE_ID)
+            ->getMany()
+            ->toArray();
+
+        // sort the masthead roles in their saved order for display
+        $mastheadRoles = array_replace(array_flip($savedMastheadUserGroupIdsOrder), $allMastheadUserGroups);
+
+        $allUsersIdsGroupedByUserGroupId = Repo::userGroup()->getMastheadUserIdsByRoleIds($mastheadRoles, $context->getId());
+
+        $mastheadUsers = [];
+        foreach ($mastheadRoles as $mastheadUserGroup) {
+            foreach ($allUsersIdsGroupedByUserGroupId[$mastheadUserGroup->getId()] ?? [] as $userId) {
+                $user = Repo::user()->get($userId);
+                $userUserGroup = UserUserGroup::withUserId($user->getId())
+                    ->withUserGroupId($mastheadUserGroup->getId())
+                    ->withActive()
+                    ->withMasthead()
+                    ->first();
+                if ($userUserGroup) {
+                    $startDatetime = new DateTime($userUserGroup->dateStart);
+                    $mastheadUsers[$mastheadUserGroup->getId()][$user->getId()] = [
+                        'user' => $user,
+                        'dateStart' => $startDatetime->format('Y'),
+                    ];
+                }
+            }
+        }
+
+        $previousYear = date('Y') - 1;
+        $reviewerIds = Repo::reviewAssignment()->getReviewerIdsByCompletedYear($context->getId(), $previousYear);
+        $usersCollector = Repo::user()->getCollector();
+        $reviewers = $usersCollector
+            ->filterByUserIds($reviewerIds->toArray())
+            ->orderBy($usersCollector::ORDERBY_FAMILYNAME, $usersCollector::ORDER_DIR_ASC, [Locale::getLocale(), Application::get()->getRequest()->getSite()->getPrimaryLocale()])
+            ->getMany();
+
+        Hook::call('AboutContextHandler::editorialMasthead', [$mastheadRoles, $mastheadUsers, $reviewers, $previousYear]);
+
+        // To come after https://github.com/pkp/pkp-lib/issues/9771
+        // $orcidIcon = OrcidManager::getIcon();
+        $orcidIcon = '';
+
         $templateMgr = TemplateManager::getManager($request);
         $this->setupTemplate($request);
-        $templateMgr->display('frontend/pages/editorialTeam.tpl');
+        $templateMgr->assign([
+            'mastheadRoles' => $mastheadRoles,
+            'mastheadUsers' => $mastheadUsers,
+            'reviewers' => $reviewers,
+            'previousYear' => $previousYear,
+            'orcidIcon' => $orcidIcon
+        ]);
+        $templateMgr->display('frontend/pages/editorialMasthead.tpl');
+    }
+
+    /**
+     * Display editorial history page.
+     *
+     * @param array $args
+     * @param \PKP\core\PKPRequest $request
+     *
+     * @hook AboutContextHandler::editorialHistory [[$mastheadRoles, $mastheadUsers]]
+     */
+    public function editorialHistory($args, $request)
+    {
+        $context = $request->getContext();
+
+        $savedMastheadUserGroupIdsOrder = (array) $context->getData('mastheadUserGroupIds');
+
+        $collector = Repo::userGroup()->getCollector();
+        $allMastheadUserGroups = $collector
+            ->filterByContextIds([$context->getId()])
+            ->filterByMasthead(true)
+            ->filterExcludeRoles([Role::ROLE_ID_REVIEWER])
+            ->orderBy($collector::ORDERBY_ROLE_ID)
+            ->getMany()
+            ->toArray();
+
+        // sort the masthead roles in their saved order for display
+        $mastheadRoles = array_replace(array_flip($savedMastheadUserGroupIdsOrder), $allMastheadUserGroups);
+
+        $allUsersIdsGroupedByUserGroupId = Repo::userGroup()->getMastheadUserIdsByRoleIds($mastheadRoles, $context->getId(), UserUserGroupStatus::STATUS_ENDED);
+
+        $mastheadUsers = [];
+        foreach ($mastheadRoles as $mastheadUserGroup) {
+            foreach ($allUsersIdsGroupedByUserGroupId[$mastheadUserGroup->getId()] ?? [] as $userId) {
+                $user = Repo::user()->get($userId);
+                $userUserGroups = UserUserGroup::withUserId($user->getId())
+                    ->withUserGroupId($mastheadUserGroup->getId())
+                    ->withEnded()
+                    ->withMasthead()
+                    ->get();
+                $services = [];
+                foreach ($userUserGroups as $userUserGroup) {
+                    $startDatetime = new DateTime($userUserGroup->dateStart);
+                    $endDatetime = new DateTime($userUserGroup->dateEnd);
+                    $services[] = [
+                        'dateStart' => $startDatetime->format('Y'),
+                        'dateEnd' => $endDatetime->format('Y'),
+                    ];
+                }
+                if (!empty($services)) {
+                    $mastheadUsers[$mastheadUserGroup->getId()][$user->getId()] = [
+                        'user' => $user,
+                        'services' => $services
+                    ];
+                }
+            }
+        }
+
+        Hook::call('AboutContextHandler::editorialHistory', [$mastheadRoles, $mastheadUsers]);
+
+        // To come after https://github.com/pkp/pkp-lib/issues/9771
+        // $orcidIcon = OrcidManager::getIcon();
+        $orcidIcon = '';
+
+        $templateMgr = TemplateManager::getManager($request);
+        $this->setupTemplate($request);
+        $templateMgr->assign([
+            'mastheadRoles' => $mastheadRoles,
+            'mastheadUsers' => $mastheadUsers,
+            'orcidIcon' => $orcidIcon
+        ]);
+        $templateMgr->display('frontend/pages/editorialHistory.tpl');
     }
 
     /**

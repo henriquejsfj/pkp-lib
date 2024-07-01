@@ -17,8 +17,11 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
+use PKP\core\Core;
 use PKP\core\interfaces\CollectorInterface;
+use PKP\core\PKPApplication;
 use PKP\plugins\Hook;
+use PKP\userGroup\relationships\enums\UserUserGroupStatus;
 
 /**
  * @template T of UserGroup
@@ -28,7 +31,7 @@ class Collector implements CollectorInterface
     public const ORDERBY_ROLE_ID = 'roleId';
     public const ORDERBY_ID = 'id';
 
-    public ?string $orderBy = null;
+    public ?string $orderBy = self::ORDERBY_ID;
 
     /** @var DAO */
     public $dao;
@@ -38,6 +41,8 @@ class Collector implements CollectorInterface
     public ?array $contextIds = null; // getByContextId,
 
     public ?array $roleIds = null;
+
+    public ?array $excludeRoles = null;
 
     public ?array $stageIds = null; // getUserGroupsByStage
 
@@ -58,6 +63,11 @@ class Collector implements CollectorInterface
     public ?int $count = null;
 
     public ?int $offset = null;
+
+    public UserUserGroupStatus $userUserGroupStatus = UserUserGroupStatus::STATUS_ACTIVE;
+
+    public ?bool $masthead = null;
+
 
     public function __construct(DAO $dao)
     {
@@ -124,6 +134,15 @@ class Collector implements CollectorInterface
     }
 
     /**
+     * Exclude roles
+     */
+    public function filterExcludeRoles(?array $excludedRoles): self
+    {
+        $this->excludeRoles = $excludedRoles;
+        return $this;
+    }
+
+    /**
      * Filter by contexts
      */
     public function filterByStageIds(?array $stageIds): self
@@ -169,6 +188,15 @@ class Collector implements CollectorInterface
     }
 
     /**
+     * Filter by masthead
+     */
+    public function filterByMasthead(?bool $masthead): self
+    {
+        $this->masthead = $masthead;
+        return $this;
+    }
+
+    /**
      * Filter by permit metadata edit
      */
     public function filterByIsRecommendOnly(): self
@@ -183,6 +211,15 @@ class Collector implements CollectorInterface
     public function filterByUserIds(?array $userIds): self
     {
         $this->userIds = $userIds;
+        return $this;
+    }
+
+    /**
+     * Filter by user's role status
+     */
+    public function filterByUserUserGroupStatus(UserUserGroupStatus $userUserGroupStatus): self
+    {
+        $this->userUserGroupStatus = $userUserGroupStatus;
         return $this;
     }
 
@@ -231,6 +268,22 @@ class Collector implements CollectorInterface
         if (isset($this->userIds)) {
             $q->join('user_user_groups as uug', 'ug.user_group_id', '=', 'uug.user_group_id');
             $q->whereIn('uug.user_id', $this->userIds);
+            $currentDateTime = Core::getCurrentDate();
+            if ($this->userUserGroupStatus === UserUserGroupStatus::STATUS_ENDED) {
+                $q->whereNotNull('uug.date_end')
+                    ->where('uug.date_end', '<=', $currentDateTime);
+            } elseif ($this->userUserGroupStatus === UserUserGroupStatus::STATUS_ACTIVE) {
+                $q->where(
+                    fn (Builder $q) =>
+                    $q->where('uug.date_start', '<=', $currentDateTime)
+                        ->orWhereNull('uug.date_start')
+                )
+                    ->where(
+                        fn (Builder $q) =>
+                        $q->where('uug.date_end', '>', $currentDateTime)
+                            ->orWhereNull('uug.date_end')
+                    );
+            }
         }
 
         if (isset($this->publicationIds)) {
@@ -245,12 +298,22 @@ class Collector implements CollectorInterface
             })->whereIn('ugs.stage_id', $this->stageIds);
         }
 
-        if (isset($this->contextIds)) {
-            $q->whereIn('ug.context_id', $this->contextIds);
-        }
+        $q->when(isset($this->contextIds), fn (Builder $q) => $q->where(function (Builder $q) {
+            // For site-wide contexts, context_id will be null.
+            // Note: SQL "WHERE IN (null, ...)" would not work!
+            $q->whereIn('ug.context_id', $this->contextIds)
+                ->when(
+                    in_array(PKPApplication::CONTEXT_SITE, $this->contextIds),
+                    fn (Builder $q) => $q->orWhereNull('ug.context_id')
+                );
+        }));
 
         if (isset($this->roleIds)) {
             $q->whereIn('ug.role_id', $this->roleIds);
+        }
+
+        if (isset($this->excludeRoles)) {
+            $q->whereNotIn('ug.role_id', $this->excludeRoles);
         }
 
         $q->when($this->isRecommendOnly !== null, function (Builder $q) {
@@ -272,6 +335,10 @@ class Collector implements CollectorInterface
 
         $q->when($this->permitMetadataEdit !== null, function (Builder $q) {
             $q->where('ug.permit_metadata_edit', $this->permitMetadataEdit ? 1 : 0);
+        });
+
+        $q->when($this->masthead !== null, function (Builder $q) {
+            $q->where('ug.masthead', $this->masthead ? 1 : 0);
         });
 
         $q->when($this->showTitle !== null, function (Builder $q) {

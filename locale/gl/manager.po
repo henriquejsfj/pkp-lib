@@ -229,7 +229,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -2012,24 +2012,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "Esixir ao autor que suxira palabras clave antes de aceptar a seu envío."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"O idioma indica o idioma principal da obra empregando un código de idioma "
-"(\"en\") cun código de país opcional (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Habilitar os metadatos do idioma"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Non solicite ao autor os idiomas durante o envío."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Pedirlle ao autor que indique os idiomas durante o envío."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Esixirlle ao autor que introduza os idiomas do envío antes de aceptalo."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Calquera dereito sobre o envío, que pode incluír Dereitos de Propiedade "
@@ -2364,16 +2346,6 @@ msgstr ""
 msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Esta ligazón só se amosará se completou a sección \"Acerca da revista\" en "
-"Configuración > Revista."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Ligazón a unha páxina que mostra o contido da cabeceira Configuración > "
-"Revista."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Esta ligazón só se amosará se cubriu a sección Equipo editorial en "
 "Configuración > Revista."
 
 msgid "manager.navigationMenus.submissions.description"
@@ -3450,3 +3422,11 @@ msgstr ""
 #~ msgstr ""
 #~ "Este correo electrónico é enviado polo Editor/a de Sección a un revisor/a "
 #~ "para lembrarlle que superou a data de entrega da revisión."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Pedir aos autores/as que presenten unha declaración de conflitos de "
+"intereses (CI) xuntamente co seu envío."
+
+msgid "manager.setup.masthead"
+msgstr "Cabeceira"

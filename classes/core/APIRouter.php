@@ -23,7 +23,6 @@ namespace PKP\core;
 use APP\core\Application;
 use Exception;
 use Illuminate\Http\Response;
-use PKP\session\SessionManager;
 
 class APIRouter extends PKPRouter
 {
@@ -57,10 +56,8 @@ class APIRouter extends PKPRouter
 
     /**
      * Get the API version
-     *
-     * @return string
      */
-    public function getVersion()
+    public function getVersion(): string
     {
         $pathInfoParts = $this->getPathInfoParts();
         return Core::cleanFileVar($pathInfoParts[2] ?? '');
@@ -68,10 +65,8 @@ class APIRouter extends PKPRouter
 
     /**
      * Get the entity being requested
-     *
-     * @return string
      */
-    public function getEntity()
+    public function getEntity(): string
     {
         $pathInfoParts = $this->getPathInfoParts();
         return Core::cleanFileVar($pathInfoParts[3] ?? '');
@@ -83,7 +78,7 @@ class APIRouter extends PKPRouter
     /**
      * @copydoc PKPRouter::route()
      */
-    public function route($request)
+    public function route(PKPRequest $request): void
     {
         $sourceFile = sprintf('api/%s/%s/index.php', $this->getVersion(), $this->getEntity());
 
@@ -95,23 +90,14 @@ class APIRouter extends PKPRouter
             exit;
         }
 
-        if (!SessionManager::isDisabled()) {
-            // Initialize session
-            SessionManager::getManager();
-        }
-
         $handler = require('./' . $sourceFile);
         $this->setHandler($handler);
     }
 
     /**
      * Get the requested operation
-     *
-     * @param PKPRequest $request
-     *
-     * @return string
      */
-    public function getRequestedOp($request)
+    public function getRequestedOp(PKPRequest $request): string
     {
         if ($routeActionName = PKPBaseController::getRouteActionName()) {
             return $routeActionName;
@@ -124,10 +110,10 @@ class APIRouter extends PKPRouter
      * @copydoc PKPRouter::handleAuthorizationFailure()
      */
     public function handleAuthorizationFailure(
-        $request,
-        $authorizationMessage,
+        PKPRequest $request,
+        string $authorizationMessage,
         array $messageParams = []
-    ) {
+    ): void {
         response()->json([
             'error' => $authorizationMessage,
             'errorMessage' => __($authorizationMessage, $messageParams),
@@ -137,24 +123,17 @@ class APIRouter extends PKPRouter
 
     /**
      * @copydoc PKPRouter::url()
-     *
-     * @param null|mixed $newContext
-     * @param null|mixed $endpoint
-     * @param null|mixed $op
-     * @param null|mixed $path
-     * @param null|mixed $params
-     * @param null|mixed $anchor
      */
     public function url(
         PKPRequest $request,
         ?string $newContext = null,
-        $endpoint = null,
-        $op = null,
-        $path = null,
-        $params = null,
-        $anchor = null,
-        $escape = false
-    ) {
+        ?string $endpoint = null,
+        ?string $op = null,
+        mixed $path = null,
+        ?array $params = null,
+        ?string $anchor = null,
+        bool $escape = false
+    ): string {
         // APIHandlers do not understand $op, $path or $anchor. All routing is baked
         // into the $endpoint string. It only accepts a string as the $newContext,
         // since it relies on this when path info is disabled.

@@ -19,13 +19,16 @@ use APP\core\Services;
 use APP\facades\Repo;
 use APP\notification\Notification;
 use APP\notification\NotificationManager;
+use APP\publication\Publication;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use PKP\config\Config;
 use PKP\core\Core;
 use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
+use PKP\file\FileManager;
 use PKP\log\event\SubmissionFileEventLogEntry;
 use PKP\log\SubmissionEmailLogDAO;
 use PKP\log\SubmissionEmailLogEntry;
@@ -38,8 +41,9 @@ use PKP\security\authorization\SubmissionFileAccessPolicy;
 use PKP\security\Role;
 use PKP\security\Validation;
 use PKP\services\PKPSchemaService;
-use PKP\stageAssignment\StageAssignmentDAO;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\reviewRound\ReviewRoundDAO;
+use PKP\submissionFile\exceptions\UnableToCreateFileContentException;
 use PKP\submissionFile\maps\Schema;
 use PKP\validation\ValidatorFactory;
 
@@ -105,8 +109,8 @@ abstract class Repository
      * Perform validation checks on data used to add or edit a submission file.
      *
      * @param array $props A key/value array with the new data to validate
-     * @param array $allowedLocales The context's supported locales
-     * @param string $primaryLocale The context's primary locale
+     * @param array $allowedLocales The supported submission metadata locales
+     * @param string $submissionLocale The submission's locale
      *
      * @return array A key/value array with validation errors. Empty if no errors
      *
@@ -116,7 +120,7 @@ abstract class Repository
         ?SubmissionFile $object,
         array $props,
         array $allowedLocales,
-        string $primaryLocale
+        string $submissionLocale
     ): array {
         $validator = ValidatorFactory::make(
             $props,
@@ -131,7 +135,7 @@ abstract class Repository
             $this->schemaService->getRequiredProps($this->dao->schema),
             $this->schemaService->getMultilingualProps($this->dao->schema),
             $allowedLocales,
-            $primaryLocale
+            $submissionLocale
         );
 
         // Check for input from disallowed locales
@@ -244,7 +248,7 @@ abstract class Repository
                 $object,
                 $props,
                 $allowedLocales,
-                $primaryLocale
+                $submissionLocale
             ]
         );
 
@@ -305,14 +309,14 @@ abstract class Repository
             $reviewRoundDao->updateStatus($reviewRound);
 
             // Update author notifications
-            $authorUserIds = [];
-            $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-            $authorAssignments = $stageAssignmentDao->getBySubmissionAndRoleIds($submissionFile->getData('submissionId'), [Role::ROLE_ID_AUTHOR]);
-            while ($assignment = $authorAssignments->next()) {
-                if ($assignment->getStageId() == $reviewRound->getStageId()) {
-                    $authorUserIds[] = (int) $assignment->getUserId();
-                }
-            }
+            // Replaces StageAssignmentDAO::getBySubmissionAndRoleIds
+            $authorUserIds = StageAssignment::withSubmissionIds([$submissionFile->getData('submissionId')])
+                ->withRoleIds([Role::ROLE_ID_AUTHOR])
+                ->withStageIds([$reviewRound->getStageId()])
+                ->get()
+                ->pluck('userId')
+                ->all();
+
             $notificationMgr = new NotificationManager();
             $notificationMgr->updateNotification(
                 $this->request,
@@ -432,12 +436,13 @@ abstract class Repository
         $notificationMgr = new NotificationManager();
         switch ($submissionFile->getData('fileStage')) {
             case SubmissionFile::SUBMISSION_FILE_REVIEW_REVISION:
-                $authorUserIds = [];
-                $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-                $submitterAssignments = $stageAssignmentDao->getBySubmissionAndRoleIds($submissionFile->getData('submissionId'), [Role::ROLE_ID_AUTHOR]);
-                while ($assignment = $submitterAssignments->next()) {
-                    $authorUserIds[] = $assignment->getUserId();
-                }
+                // Replaces StageAssignmentDAO::getBySubmissionAndRoleIds
+                $authorUserIds = StageAssignment::withSubmissionIds([$submissionFile->getData('submissionId')])
+                    ->withRoleIds([Role::ROLE_ID_AUTHOR])
+                    ->get()
+                    ->pluck('userId')
+                    ->all();
+
                 $notificationMgr->updateNotification(
                     Application::get()->getRequest(),
                     [
@@ -662,7 +667,8 @@ abstract class Repository
 
         if (
             $fileStage === SubmissionFile::SUBMISSION_FILE_PROOF ||
-            $fileStage === SubmissionFile::SUBMISSION_FILE_PRODUCTION_READY
+            $fileStage === SubmissionFile::SUBMISSION_FILE_PRODUCTION_READY ||
+            $fileStage === SubmissionFile::SUBMISSION_FILE_JATS
         ) {
             return WORKFLOW_STAGE_ID_PRODUCTION;
         }
@@ -785,15 +791,17 @@ abstract class Repository
 
         // Get editors assigned to the submission, consider also the recommendOnly editors
         $reviewRoundDao = DAORegistry::getDAO('ReviewRoundDAO'); /** @var ReviewRoundDAO $reviewRoundDao */
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao*/
         $reviewRound = $reviewRoundDao->getById($submissionFile->getData('assocId'));
-        $editorsStageAssignments = $stageAssignmentDao->getEditorsAssignedToStage(
-            $submission->getId(),
-            $reviewRound->getStageId()
-        );
+
+        // Replaces StageAssignmentDAO::getEditorsAssignedToStage
+        $editorsStageAssignments = StageAssignment::withSubmissionIds([$submission->getId()])
+            ->withStageIds([$reviewRound->getStageId()])
+            ->withRoleIds([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])
+            ->get();
+
         $recipients = [];
         foreach ($editorsStageAssignments as $editorsStageAssignment) {
-            $editor = Repo::user()->get($editorsStageAssignment->getUserId());
+            $editor = Repo::user()->get($editorsStageAssignment->userId);
             // IF no prior notification exists
             // OR if editor has logged in after the last revision upload
             // OR the last upload and notification was sent more than a day ago,
@@ -842,5 +850,65 @@ abstract class Repository
             'filename' => $submissionFile->getData('name'),
             'username' => $user?->getUsername(),
         ];
+    }
+
+    /**
+     * Can be used to copy a SubmissionFile to another SubmissionFile along with the corresponding file
+     */
+    public function versionSubmissionFile(
+        SubmissionFile $submissionFile,
+        Publication $newPublication
+    ): SubmissionFile
+    {
+        $newSubmissionFile = clone $submissionFile;
+
+        $oldFileId = $submissionFile->getData('fileId');
+
+        $oldFile = Services::get('file')->get($oldFileId);
+
+        $submission = Repo::submission()->get($newPublication->getData('submissionId'));
+
+        $fileManager = new FileManager();
+        $extension = $fileManager->parseFileExtension($oldFile->path);
+
+        $submissionDir = Repo::submissionFile()
+            ->getSubmissionDir(
+                $submission->getData('contextId'),
+                $newPublication->getData('submissionId')
+            );
+
+        $newFileId = Services::get('file')->add(
+            Config::getVar('files', 'files_dir') . '/' . $oldFile->path,
+            $submissionDir . '/' . uniqid() . '.' . $extension
+        );
+
+        $newSubmissionFile->setData('id', null);
+        $newSubmissionFile->setData('assocId', $newPublication->getId());
+        $newSubmissionFile->setData('fileId', $newFileId);
+
+        $submissionFileId = Repo::submissionFile()
+            ->add($newSubmissionFile);
+
+        $submissionFile = Repo::submissionFile()
+            ->get($submissionFileId);
+
+        return $submissionFile;
+    }
+
+    /**
+     * Returns jatsContent for Submission files that correspond to the content of the file
+     *
+     * @throws \PKP\submissionFile\exceptions\UnableToCreateFileContentException If the default JATS creation fails
+     */
+    public function getSubmissionFileContent(SubmissionFile $submissionFile): string | false
+    {
+        $fileName = Config::getVar('files', 'files_dir') . '/' . $submissionFile->getData('path') .'';
+        $retValue = file_get_contents($fileName);
+
+        if ($retValue === false) {
+            throw new UnableToCreateFileContentException($fileName);
+        }
+
+        return $retValue;
     }
 }

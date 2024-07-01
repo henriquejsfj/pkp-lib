@@ -1,14 +1,14 @@
 # Paul Heckler <paul.d.heckler@gmail.com>, 2023.
 # Rudy Hahusseau <rudy.hahusseau@univ-lorraine.fr>, 2023.
-# Germán Huélamo Bautista <germanhuelamo@gmail.com>, 2023.
+# Germán Huélamo Bautista <germanhuelamo@gmail.com>, 2023, 2024.
 # Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:48+00:00\n"
-"PO-Revision-Date: 2023-09-22 13:06+0000\n"
-"Last-Translator: Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>\n"
+"PO-Revision-Date: 2024-05-13 15:39+0000\n"
+"Last-Translator: Germán Huélamo Bautista <germanhuelamo@gmail.com>\n"
 "Language-Team: French <http://translate.pkp.sfu.ca/projects/pkp-lib/admin/"
 "fr_FR/>\n"
 "Language: fr_FR\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "admin.systemInfo.settingName"
 msgstr "Fixation du nom"
@@ -229,7 +229,7 @@ msgstr ""
 "qui a échoué précédemment ou un processus en cours d'exécution. Ce fichier "
 "sera automatiquement retraité."
 
-msgid "admin.scheduledTask.usageStatsLoader.openFileFailed"
+msgid "admin.job.processLogFile.openFileFailed"
 msgstr "Le fichier {$file} n'a pas pu être ouvert et a été rejeté."
 
 msgid "admin.scheduledTask.usageStatsLoader.veryOldLogFile"
@@ -244,46 +244,46 @@ msgstr ""
 "vous devez restaurer tous les fichiers journaux de ce mois et utiliser "
 "l'outil CLI pour retraiter les statistiques."
 
-msgid "admin.scheduledTask.usageStatsLoader.wrongLoglineFormat"
+msgid "admin.job.processLogFile.wrongLoglineFormat"
 msgstr ""
 "La ligne {$lineNumber} dans le fichier journal {$file} n'a pas le bon format "
 "et sera donc ignorée."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry"
+msgid "admin.job.processLogFile.invalidLogEntry"
 msgstr ""
 "Entrée de journal invalide à la ligne {$lineNumber} dans le fichier journal "
 "{$file} : {$error}"
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.time"
+msgid "admin.job.processLogFile.invalidLogEntry.time"
 msgstr "L'heure (Time) n'a pas un format de date valide."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.contextId"
+msgid "admin.job.processLogFile.invalidLogEntry.contextId"
 msgstr "L'ID du contexte n'est pas un nombre entier."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.submissionId"
+msgid "admin.job.processLogFile.invalidLogEntry.submissionId"
 msgstr "L'ID de la soumission n'est pas un nombre entier."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.representationId"
+msgid "admin.job.processLogFile.invalidLogEntry.representationId"
 msgstr "L'ID de la représentation n'est pas un nombre entier."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.assocType"
+msgid "admin.job.processLogFile.invalidLogEntry.assocType"
 msgstr "Le type associé n'est pas supporté."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.fileType"
+msgid "admin.job.processLogFile.invalidLogEntry.fileType"
 msgstr "Le type de fichier n'est pas supporté."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.country"
+msgid "admin.job.processLogFile.invalidLogEntry.country"
 msgstr "Le pays n'est pas une chaîne de deux caractères alphabétiques."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.region"
+msgid "admin.job.processLogFile.invalidLogEntry.region"
 msgstr ""
 "La région n'est pas une chaîne d'un maximum de trois caractères "
 "alphanumériques."
 
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.institutionIds"
+msgid "admin.job.processLogFile.invalidLogEntry.institutionIds"
 msgstr "Les identifiants des institutions ne sont dans un tableau."
 
-msgid "admin.scheduledTask.usageStatsLoader.insertError"
+msgid "admin.job.processLogFile.insertError"
 msgstr ""
 "Une erreur s'est produite lors du traitement du fichier journal {$file} à la "
 "ligne {$lineNumber} : {$msg}"
@@ -573,7 +573,7 @@ msgstr ""
 "envoyer un travail à une file d'attente spécifique, passez le paramètre --"
 "queue=NOM_DE_LA_QUEUE. Vous pouvez également passer le paramètre --test pour "
 "exécuter la tâche de test et le paramètre --once pour exécuter un travail à "
-"la fois"
+"la fois."
 
 msgid "admin.cli.tool.jobs.available.options.run.completed.description"
 msgstr ""
@@ -861,7 +861,6 @@ msgstr ""
 "statistiques. Toutefois, si tous les journaux/éditeurs/dépôts de ce site "
 "sont publiés, détenus ou gérés par le même fournisseur, vous pouvez désigner "
 "le site comme plateforme."
-
 "et tous les dépôts."
 
 msgid "admin.settings.statistics.sushiPlatform.sushiPlatformID"
@@ -957,3 +956,43 @@ msgstr "Exécuter le « worker deamon » pour la file d'attente de test"
 
 #~ msgid "admin.settings.passwordCharacters"
 #~ msgstr "caractères"
+
+msgid "admin.settings.sharedReviewerStatistics"
+msgstr "Statistiques des évaluateur·rice·s"
+
+msgid "admin.settings.sharedReviewerStatistics.disable"
+msgstr "Désactiver les statistiques agrégées des évaluateur·rice·s"
+
+msgid "admin.settings.statistics.sushiPlatform.isSiteSushiPlatform"
+msgstr "Utiliser le site comme plateforme pour toutes les revues."
+
+msgid "admin.job.processLogFile.fileNotFound"
+msgstr "Le fichier {$file} n'existe pas."
+
+msgid "admin.cli.tool.jobs.sandbox.message"
+msgstr ""
+"Les travaux en attente ne peuvent pas être exécutés car le mode « bac à "
+"sable » de l'application est activé."
+
+msgid "admin.job.archiveLogFile.error"
+msgstr ""
+"Le fichier {$file} n'a pas pu être déplacé de {$dispatchFilePath} vers "
+"{$archivedFilePath}."
+
+msgid "admin.cli.tool.jobs.available.options.restart.confirm"
+msgstr ""
+"Les workers quitteront le système après avoir terminé l'exécution du travail "
+"en cours."
+
+msgid "admin.settings.sharedReviewerStatistics.description"
+msgstr ""
+"Dans une installation multi-contexte, les statistiques relatives aux "
+"évaluateur·rice·s, telles que le nombre d'évaluations soumises, peuvent être "
+"affichées soit individuellement pour chaque contexte, soit collectivement."
+
+msgid "admin.fileLoader.fileDispatched"
+msgstr "Le fichier {$filename} a été déplacé dans le dossier d'envoi."
+
+msgid "admin.cli.tool.jobs.available.options.restart.description"
+msgstr ""
+"Redémarrer les worker daemons de la file d'attente après leur travail actuel."

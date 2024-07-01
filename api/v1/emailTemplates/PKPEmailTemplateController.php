@@ -72,8 +72,7 @@ class PKPEmailTemplateController extends PKPBaseController
                 ->name('emailTemplate.getMany');
 
             Route::get('{key}', $this->get(...))
-                ->name('emailTemplate.getTemplate')
-                ->whereAlphaNumeric('key');
+                ->name('emailTemplate.getTemplate');
         });
 
         Route::middleware([
@@ -93,8 +92,7 @@ class PKPEmailTemplateController extends PKPBaseController
                 ->name('emailTemplate.restoreDefaults');
 
             Route::delete('{key}', $this->delete(...))
-                ->name('emailTemplate.delete')
-                ->whereAlphaNumeric('key');
+                ->name('emailTemplate.delete');
         });
     }
 
@@ -155,7 +153,7 @@ class PKPEmailTemplateController extends PKPBaseController
         $emailTemplates = $collector->getMany();
 
         return response()->json([
-            'itemsMax' => $collector->limit(null)->offset(null)->getCount(),
+            'itemsMax' => $collector->getCount(),
             'items' => Repo::emailTemplate()->getSchemaMap()->summarizeMany($emailTemplates),
         ], Response::HTTP_OK);
     }

@@ -17,8 +17,10 @@ use APP\core\Application;
 use APP\facades\Repo;
 use APP\submission\Submission;
 use Carbon\Carbon;
+use Illuminate\Support\LazyCollection;
 use PKP\context\Context;
 use PKP\context\SubEditorsDAO;
+use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
 use PKP\file\TemporaryFileDAO;
 use PKP\log\SubmissionEmailLogDAO;
@@ -27,9 +29,7 @@ use PKP\notification\NotificationDAO;
 use PKP\plugins\Hook;
 use PKP\security\Role;
 use PKP\security\RoleDAO;
-use PKP\session\SessionDAO;
-use PKP\stageAssignment\StageAssignmentDAO;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\SubmissionCommentDAO;
 
 class Repository
@@ -135,7 +135,7 @@ class Repository
      *
      * @return bool
      */
-    public function canCurrentUserGossip($userId)
+    public function canCurrentUserGossip(int $userId)
     {
         $request = Application::get()->getRequest();
         $context = $request->getContext();
@@ -195,41 +195,68 @@ class Repository
     }
 
     /**
-     * Check for roles that give access to the passed workflow stage.
+     * Retrieve user roles which give access to (certain) submission workflow stages
+     * returns [
+     *   stage ID => [role IDs]
+     * ]
      *
-     * @param int $userId
-     * @param int $contextId
-     * @param Submission $submission
-     * @param int $stageId
-     *
-     * @return array
      */
-    public function getAccessibleStageRoles($userId, $contextId, &$submission, $stageId)
+    public function getAccessibleWorkflowStages(int $userId, int $contextId, Submission $submission, ?array $userRoleIds = null): array
     {
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-        $stageAssignmentsResult = $stageAssignmentDao->getBySubmissionAndUserIdAndStageId($submission->getId(), $userId, $stageId);
+        if (is_null($userRoleIds)) {
+            $roleDao = DAORegistry::getDAO('RoleDAO'); /** @var RoleDAO $roleDao */
+            $userRoles = $roleDao->getByUserIdGroupedByContext($userId);
 
-        $accessibleStageRoles = [];
+            $userRoleIds = [];
+            if (array_key_exists($contextId, $userRoles)) {
+                $contextRoles = $userRoles[$contextId];
+
+                foreach ($contextRoles as $contextRole) { /** @var Role $userRole */
+                    $userRoleIds[] = $contextRole->getRoleId();
+                }
+            }
+
+            // Has admin role?
+            if ($contextId != PKPApplication::CONTEXT_ID_NONE &&
+                array_key_exists(PKPApplication::CONTEXT_ID_NONE, $userRoles) &&
+                in_array(Role::ROLE_ID_SITE_ADMIN, $userRoles[PKPApplication::CONTEXT_ID_NONE])
+            ) {
+                $userRoleIds[] = Role::ROLE_ID_SITE_ADMIN;
+            }
+        }
+
+        $accessibleWorkflowStages = [];
+        // Replaces StageAssignmentDAO::getBySubmissionAndUserIdAndStageId
+        $stageAssignments = StageAssignment::with(['userGroupStages'])
+            ->withSubmissionIds([$submission->getId()])
+            ->withUserId($userId)
+            ->get();
 
         // Assigned users have access based on their assignment
-        while ($stageAssignment = $stageAssignmentsResult->next()) {
-            $userGroup = Repo::userGroup()->get($stageAssignment->getUserGroupId());
-            $accessibleStageRoles[] = $userGroup->getRoleId();
-        }
-        $accessibleStageRoles = array_unique($accessibleStageRoles);
+        foreach ($stageAssignments as $stageAssignment) {
+            $userGroup = Repo::userGroup()->get($stageAssignment->userGroupId);
+            $roleId = $userGroup->getRoleId();
 
-        // If unassigned, only managers and admins have access
-        if (empty($accessibleStageRoles)) {
-            $roleDao = DAORegistry::getDAO('RoleDAO'); /** @var RoleDAO $roleDao */
-            if ($roleDao->userHasRole($contextId, $userId, Role::ROLE_ID_MANAGER)) {
-                $accessibleStageRoles[] = Role::ROLE_ID_MANAGER;
+            // Check global user roles within the context, e.g., user can be assigned in the role, which was revoked
+            if (!in_array($roleId, $userRoleIds)) {
+                continue;
             }
-            if ($roleDao->userHasRole(Application::CONTEXT_SITE, $userId, Role::ROLE_ID_SITE_ADMIN)) {
-                $accessibleStageRoles[] = Role::ROLE_ID_SITE_ADMIN;
-            }
+
+            $stageAssignment->userGroupStages->each(function ($userGroupStage) use (&$accessibleWorkflowStages, $roleId) {
+                $accessibleWorkflowStages[$userGroupStage->stageId][] = $roleId;
+            });
         }
 
-        return array_map('intval', $accessibleStageRoles);
+        // Managers and admin have access if not assigned to the submission or are assigned in a revoked role
+        $managerRoles = array_intersect($userRoleIds, [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER]);
+        if (empty($accessibleWorkflowStages) && !empty($managerRoles)) {
+            $workflowStages = Application::getApplicationStages();
+            foreach ($workflowStages as $stageId) {
+                $accessibleWorkflowStages[$stageId] = $managerRoles;
+            }
+        }
+
+        return $accessibleWorkflowStages;
     }
 
     /**
@@ -314,10 +341,9 @@ class Repository
 
         Repo::decision()->dao->reassignDecisions($oldUserId, $newUserId);
 
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
-        foreach ($reviewAssignmentDao->getByUserId($oldUserId) as $reviewAssignment) {
-            $reviewAssignment->setReviewerId($newUserId);
-            $reviewAssignmentDao->updateObject($reviewAssignment);
+        $reviewAssignments = Repo::reviewAssignment()->getCollector()->filterByReviewerIds([$oldUserId])->getMany();
+        foreach ($reviewAssignments as $reviewAssignment) {
+            Repo::reviewAssignment()->edit($reviewAssignment, ['reviewerId' => $newUserId]);
         }
 
         $submissionEmailLogDao = DAORegistry::getDAO('SubmissionEmailLogDAO'); /** @var SubmissionEmailLogDAO $submissionEmailLogDao */
@@ -336,8 +362,8 @@ class Repository
         $notificationDao->transferNotifications($oldUserId, $newUserId);
 
         // Delete the old user and associated info.
-        $sessionDao = DAORegistry::getDAO('SessionDAO'); /** @var SessionDAO $sessionDao */
-        $sessionDao->deleteByUserId($oldUserId);
+        Application::get()->getRequest()->getSessionGuard()->invalidateOtherSessions($oldUserId);
+
         $temporaryFileDao = DAORegistry::getDAO('TemporaryFileDAO'); /** @var TemporaryFileDAO $temporaryFileDao */
         $temporaryFileDao->deleteByUserId($oldUserId);
         $subEditorsDao = DAORegistry::getDAO('SubEditorsDAO'); /** @var SubEditorsDAO $subEditorsDao */
@@ -347,24 +373,29 @@ class Repository
         $userGroups = Repo::userGroup()->userUserGroups($oldUserId);
         foreach ($userGroups as $userGroup) {
             if (!Repo::userGroup()->userInGroup($newUserId, $userGroup->getId())) {
-                Repo::userGroup()->assignUserToGroup($newUserId, $userGroup->getId());
+                $mastheadStatus = Repo::userGroup()->getUserUserGroupMastheadStatus($oldUserId, $userGroup->getId());
+                Repo::userGroup()->assignUserToGroup($newUserId, $userGroup->getId(), null, null, $mastheadStatus);
             }
         }
 
         Repo::userGroup()->deleteAssignmentsByUserId($oldUserId);
 
         // Transfer stage assignments.
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-        $stageAssignments = $stageAssignmentDao->getByUserId($oldUserId);
-        while ($stageAssignment = $stageAssignments->next()) {
-            $duplicateAssignments = $stageAssignmentDao->getBySubmissionAndStageId($stageAssignment->getSubmissionId(), null, $stageAssignment->getUserGroupId(), $newUserId);
-            if (!$duplicateAssignments->next()) {
+        $stageAssignments = StageAssignment::withUserId($oldUserId)->get();
+        foreach ($stageAssignments as $stageAssignment) {
+            // Replaces StageAssignmentDAO::getBySubmissionAndStageId
+            $duplicateAssignments = StageAssignment::withSubmissionIds([$stageAssignment->submissionId])
+                ->withUserGroupId($stageAssignment->userGroupId)
+                ->withUserId($newUserId)
+                ->get();
+
+            if ($duplicateAssignments->isEmpty()) {
                 // If no similar assignments already exist, transfer this one.
-                $stageAssignment->setUserId($newUserId);
-                $stageAssignmentDao->updateObject($stageAssignment);
+                $stageAssignment->userId = $newUserId;
+                $stageAssignment->save();
             } else {
                 // There's already a stage assignment for the new user; delete.
-                $stageAssignmentDao->deleteObject($stageAssignment);
+                $stageAssignment->delete();
             }
         }
 
@@ -396,5 +427,11 @@ class Repository
     public function deleteUnvalidatedExpiredUsers(Carbon $dateTillValid, array $excludableUsersId = [])
     {
         return $this->dao->deleteUnvalidatedExpiredUsers($dateTillValid, $excludableUsersId);
+    }
+
+    /** Get admin users */
+    public function getAdminUsers(): LazyCollection
+    {
+        return $this->dao->getAdminUsers();
     }
 }

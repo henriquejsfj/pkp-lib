@@ -35,11 +35,12 @@
 	{fbvFormSection title="reviewer.step1.request"}
 		<p>{$reviewerRequest|nl2br}</p>
 	{/fbvFormSection}
+	{assign var="publication" value=$submission->getCurrentPublication()}
 	{fbvFormSection label="submission.title"}
-		{$submission->getLocalizedTitle()|strip_unsafe_html}
+		{$currentPublication->getLocalizedTitle()|strip_unsafe_html}
 	{/fbvFormSection}
 	{fbvFormSection label=$descriptionFieldKey}
-		{$submission->getLocalizedAbstract()|strip_unsafe_html}
+		{$currentPublication->getLocalizedData('abstract')|strip_unsafe_html}
 	{/fbvFormSection}
 
 	{fbvFormSection label="editor.submissionReview.reviewType"}
@@ -47,7 +48,7 @@
 	{/fbvFormSection}
 
 	{if !$restrictReviewerFileAccess}
-	{capture assign=reviewFilesGridUrl}{url router=\PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.files.review.ReviewerReviewFilesGridHandler" op="fetchGrid" submissionId=$submission->getId() stageId=$reviewAssignment->getStageId() reviewRoundId=$reviewRoundId reviewAssignmentId=$reviewAssignment->getId() escape=false}{/capture}
+	{capture assign=reviewFilesGridUrl}{url router=PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.files.review.ReviewerReviewFilesGridHandler" op="fetchGrid" submissionId=$submission->getId() stageId=$reviewAssignment->getStageId() reviewRoundId=$reviewRoundId reviewAssignmentId=$reviewAssignment->getId() escape=false}{/capture}
 	{load_url_in_div id="reviewFilesStep1" url=$reviewFilesGridUrl}
 	{/if}
 
@@ -87,7 +88,7 @@
 
 	{if !$reviewAssignment->getDateConfirmed() && $currentContext->getData('privacyStatement')}
 		{fbvFormSection list=true}
-			{capture assign="privacyUrl"}{url router=\PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
+			{capture assign="privacyUrl"}{url router=PKP\core\PKPApplication::ROUTE_PAGE page="about" op="privacy"}{/capture}
 			{capture assign="privacyLabel"}{translate key="user.register.form.privacyConsent" privacyUrl=$privacyUrl}{/capture}
 			{fbvElement type="checkbox" id="privacyConsent" required=true value=1 label=$privacyLabel translate=false checked=$privacyConsent}
 		{/fbvFormSection}

@@ -12,13 +12,21 @@
 	// Attach the file upload form handler.
 	$(function() {ldelim}
 		$('#uploadForm').pkpHandler(
-			'$.pkp.controllers.form.AjaxFormHandler'
+		'$.pkp.controllers.form.FileUploadFormHandler',
+			{ldelim}
+				$uploader: $('#plupload'),
+				uploaderOptions: {ldelim}
+					uploadUrl: {url|json_encode op="uploadFile" fileType=$fileType escape=false},
+					baseUrl: {$baseUrl|json_encode}
+				{rdelim}
+			{rdelim}
 		);
 	{rdelim});
 </script>
 
 <form class="pkp_form" id="uploadForm" action="{url op="updateFile" fileId=$libraryFile->getId()}" method="post">
 	{csrf}
+	<input type="hidden" name="temporaryFileId" id="temporaryFileId" value="" />
 	{fbvFormArea id="name"}
 		{fbvFormSection title="common.name" required=true}
 			{fbvElement type="text" id="libraryFileName" value=$libraryFileName maxlength="255" multilingual=true required=true}
@@ -46,6 +54,10 @@
 				<td class="label">{translate key="common.dateUploaded"}</td>
 				<td class="value">{$libraryFile->getDateUploaded()|date_format:$datetimeFormatShort}</td>
 			</tr>
+			<tr valign="top">
+				<td class="label">{translate key="common.replaceFile"}</td>
+				<td class="value">{include file="controllers/fileUploadContainer.tpl" id="plupload"}</td>
+			</tr>
 			</table>
 		{/fbvFormSection}
 	{/fbvFormArea}
@@ -54,7 +66,7 @@
 		{capture assign=enablePublicAccess}{translate key="common.publicAccess"}{/capture}
 		{fbvElement type="checkbox" id="publicAccess" value="1" checked=$publicAccess label=$enablePublicAccess translate=false}
 		<p>
-			{capture assign=downloadUrl}{url router=\PKP\core\PKPApplication::ROUTE_PAGE page="libraryFiles" op="downloadPublic" path=$libraryFile->getId()}{/capture}
+			{capture assign=downloadUrl}{url router=PKP\core\PKPApplication::ROUTE_PAGE page="libraryFiles" op="downloadPublic" path=$libraryFile->getId()}{/capture}
 			{translate key="settings.libraryFiles.public.viewInstructions" downloadUrl=$downloadUrl}
 		</p>
 	{/fbvFormSection}

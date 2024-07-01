@@ -268,7 +268,7 @@ msgstr "Record ansehen"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Erfolgreiche Registrierungsmeldung"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOIs erfolgreich aktualisiert"
 
 msgid "manager.dois.registration.depositDois"
@@ -2154,24 +2154,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "Vor Annahme der Einreichung Angaben zu Schlagworten von Autor/in verlangen."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Sprache weist die Hauptsprache der Arbeit aus, indem ein Sprachcode (\"de\") "
-"mit einem optionalen Ländercode (\"de_DE\") verwendet wird."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Metadaten für Sprache aktivieren"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Bei der Einreichung keine Angabe zur Sprache von Autor/in erfragen."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Autor/in bei der Einreichung um Angaben zur Sprache bitten."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Vor Annahme der Einreichung Angaben zur Sprache von Autor/in verlangen."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Alle Rechte an diesem Beitrag einschließlich Schutz- und Urheberrechten "
@@ -2521,16 +2503,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Dieser Link wird nur angezeigt, falls Sie den Abschnitt Über uns in den "
 "Einstellungen > Zeitschrift ausgefüllt haben."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Link zur Seite, welche den Inhalt des Impressums aus den Einstellungen > "
-"Zeitschrift anzeigt."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Dieser Link wird nur angezeigt, falls Sie den Abschnitt Herausgeber-Team "
-"unter Einstellungen > Zeitschrift ausgefüllt haben."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Link zur den Einreichungsrichtlinien."
@@ -3799,3 +3771,11 @@ msgid "plugins.importexport.native.error.submissionFileRevisionMissing"
 msgstr ""
 "Die Überarbeitung {$revision} der Einreichungsdatei {$id} wurde "
 "übersprungen, da die Datei nicht unter dem Pfad \"{$path}\" gefunden wurde."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Verlangen Sie von Autor/innen, die einen Beitrag einreichen wollen, "
+"zusätzlich eine Erklärung zu möglicherweise bestehenden Interessenkonflikten."
+
+msgid "manager.setup.masthead"
+msgstr "Impressum"

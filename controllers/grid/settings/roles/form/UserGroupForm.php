@@ -26,8 +26,7 @@ use PKP\facades\Locale;
 use PKP\form\Form;
 use PKP\security\Role;
 use PKP\security\RoleDAO;
-use PKP\security\Validation;
-use PKP\stageAssignment\StageAssignmentDAO;
+use PKP\stageAssignment\StageAssignment;
 use PKP\userGroup\relationships\UserGroupStage;
 use PKP\workflow\WorkflowStageDAO;
 
@@ -91,7 +90,7 @@ class UserGroupForm extends Form
     /**
      * Get all locale field names
      */
-    public function getLocaleFieldNames()
+    public function getLocaleFieldNames(): array
     {
         return ['name', 'abbrev'];
     }
@@ -124,6 +123,7 @@ class UserGroupForm extends Form
                 'permitSelfRegistration' => $userGroup->getPermitSelfRegistration(),
                 'permitMetadataEdit' => $userGroup->getPermitMetadataEdit(),
                 'recommendOnly' => $userGroup->getRecommendOnly(),
+                'masthead' => $userGroup->getMasthead(),
             ];
 
             foreach ($data as $field => $value) {
@@ -137,7 +137,7 @@ class UserGroupForm extends Form
      */
     public function readInputData()
     {
-        $this->readUserVars(['roleId', 'name', 'abbrev', 'assignedStages', 'showTitle', 'permitSelfRegistration', 'recommendOnly', 'permitMetadataEdit']);
+        $this->readUserVars(['roleId', 'name', 'abbrev', 'assignedStages', 'showTitle', 'permitSelfRegistration', 'recommendOnly', 'permitMetadataEdit', 'masthead']);
     }
 
     /**
@@ -210,7 +210,7 @@ class UserGroupForm extends Form
 
             $userGroup->setRecommendOnly($this->getData('recommendOnly') && in_array($userGroup->getRoleId(), $this->getRecommendOnlyRoles()));
             $userGroup = $this->_setUserGroupLocaleFields($userGroup, $request);
-
+            $userGroup->setMasthead($this->getData('masthead') ?? false);
             $userGroupId = Repo::userGroup()->add($userGroup);
         } else {
             $userGroup = Repo::userGroup()->get($userGroupId);
@@ -221,19 +221,19 @@ class UserGroupForm extends Form
             if (in_array($userGroup->getRoleId(), Repo::userGroup()::NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES)) {
                 $userGroup->setPermitMetadataEdit(true);
             } else {
-                $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-                $allUserAssignments = $stageAssignmentDao
-                    ->getByUserGroupId($userGroupId, $this->getContextId())
-                    ->toAssociativeArray();
+                $permitMetadataEdit = $userGroup->getPermitMetadataEdit();
 
-                foreach ($allUserAssignments as $userAssignment) {
-                    $userAssignment->setCanChangeMetadata($userGroup->getPermitMetadataEdit());
-                    $stageAssignmentDao->updateObject($userAssignment);
+                $stageAssignments = StageAssignment::withUserGroupId($userGroupId)
+                    ->withContextId($this->getContextId())
+                    ->get();
+
+                foreach ($stageAssignments as $stageAssignment) {
+                    $stageAssignment->update(['canChangeMetadata' => $permitMetadataEdit]);
                 }
             }
 
             $userGroup->setRecommendOnly($this->getData('recommendOnly') && in_array($userGroup->getRoleId(), $this->getRecommendOnlyRoles()));
-
+            $userGroup->setMasthead($this->getData('masthead') ?? false);
             Repo::userGroup()->edit($userGroup, []);
         }
 

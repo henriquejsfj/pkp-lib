@@ -16,18 +16,19 @@ namespace PKP\submission\maps;
 use APP\core\Application;
 use APP\facades\Repo;
 use APP\submission\Submission;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Enumerable;
 use Illuminate\Support\LazyCollection;
 use PKP\db\DAORegistry;
 use PKP\plugins\Hook;
 use PKP\plugins\PluginRegistry;
 use PKP\query\QueryDAO;
+use PKP\security\Role;
 use PKP\services\PKPSchemaService;
 use PKP\stageAssignment\StageAssignment;
-use PKP\stageAssignment\StageAssignmentDAO;
 use PKP\submission\Genre;
 use PKP\submission\reviewAssignment\ReviewAssignment;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
+use PKP\submission\reviewRound\ReviewRound;
 use PKP\submission\reviewRound\ReviewRoundDAO;
 use PKP\submissionFile\SubmissionFile;
 use PKP\userGroup\UserGroup;
@@ -47,6 +48,12 @@ class Schema extends \PKP\core\maps\Schema
     /** @var Genre[] The file genres in this context. */
     public array $genres;
 
+    /** @var Enumerable Review assignments associated with submissions. */
+    public Enumerable $reviewAssignments;
+
+    /** @var Enumerable Stage assignments associated with submissions. */
+    public Enumerable $stageAssignments;
+
     /**
      * Get extra property names used in the submissions list
      *
@@ -62,11 +69,16 @@ class Schema extends \PKP\core\maps\Schema
             'currentPublicationId',
             'dateLastActivity',
             'dateSubmitted',
+            'editorAssigned',
             'id',
             'lastModified',
             'publications',
+            'recommendationsIn',
             'reviewAssignments',
+            'reviewersNotAssigned',
             'reviewRounds',
+            'revisionsRequested',
+            'revisionsSubmitted',
             'stageId',
             'stageName',
             'stages',
@@ -78,6 +90,8 @@ class Schema extends \PKP\core\maps\Schema
             'urlWorkflow',
             'urlPublished',
         ];
+
+        $props = array_merge($props, $this->appSpecificProps());
 
         Hook::call('Submission::getSubmissionsListProps', [&$props]);
 
@@ -91,12 +105,24 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @param LazyCollection<int,UserGroup> $userGroups The user groups in this context
      * @param Genre[] $genres The file genres in this context
+     * @param ?Enumerable $reviewAssignments review assignments associated with a submission
+     * @param ?Enumerable $stageAssignments stage assignments associated with a submission
+     * @param bool|Collection<int> $anonymizeReviews List of review assignment IDs to anonymize
      */
-    public function map(Submission $item, LazyCollection $userGroups, array $genres): array
-    {
+    public function map(
+        Submission $item,
+        LazyCollection $userGroups,
+        array $genres,
+        ?Enumerable $reviewAssignments = null,
+        ?Enumerable $stageAssignments = null,
+        bool|Collection $anonymizeReviews = false
+    ): array {
         $this->userGroups = $userGroups;
         $this->genres = $genres;
-        return $this->mapByProperties($this->getProps(), $item);
+        $this->reviewAssignments = $reviewAssignments ?? Repo::reviewAssignment()->getCollector()->filterBySubmissionIds([$item->getId()])->getMany()->remember();
+        $this->stageAssignments = $stageAssignments ?? $this->getStageAssignmentsBySubmissions(collect([$item]), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR]);
+
+        return $this->mapByProperties($this->getProps(), $item, $anonymizeReviews);
     }
 
     /**
@@ -106,12 +132,24 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @param LazyCollection<int,UserGroup> $userGroups The user groups in this context
      * @param Genre[] $genres The file genres in this context
+     * @param ?Enumerable $reviewAssignments review assignments associated with a submission
+     * @param ?Enumerable $stageAssignments stage assignments associated with a submission
+     * @param bool|Collection<int> $anonymizeReviews List of review assignment IDs to anonymize
      */
-    public function summarize(Submission $item, LazyCollection $userGroups, array $genres): array
-    {
+    public function summarize(
+        Submission $item,
+        LazyCollection $userGroups,
+        array $genres,
+        ?Enumerable $reviewAssignments = null,
+        ?Enumerable $stageAssignments = null,
+        bool|Collection $anonymizeReviews = false,
+    ): array {
         $this->userGroups = $userGroups;
         $this->genres = $genres;
-        return $this->mapByProperties($this->getSummaryProps(), $item);
+        $this->reviewAssignments = $reviewAssignments ?? Repo::reviewAssignment()->getCollector()->filterBySubmissionIds([$item->getId()])->getMany()->remember();
+        $this->stageAssignments = $stageAssignments ?? $this->getStageAssignmentsBySubmissions(collect([$item]), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR]);
+
+        return $this->mapByProperties($this->getSummaryProps(), $item, $anonymizeReviews);
     }
 
     /**
@@ -121,15 +159,31 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @param LazyCollection<int,UserGroup> $userGroups The user groups in this context
      * @param Genre[] $genres The file genres in this context
+     * @param bool|Collection<int> $anonymizeReviews List of review assignment IDs to anonymize
      */
-    public function mapMany(Enumerable $collection, LazyCollection $userGroups, array $genres): Enumerable
+    public function mapMany(Enumerable $collection, LazyCollection $userGroups, array $genres, bool|Collection $anonymizeReviews = false): Enumerable
     {
         $this->collection = $collection;
         $this->userGroups = $userGroups;
         $this->genres = $genres;
-        return $collection->map(function ($item) {
-            return $this->map($item, $this->userGroups, $this->genres);
-        });
+        $this->reviewAssignments = Repo::reviewAssignment()->getCollector()->filterBySubmissionIds($collection->keys()->toArray())->getMany()->remember();
+
+        $associatedReviewAssignments = $this->reviewAssignments->groupBy(fn (ReviewAssignment $reviewAssignment, int $key) =>
+            $reviewAssignment->getData('submissionId'));
+        $associatedStageAssignments = $this->stageAssignments->groupBy(fn (StageAssignment $stageAssignment, int $key) =>
+            $stageAssignment->submissionId);
+
+        return $collection->map(
+            fn ($item) =>
+            $this->map(
+                $item,
+                $this->userGroups,
+                $this->genres,
+                $associatedReviewAssignments->get($item->getId()),
+                $associatedStageAssignments->get($item->getId()),
+                $anonymizeReviews
+            )
+        );
     }
 
     /**
@@ -139,15 +193,36 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @param LazyCollection<int,UserGroup> $userGroups The user groups in this context
      * @param Genre[] $genres The file genres in this context
+     * @param bool|Collection<int> $anonymizeReviews List of review assignment IDs to anonymize
      */
-    public function summarizeMany(Enumerable $collection, LazyCollection $userGroups, array $genres): Enumerable
+    public function summarizeMany(Enumerable $collection, LazyCollection $userGroups, array $genres, bool|Collection $anonymizeReviews = false): Enumerable
     {
         $this->collection = $collection;
         $this->userGroups = $userGroups;
         $this->genres = $genres;
-        return $collection->map(function ($item) {
-            return $this->summarize($item, $this->userGroups, $this->genres);
-        });
+        $this->reviewAssignments = Repo::reviewAssignment()->getCollector()->filterBySubmissionIds($collection->keys()->toArray())->getMany()->remember();
+        $this->stageAssignments = $this->getStageAssignmentsBySubmissions($collection, [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR]);
+
+        $associatedReviewAssignments = $this->reviewAssignments->groupBy(
+            fn (ReviewAssignment $reviewAssignment, int $key) =>
+            $reviewAssignment->getData('submissionId')
+        );
+        $associatedStageAssignment = $this->stageAssignments->groupBy(
+            fn (StageAssignment $stageAssignment, int $key) =>
+            $stageAssignment->submissionId
+        );
+
+        return $collection->map(
+            fn ($item) =>
+            $this->summarize(
+                $item,
+                $this->userGroups,
+                $this->genres,
+                $associatedReviewAssignments->get($item->getId()),
+                $associatedStageAssignment->get($item->getId()),
+                $anonymizeReviews
+            )
+        );
     }
 
     /**
@@ -155,12 +230,23 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @param LazyCollection<int,UserGroup> $userGroups The user groups in this context
      * @param Genre[] $genres The file genres in this context
+     * @param ?Enumerable $reviewAssignments review assignments associated with a submission
+     * @param ?Enumerable $stageAssignments stage assignments associated with a submission
+     * @param bool|Collection<int> $anonymizeReviews List of review assignment IDs to anonymize
      */
-    public function mapToSubmissionsList(Submission $item, LazyCollection $userGroups, array $genres): array
-    {
+    public function mapToSubmissionsList(
+        Submission $item,
+        LazyCollection $userGroups,
+        array $genres,
+        ?Enumerable $reviewAssignments = null,
+        ?Enumerable $stageAssignments = null,
+        bool|Collection $anonymizeReviews = false
+    ): array {
         $this->userGroups = $userGroups;
         $this->genres = $genres;
-        return $this->mapByProperties($this->getSubmissionsListProps(), $item);
+        $this->reviewAssignments = $reviewAssignments ?? Repo::reviewAssignment()->getCollector()->filterBySubmissionIds([$item->getId()])->getMany()->remember();
+        $this->stageAssignments = $stageAssignments ?? $this->getStageAssignmentsBySubmissions(collect([$item]), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR]);
+        return $this->mapByProperties($this->getSubmissionsListProps(), $item, $anonymizeReviews);
     }
 
     /**
@@ -170,15 +256,40 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @param LazyCollection<int,UserGroup> $userGroups The user groups in this context
      * @param Genre[] $genres The file genres in this context
+     * @param bool|Collection<int> $anonymizeReviews List of review assignment IDs to anonymize
      */
-    public function mapManyToSubmissionsList(Enumerable $collection, LazyCollection $userGroups, array $genres): Enumerable
-    {
+    public function mapManyToSubmissionsList(
+        Enumerable $collection,
+        LazyCollection $userGroups,
+        array $genres,
+        bool|Collection $anonymizeReviews = false
+    ): Enumerable {
         $this->collection = $collection;
         $this->userGroups = $userGroups;
         $this->genres = $genres;
-        return $collection->map(function ($item) {
-            return $this->mapToSubmissionsList($item, $this->userGroups, $this->genres);
-        });
+        $this->reviewAssignments = Repo::reviewAssignment()->getCollector()->filterBySubmissionIds($collection->keys()->toArray())->getMany()->remember();
+        $this->stageAssignments = $this->getStageAssignmentsBySubmissions($collection, [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR]);
+
+        $associatedReviewAssignments = $this->reviewAssignments->groupBy(
+            fn (ReviewAssignment $reviewAssignment, int $key) =>
+            $reviewAssignment->getData('submissionId')
+        );
+        $associatedStageAssignment = $this->stageAssignments->groupBy(
+            fn (StageAssignment $stageAssignment, int $key) =>
+            $stageAssignment->submissionId
+        );
+
+        return $collection->map(
+            fn ($item) =>
+            $this->mapToSubmissionsList(
+                $item,
+                $this->userGroups,
+                $this->genres,
+                $associatedReviewAssignments->get($item->getId()),
+                $associatedStageAssignment->get($item->getId()),
+                $anonymizeReviews
+            )
+        );
     }
 
     /**
@@ -210,39 +321,64 @@ class Schema extends \PKP\core\maps\Schema
         $props = array_filter($this->getSummaryProps(), function ($prop) {
             return $prop !== 'publications';
         });
+
+        $this->reviewAssignments = Repo::reviewAssignment()->getCollector()->filterBySubmissionIds([$item->getId()])->getMany()->remember();
+        $this->stageAssignments = $this->getStageAssignmentsBySubmissions(collect([$item]), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR]);
+
         return $this->mapByProperties($props, $item);
     }
 
     /**
      * Map schema properties of a Submission to an assoc array
+     *
+     * @param bool|Collection<int> $anonymizeReviews List of review assignment IDs to anonymize
      */
-    protected function mapByProperties(array $props, Submission $submission): array
+    protected function mapByProperties(array $props, Submission $submission, bool|Collection $anonymizeReviews = false): array
     {
         $output = [];
 
         if (in_array('publications', $props)) {
-            $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
-            $currentUserReviewAssignment = $reviewAssignmentDao->getLastReviewRoundReviewAssignmentByReviewer(
-                $submission->getId(),
-                $this->request->getUser()->getId()
-            );
+            $currentUserReviewAssignment = Repo::reviewAssignment()->getCollector()
+                ->filterBySubmissionIds([$submission->getId()])
+                ->filterByReviewerIds([$this->request->getUser()->getId()])
+                ->filterByLastReviewRound(true)
+                ->getMany()
+                ->first();
             $anonymize = $currentUserReviewAssignment && $currentUserReviewAssignment->getReviewMethod() === ReviewAssignment::SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS;
         }
+
+        $reviewRounds = $this->getReviewRoundsFromSubmission($submission);
+        $currentReviewRound = $reviewRounds->sortKeys()->last(); /** @var ReviewRound|null $currentReviewRound */
 
         foreach ($props as $prop) {
             switch ($prop) {
                 case '_href':
                     $output[$prop] = Repo::submission()->getUrlApi($this->context, $submission->getId());
                     break;
+                case 'editorAssigned':
+                    $output[$prop] = $this->getPropertyStageAssignments($this->stageAssignments);
+                    break;
                 case 'publications':
                     $output[$prop] = Repo::publication()->getSchemaMap($submission, $this->userGroups, $this->genres)
                         ->summarizeMany($submission->getData('publications'), $anonymize)->values();
                     break;
+                case 'recommendationsIn':
+                    $output[$prop] = $currentReviewRound ? $this->areRecommendationsIn($currentReviewRound, $this->stageAssignments) : null;
+                    break;
                 case 'reviewAssignments':
-                    $output[$prop] = $this->getPropertyReviewAssignments($submission);
+                    $output[$prop] = $this->getPropertyReviewAssignments($this->reviewAssignments, $anonymizeReviews);
+                    break;
+                case 'reviewersNotAssigned':
+                    $output[$prop] = $currentReviewRound && $this->reviewAssignments->count() >= intval($this->context->getData('numReviewersPerSubmission'));
                     break;
                 case 'reviewRounds':
-                    $output[$prop] = $this->getPropertyReviewRounds($submission);
+                    $output[$prop] = $this->getPropertyReviewRounds($reviewRounds);
+                    break;
+                case 'revisionsRequested':
+                    $output[$prop] = $currentReviewRound && $currentReviewRound->getData('status') == ReviewRound::REVIEW_ROUND_STATUS_REVISIONS_REQUESTED;
+                    break;
+                case 'revisionsSubmitted':
+                    $output[$prop] = $currentReviewRound && $currentReviewRound->getData('status') == ReviewRound::REVIEW_ROUND_STATUS_REVISIONS_SUBMITTED;
                     break;
                 case 'stageName':
                     $output[$prop] = __(Application::get()->getWorkflowStageName($submission->getData('stageId')));
@@ -277,11 +413,8 @@ class Schema extends \PKP\core\maps\Schema
     /**
      * Get details about the review assignments for a submission
      */
-    protected function getPropertyReviewAssignments(Submission $submission): array
+    protected function getPropertyReviewAssignments(Enumerable $reviewAssignments, bool|Collection $anonymizeReviews = false): array
     {
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
-        $reviewAssignments = $reviewAssignmentDao->getBySubmissionId($submission->getId());
-
         $reviews = [];
         foreach ($reviewAssignments as $reviewAssignment) {
             // @todo for now, only show reviews that haven't been
@@ -292,19 +425,28 @@ class Schema extends \PKP\core\maps\Schema
 
             $request = Application::get()->getRequest();
             $currentUser = $request->getUser();
-            $context = $request->getContext();
-            $due = is_null($reviewAssignment->getDateDue()) ? null : date('Y-m-d', strtotime($reviewAssignment->getDateDue()));
-            $responseDue = is_null($reviewAssignment->getDateResponseDue()) ? null : date('Y-m-d', strtotime($reviewAssignment->getDateResponseDue()));
+            $dateDue = is_null($reviewAssignment->getDateDue()) ? null : date('Y-m-d', strtotime($reviewAssignment->getDateDue()));
+            $dateResponseDue = is_null($reviewAssignment->getDateResponseDue()) ? null : date('Y-m-d', strtotime($reviewAssignment->getDateResponseDue()));
+            $dateConfirmed = is_null($reviewAssignment->getDateConfirmed()) ? null : date('Y-m-d', strtotime($reviewAssignment->getDateConfirmed()));
+            $dateCompleted = is_null($reviewAssignment->getDateCompleted()) ? null : date('Y-m-d', strtotime($reviewAssignment->getDateCompleted()));
+            $dateAssigned = is_null($reviewAssignment->getDateAssigned()) ? null : date('Y-m-d', strtotime($reviewAssignment->getDateAssigned()));
 
             $reviews[] = [
                 'id' => (int) $reviewAssignment->getId(),
                 'isCurrentUserAssigned' => $currentUser->getId() == (int) $reviewAssignment->getReviewerId(),
                 'statusId' => (int) $reviewAssignment->getStatus(),
                 'status' => __($reviewAssignment->getStatusKey()),
-                'due' => $due,
-                'responseDue' => $responseDue,
+                'dateDue' => $dateDue,
+                'dateResponseDue' => $dateResponseDue,
+                'dateConfirmed' => $dateConfirmed,
+                'dateCompleted' => $dateCompleted,
+                'dateAssigned' => $dateAssigned,
                 'round' => (int) $reviewAssignment->getRound(),
                 'roundId' => (int) $reviewAssignment->getReviewRoundId(),
+                'recommendation' => $reviewAssignment->getRecommendation(),
+                'dateCancelled' => $reviewAssignment->getData('dateCancelled'),
+                'reviewerFullName' => $anonymizeReviews && $anonymizeReviews->contains($reviewAssignment->getId()) ? '' : $reviewAssignment->getData('reviewerFullName'),
+                'reviewMethod' => $reviewAssignment->getData('reviewMethod')
             ];
         }
 
@@ -313,12 +455,11 @@ class Schema extends \PKP\core\maps\Schema
 
     /**
      * Get details about the review rounds for a submission
+     *
+     * @param Collection<ReviewRound> $reviewRounds
      */
-    protected function getPropertyReviewRounds(Submission $submission): array
+    protected function getPropertyReviewRounds(Collection $reviewRounds): array
     {
-        $reviewRoundDao = DAORegistry::getDAO('ReviewRoundDAO'); /** @var ReviewRoundDAO $reviewRoundDao */
-        $reviewRounds = $reviewRoundDao->getBySubmissionId($submission->getId())->toIterator();
-
         $rounds = [];
         foreach ($reviewRounds as $reviewRound) {
             $rounds[] = [
@@ -363,10 +504,6 @@ class Schema extends \PKP\core\maps\Schema
         $stageIds = Application::get()->getApplicationStages();
         $request = Application::get()->getRequest();
         $currentUser = $request->getUser();
-        $context = $request->getContext();
-
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-        $stageAssignments = $stageAssignmentDao->getBySubmissionAndUserIdAndStageId($submission->getId(), $currentUser->getId() ?? 0)->toArray();
 
         $queryDao = DAORegistry::getDAO('QueryDAO'); /** @var QueryDAO $queryDao */
         $openPerStage = $queryDao->countOpenPerStage($submission->getId(), [$request->getUser()->getId()]);
@@ -383,17 +520,26 @@ class Schema extends \PKP\core\maps\Schema
 
             $currentUserAssignedRoles = [];
             if ($currentUser) {
-                /** @var StageAssignment $stageAssignment */
+                // Replaces StageAssignmentDAO::getBySubmissionAndUserIdAndStageId
+                $stageAssignments = StageAssignment::withSubmissionIds([$submission->getId()])
+                    ->withUserId($currentUser->getId() ?? 0)
+                    ->get();
+
                 foreach ($stageAssignments as $stageAssignment) {
-                    $userGroup = $this->getUserGroup($stageAssignment->getUserGroupId());
+                    $userGroup = $this->getUserGroup($stageAssignment->userGroupId);
                     if ($userGroup) {
                         $currentUserAssignedRoles[] = $userGroup->getRoleId();
                     }
                 }
-                $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-                $stageAssignmentsResult = $stageAssignmentDao->getBySubmissionAndUserIdAndStageId($submission->getId(), $currentUser->getId(), $stageId);
-                while ($stageAssignment = $stageAssignmentsResult->next()) {
-                    $userGroup = Repo::userGroup()->get($stageAssignment->getUserGroupId());
+
+                // Replaces StageAssignmentDAO::getBySubmissionAndUserIdAndStageId
+                $stageAssignments = StageAssignment::withSubmissionIds([$submission->getId()])
+                    ->withUserId($currentUser->getId())
+                    ->withStageIds([$stageId])
+                    ->get();
+
+                foreach ($stageAssignments as $stageAssignment) {
+                    $userGroup = Repo::userGroup()->get($stageAssignment->userGroupId);
                     $currentUserAssignedRoles[] = (int) $userGroup->getRoleId();
                 }
             }
@@ -402,8 +548,12 @@ class Schema extends \PKP\core\maps\Schema
             // Stage-specific statuses
             switch ($stageId) {
                 case WORKFLOW_STAGE_ID_SUBMISSION:
-                    $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-                    $assignedEditors = $stageAssignmentDao->editorAssignedToStage($submission->getId(), $stageId);
+                    // Replaces StageAssignmentDAO::editorAssignedToStage
+                    $assignedEditors = StageAssignment::withSubmissionIds([$submission->getId()])
+                        ->withStageIds([$stageId])
+                        ->withRoleIds([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])
+                        ->exists();
+
                     if (!$assignedEditors) {
                         $stage['statusId'] = Repo::submission()::STAGE_STATUS_SUBMISSION_UNASSIGNED;
                         $stage['status'] = __('submissions.queuedUnassigned');
@@ -433,14 +583,19 @@ class Schema extends \PKP\core\maps\Schema
                         ];
 
                         // See if the  current user can only recommend:
-                        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
                         $user = $request->getUser();
-                        $editorsStageAssignments = $stageAssignmentDao->getEditorsAssignedToStage($submission->getId(), $stageId);
+
+                        // Replaces StageAssignmentDAO::getEditorsAssignedToStage
+                        $editorsStageAssignments = StageAssignment::withSubmissionIds([$submission->getId()])
+                            ->withStageIds([$stageId])
+                            ->withRoleIds([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])
+                            ->get();
+
                         // if the user is assigned several times in the editorial role, and
                         // one of the assignments have recommendOnly option set, consider it here
                         $stage['currentUserCanRecommendOnly'] = false;
                         foreach ($editorsStageAssignments as $editorsStageAssignment) {
-                            if ($editorsStageAssignment->getUserId() == $user->getId() && $editorsStageAssignment->getRecommendOnly()) {
+                            if ($editorsStageAssignment->userId == $user->getId() && $editorsStageAssignment->recommendOnly) {
                                 $stage['currentUserCanRecommendOnly'] = true;
                                 break;
                             }
@@ -474,6 +629,19 @@ class Schema extends \PKP\core\maps\Schema
         return $stages;
     }
 
+    /**
+     * Check if deciding editors are assigned to the submission
+     *
+     * @param Enumerable<StageAssignment> $stageAssignments
+     */
+    protected function getPropertyStageAssignments(Enumerable $stageAssignments): bool
+    {
+        return $stageAssignments->isNotEmpty() && $stageAssignments->contains(
+            fn (StageAssignment $stageAssignment) =>
+            !$stageAssignment->recommendOnly
+        );
+    }
+
     protected function getUserGroup(int $userGroupId): ?UserGroup
     {
         /** @var UserGroup $userGroup */
@@ -483,5 +651,49 @@ class Schema extends \PKP\core\maps\Schema
             }
         }
         return null;
+    }
+
+    /**
+     *
+     * @param Enumerable<Submission> $submissions
+     *
+     * @return LazyCollection<StageAssignment> The collection of stage assignments associated with submissions
+     */
+    protected function getStageAssignmentsBySubmissions(Enumerable $submissions, array $roleIds = []): LazyCollection
+    {
+        $submissionIds = $submissions->map(fn (Submission $submission) => $submission->getId())->toArray();
+        return StageAssignment::withSubmissionIds($submissionIds)
+            ->withRoleIds($roleIds)
+            ->lazy();
+    }
+
+    /**
+     * @return Collection<ReviewRound> [round => ReviewRound] sorted by the round number
+     */
+    protected function getReviewRoundsFromSubmission(Submission $submission): Collection
+    {
+        $reviewRoundDao = DAORegistry::getDAO('ReviewRoundDAO'); /** @var ReviewRoundDAO $reviewRoundDao */
+
+        return collect($reviewRoundDao->getBySubmissionId($submission->getId())->toIterator())
+            ->keyBy(fn (ReviewRound $reviewRound) => $reviewRound->getData('round'));
+    }
+
+    /**
+     * @return ?bool if there is one or more recommending editors assigned and all recommendations are given return true,
+     * otherwise returns false (recommendations are not yet given) or null (no recommending editors assigned)
+     */
+    protected function areRecommendationsIn(ReviewRound $currentReviewRound, Enumerable $stageAssignments): ?bool
+    {
+        $hasDecidingEditors = $stageAssignments->first(fn (StageAssignment $stageAssignment) => $stageAssignment->recommendOnly);
+
+        return $hasDecidingEditors ? $currentReviewRound->getData('status') == ReviewRound::REVIEW_ROUND_STATUS_RECOMMENDATIONS_READY : null;
+    }
+
+    /**
+     * Implement by a child class to add application-specific props to a submission
+     */
+    protected function appSpecificProps(): array
+    {
+        return [];
     }
 }

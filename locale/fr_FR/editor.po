@@ -1,13 +1,13 @@
 # Stefan Schneider <mail@stefan-schneider.at>, 2023.
-# Germán Huélamo Bautista <germanhuelamo@gmail.com>, 2023.
+# Germán Huélamo Bautista <germanhuelamo@gmail.com>, 2023, 2024.
 # Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:49+00:00\n"
-"PO-Revision-Date: 2023-09-22 13:06+0000\n"
-"Last-Translator: Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>\n"
+"PO-Revision-Date: 2024-05-31 16:41+0000\n"
+"Last-Translator: Germán Huélamo Bautista <germanhuelamo@gmail.com>\n"
 "Language-Team: French <http://translate.pkp.sfu.ca/projects/pkp-lib/editor/"
 "fr_FR/>\n"
 "Language: fr_FR\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "editor.submissionArchive.confirmDelete"
 msgstr ""
@@ -162,7 +162,7 @@ msgstr ""
 "Inclure tous les fichiers de toutes les étapes de production accessibles."
 
 msgid "editor.submission.review.currentFiles"
-msgstr "{$round}e série d'évaluation des fichiers"
+msgstr "Fichiers d'évaluation en cours pour le cycle {$round}"
 
 msgid "editor.submission.backToSearch"
 msgstr "Revenir en mode de recherche simple"
@@ -177,10 +177,10 @@ msgid "editor.review.unassignReviewer"
 msgstr "Retirer ce rapporteur"
 
 msgid "editor.review.cancelReviewer"
-msgstr "Annuler l'évaluateur(-trice)"
+msgstr "Annuler l'évaluateur·rice"
 
 msgid "editor.review.reinstateReviewer"
-msgstr "Réintégrer l'évaluateur(-trice)"
+msgstr "Réintégrer l'évaluateur·rice"
 
 msgid "editor.review.resendRequestReviewer"
 msgstr "Envoyer à nouveau la demande d’évaluation"
@@ -201,12 +201,10 @@ msgid "editor.submissionReview.open"
 msgstr "Évaluation ouverte"
 
 msgid "editor.submissionReview.anonymous"
-msgstr ""
-"Évaluateur ou évaluatrice anonyme/ Identité de l'auteur ou de l'autrice "
-"divulguée"
+msgstr "Évaluateur·rice anonyme/ Identité de l'auteur·e divulguée"
 
 msgid "editor.submissionReview.doubleAnonymous"
-msgstr "Évaluateur ou évaluatrice anonyme / auteur ou autrice anonyme"
+msgstr "Évaluateur·rice anonyme / auteur·e anonyme"
 
 msgid "editor.submissionReview.restrictFiles"
 msgstr "Fichiers devant être évalués"
@@ -300,7 +298,7 @@ msgid "editor.review.requestCancelled"
 msgstr "Demande annulée"
 
 msgid "editor.review.requestDeclined.tooltip"
-msgstr "L'évaluateur ou évaluatrice a refusé cette demande d'évaluation."
+msgstr "L'évaluateur·rice a refusé cette demande d'évaluation."
 
 msgid "editor.review.requestCancelled.tooltip"
 msgstr "Le rédacteur ou la rédactrice a annulé cette demande d'évaluation."
@@ -324,7 +322,7 @@ msgid "editor.review.reviewSubmitted"
 msgstr "Évaluation soumise"
 
 msgid "editor.review.reviewerThanked"
-msgstr "Évaluatrice ou évaluateur remercié"
+msgstr "Évaluateur·rice remercié·e"
 
 msgid "editor.review.ReviewerResendRequest"
 msgstr "Demande envoyée à nouveau"
@@ -357,13 +355,13 @@ msgstr ""
 
 msgid "editor.review.errorReinstatingReviewer"
 msgstr ""
-"Il y a eu une erreur au moment de rétablir l'évaluateur ou évaluatrice. "
-"Veuillez réessayer."
+"Il y a eu une erreur au moment de rétablir l'évaluateur·rice. Veuillez "
+"réessayer."
 
 msgid "editor.review.errorResendingReviewerRequest"
 msgstr ""
 "Une erreur s’est produite lors de la demande de réexamen de l’invitation par "
-"l’évaluateur/trice.  Veuillez réessayer."
+"l’évaluateur·rice.  Veuillez réessayer."
 
 msgid "editor.review.userGroupSelect"
 msgstr "Ajouter l'utilisateur à ce groupe de rapporteurs"
@@ -379,7 +377,7 @@ msgstr "Ne pas considérer cet examen"
 msgid "editor.review.readConfirmation"
 msgstr ""
 "Une fois l'évaluation consultée, cliquer sur « Confirmer » pour indiquer que "
-"le processus d'évaluation peut se poursuivre. Si l'évaluateur-trice a soumis "
+"le processus d'évaluation peut se poursuivre. Si l'évaluateur·rice a soumis "
 "son évaluation ailleurs, vous pouvez téléverser le fichier ci-dessous puis "
 "cliquer sur « Confirmer » pour poursuivre."
 
@@ -459,7 +457,7 @@ msgid "editor.submission.production.productionReadyFiles"
 msgstr "Fichiers publiables"
 
 msgid "editor.submission.newRound"
-msgstr "Nouvelle série d'évaluations"
+msgstr "Nouveau cycle d'évaluation"
 
 msgid "editor.submissionReview.recordDecision"
 msgstr "Enregistrement des décisions éditoriales"
@@ -481,9 +479,9 @@ msgstr "Ne pas créer une discussion sur cette recommandation."
 
 msgid "editor.submission.newRoundDescription"
 msgstr ""
-"Vous êtes sur le point de créer une nouvelle série d'évaluations pour cette "
-"soumission. Les fichiers qui n'ont pas été utilisés dans les autres séries "
-"d'évaluations sont indiqués ci-dessous."
+"Vous êtes sur le point de créer un nouveau cycle d'évaluation pour cette "
+"soumission. Les fichiers qui n'ont pas été utilisés dans un cycle précédent "
+"sont indiqués ci-dessous."
 
 msgid "editor.submission.createNewRound"
 msgstr "Créer un nouveau cycle d'évaluation"
@@ -747,3 +745,6 @@ msgstr "L’étape {$stepName} a posé un problème."
 #~ "Le public identifié comme '{$publicIdentifier}' existe déjà pour un autre "
 #~ "objet de même type. Veuillez indiquer un public unique pour l'objet de "
 #~ "même type à l'intérieur de votre revue."
+
+msgid "reviewer.list.reviewerSameInstitution"
+msgstr "Même institution de rattachement que l'auteur·e"

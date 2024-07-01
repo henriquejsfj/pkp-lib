@@ -26,8 +26,7 @@ use PKP\form\Form;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\ConfirmationModal;
 use PKP\security\Role;
-use PKP\stageAssignment\StageAssignmentDAO;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\reviewRound\ReviewRound;
 use PKP\submission\reviewRound\ReviewRoundDAO;
 use PKP\submissionFile\SubmissionFile;
@@ -88,10 +87,7 @@ class PKPSubmissionFilesUploadBaseForm extends Form
             $this->_reviewRound = & $reviewRound;
         } elseif ($assocType == Application::ASSOC_TYPE_REVIEW_ASSIGNMENT && !$reviewRound) {
             // Get the review assignment object.
-            /** @var ReviewAssignmentDAO */
-            $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO');
-            /** @var \PKP\submission\reviewAssignment\ReviewAssignment */
-            $reviewAssignment = $reviewAssignmentDao->getById((int) $assocId);
+            $reviewAssignment = Repo::reviewAssignment()->get((int) $assocId);
             if ($reviewAssignment->getDateCompleted()) {
                 fatalError('Review already completed!');
             }
@@ -252,7 +248,6 @@ class PKPSubmissionFilesUploadBaseForm extends Form
      */
     public function getRevisionSubmissionFilesSelection($user, $uploadedFile = null)
     {
-        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
         $allSubmissionFiles = $this->getSubmissionFiles();
         $submissionFiles = [];
         foreach ($allSubmissionFiles as $submissionFile) {
@@ -260,9 +255,16 @@ class PKPSubmissionFilesUploadBaseForm extends Form
             if ($uploadedFile && $uploadedFile->getId() == $submissionFile->getId()) {
                 continue;
             }
+            // Replaces StageAssignmentDAO::getBySubmissionAndRoleIds
+            $hasAnyAssignments = StageAssignment::withSubmissionIds([$submissionFile->getData('submissionId')])
+                ->withRoleIds([Role::ROLE_ID_AUTHOR])
+                ->withStageIds([$this->getStageId()])
+                ->withUserId($user->getId())
+                ->exists();
+                
             if (
                 ($submissionFile->getFileStage() == SubmissionFile::SUBMISSION_FILE_REVIEW_ATTACHMENT || $submissionFile->getFileStage() == SubmissionFile::SUBMISSION_FILE_REVIEW_FILE) &&
-                $stageAssignmentDao->getBySubmissionAndRoleIds($submissionFile->getData('submissionId'), [Role::ROLE_ID_AUTHOR], $this->getStageId(), $user->getId())
+                $hasAnyAssignments
             ) {
                 // Authors are not permitted to revise reviewer documents.
                 continue;

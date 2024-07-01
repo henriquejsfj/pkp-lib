@@ -248,7 +248,7 @@ msgstr "Жазбаны көрсету"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Сәтті тіркеу туралы хабарлама"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI сәтті жаңартылды"
 
 msgid "manager.dois.registration.depositDois"
@@ -2027,25 +2027,6 @@ msgstr ""
 "Автордан өз материалын қабылдамас бұрын кілт сөздерді міндетті түрде "
 "көрсетуін талап етіңіз."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Тіл тіл кодын («ru»), одан кейін қосымша ел кодын («ru_RU») пайдалана "
-"отырып, негізгі жұмыс тілін көрсетеді."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Метадеректерге тілді қосыңыз"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Өтініш беру кезінде автордан материалдың тілдерін сұрамаңыз."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Автордан материалды жіберу кезінде олардың тілдерін көрсетуін сұраңыз."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Осы материалды қабылдамас бұрын автордан материалдың тілдерін көрсетуін "
-"талап етіңіз."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Сіз жіберген материалға қолданылатын кез келген құқықтар зияткерлік меншік "
@@ -2393,15 +2374,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Бұл сілтеме Параметрлер > Журнал ішіндегі «Журнал туралы» бөлімін аяқтаған "
 "жағдайда ғана көрсетіледі."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Параметрлер > Журнал тармағында тақырыптың мазмұнын көрсететін бетке сілтеме."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Бұл сілтеме Параметрлер > Журнал ішіндегі Редакциялық топ бөлімін аяқтасаңыз "
-"ғана пайда болады."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Жіберу нұсқауларын көрсететін бетке сілтеме."
@@ -3561,3 +3533,11 @@ msgstr ""
 #~ msgstr ""
 #~ "Бұл электрондық хатты Редактор рецензентке материалдардың қарастырылуы "
 #~ "тиіс екенін еске салу үшін жібереді"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Требовать от авторов представлять Декларацию о конфликте интересов вместе с "
+"отправляемым материалом."
+
+msgid "manager.setup.masthead"
+msgstr "Шығыс деректер"

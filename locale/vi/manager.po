@@ -231,7 +231,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1972,24 +1972,6 @@ msgstr "Yêu cầu tác giả đề xuất từ khóa trong quá trình gửi b�
 msgid "manager.setup.metadata.keywords.require"
 msgstr "Yêu cầu tác giả đề xuất các từ khóa trước khi chấp nhận bài của họ."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Ngôn ngữ chỉ ra ngôn ngữ chính của tác phẩm bằng mã ngôn ngữ, tiếng Anh/"
-"tiếng Việt (\"en\"/\"vi\") với mã quốc gia tùy chọn (\"en_US\"/\"vi_VN\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Bật siêu dữ liệu ngôn ngữ"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Không yêu cầu ngôn ngữ của bài gửi từ tác giả trong quá trình gửi bài."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Yêu cầu tác giả cho biết ngôn ngữ của bài gửi trong quá trình gửi bài."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Yêu cầu tác giả nhập ngôn ngữ của bài nộp trước khi chấp nhận bài gửi của họ."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Bất kỳ quyền nào có được đối với bài gửi, có thể bao gồm Quyền sở hữu trí "
@@ -2319,16 +2301,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Liên kết này sẽ chỉ được hiển thị nếu bạn đã điền vào phần Giới thiệu Tạp "
 "chí trong Cài đặt > Tạp chí."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Liên kết đến một trang hiển thị nội dung giới thiệu về Ban biên tập trong "
-"Cài đặt > Tạp chí."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Liên kết này sẽ chỉ được hiển thị nếu bạn đã điền vào phần Nhóm biên tập "
-"trong Cài đặt> Nhật ký."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Liên kết đến trang hiển thị hướng dẫn gửi bài."
@@ -3435,3 +3407,10 @@ msgstr ""
 #~ "Email này được gửi bởi một Biên tập viên để nhắc nhở người review rằng "
 #~ "review của họ đến hạn nộp. Email này được sử dụng khi Biên tập viên gửi "
 #~ "nhắc nhở đến người review một cách thủ công"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Yêu cầu tác giả gửi một tuyên bố xung đột lợi ích (CI) với bài gửi của họ."
+
+msgid "manager.setup.masthead"
+msgstr "Tiêu đề"

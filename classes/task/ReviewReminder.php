@@ -22,7 +22,6 @@ use Illuminate\Support\Facades\Mail;
 use PKP\context\Context;
 use PKP\core\Core;
 use PKP\core\PKPApplication;
-use PKP\db\DAORegistry;
 use PKP\invitation\invitations\ReviewerAccessInvite;
 use PKP\log\event\PKPSubmissionEventLogEntry;
 use PKP\mail\mailables\ReviewRemindAuto;
@@ -30,7 +29,6 @@ use PKP\mail\mailables\ReviewResponseRemindAuto;
 use PKP\scheduledTask\ScheduledTask;
 use PKP\submission\PKPSubmission;
 use PKP\submission\reviewAssignment\ReviewAssignment;
-use PKP\submission\reviewAssignment\ReviewAssignmentDAO;
 
 class ReviewReminder extends ScheduledTask
 {
@@ -51,8 +49,6 @@ class ReviewReminder extends ScheduledTask
         Context $context,
         ReviewRemindAuto|ReviewResponseRemindAuto $mailable
     ): void {
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
-        $reviewId = $reviewAssignment->getId();
 
         $reviewer = Repo::user()->get($reviewAssignment->getReviewerId());
         if (!isset($reviewer)) {
@@ -68,31 +64,30 @@ class ReviewReminder extends ScheduledTask
 
         $mailable->setData($primaryLocale);
 
-        $application = Application::get();
-        $request = $application->getRequest();
-        $dispatcher = $application->getDispatcher();
         $reviewerAccessKeysEnabled = $context->getData('reviewerAccessKeysEnabled');
         if ($reviewerAccessKeysEnabled) { // Give one-click access if enabled
-            $reviewInvitation = new ReviewerAccessInvite(
-                $reviewAssignment->getReviewerId(),
-                $context->getId(),
-                $reviewAssignment->getId()
-            );
-            $reviewInvitation->setMailable($mailable);
-            $reviewInvitation->dispatch();
+            $reviewInvitation = new ReviewerAccessInvite();
+            $reviewInvitation->initialize($reviewAssignment->getReviewerId(), $context->getId(), null);
+
+            $reviewInvitation->reviewAssignmentId = $reviewAssignment->getId();
+            $reviewInvitation->updatePayload();
+
+            $reviewInvitation->invite();
+            $reviewInvitation->updateMailableWithUrl($mailable);
         }
 
         // deprecated template variables OJS 2.x
         $mailable->addData([
             'messageToReviewer' => __('reviewer.step1.requestBoilerplate'),
-            'abstractTermIfEnabled' => ($submission->getLocalizedAbstract() == '' ? '' : __('common.abstract')),
+            'abstractTermIfEnabled' => ($submission->getCurrentPublication()->getLocalizedData('abstract') == '' ? '' : __('common.abstract')),
         ]);
 
         Mail::send($mailable);
 
-        $reviewAssignment->setDateReminded(Core::getCurrentDate());
-        $reviewAssignment->setReminderWasAutomatic(1);
-        $reviewAssignmentDao->updateObject($reviewAssignment);
+        Repo::reviewAssignment()->edit($reviewAssignment, [
+            'dateReminded' => Core::getCurrentDate(),
+            'reminderWasAutomatic' => 1
+        ]);
 
         $eventLog = Repo::eventLog()->newDataObject([
             'assocType' => PKPApplication::ASSOC_TYPE_SUBMISSION,
@@ -116,10 +111,9 @@ class ReviewReminder extends ScheduledTask
         $submission = null;
         $context = null;
 
-        $reviewAssignmentDao = DAORegistry::getDAO('ReviewAssignmentDAO'); /** @var ReviewAssignmentDAO $reviewAssignmentDao */
         $contextDao = Application::getContextDAO();
 
-        $incompleteAssignments = $reviewAssignmentDao->getIncompleteReviewAssignments();
+        $incompleteAssignments = Repo::reviewAssignment()->getCollector()->filterByIsIncomplete(true)->getMany();
         $inviteReminderDays = $submitReminderDays = null;
         foreach ($incompleteAssignments as $reviewAssignment) {
             // Avoid review assignments that a reminder exists for.
@@ -137,14 +131,14 @@ class ReviewReminder extends ScheduledTask
                 }
             }
 
-            if ($submission->getStatus() != PKPSubmission::STATUS_QUEUED) {
+            if ($submission->getData('status') != PKPSubmission::STATUS_QUEUED) {
                 continue;
             }
 
             // Fetch the context
-            if ($context == null || $context->getId() != $submission->getContextId()) {
+            if ($context == null || $context->getId() != $submission->getData('contextId')) {
                 unset($context);
-                $context = $contextDao->getById($submission->getContextId());
+                $context = $contextDao->getById($submission->getData('contextId'));
 
                 $inviteReminderDays = $context->getData('numDaysBeforeInviteReminder');
                 $submitReminderDays = $context->getData('numDaysBeforeSubmitReminder');

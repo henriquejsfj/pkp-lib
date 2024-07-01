@@ -65,7 +65,6 @@ class PKPAuthorForm extends Form
         $this->addCheck(new \PKP\form\validation\FormValidatorEmail($this, 'email', 'required', 'form.emailRequired'));
         $this->addCheck(new \PKP\form\validation\FormValidatorUrl($this, 'userUrl', 'optional', 'user.profile.form.urlInvalid'));
         $this->addCheck(new \PKP\form\validation\FormValidator($this, 'userGroupId', 'required', 'submission.submit.form.contributorRoleRequired'));
-        $this->addCheck(new \PKP\form\validation\FormValidatorORCID($this, 'orcid', 'optional', 'user.orcid.orcidInvalid'));
         $this->addCheck(new \PKP\form\validation\FormValidatorPost($this));
         $this->addCheck(new \PKP\form\validation\FormValidatorCSRF($this));
     }
@@ -76,7 +75,6 @@ class PKPAuthorForm extends Form
     /**
      * Get the author
      *
-     * @return Author
      */
     public function getAuthor(): ?Author
     {
@@ -134,7 +132,7 @@ class PKPAuthorForm extends Form
                 'country' => $author->getCountry(),
                 'email' => $author->getEmail(),
                 'userUrl' => $author->getUrl(),
-                'orcid' => $author->getOrcid(),
+                'competingInterests' => $author->getCompetingInterests(null),
                 'userGroupId' => $author->getUserGroupId(),
                 'biography' => $author->getBiography(null),
                 'primaryContact' => $this->getPublication()->getData('primaryContactId') === $author->getId(),
@@ -155,7 +153,8 @@ class PKPAuthorForm extends Form
      */
     public function fetch($request, $template = null, $display = false)
     {
-        $authorUserGroups = Repo::userGroup()->getByRoleIds([Role::ROLE_ID_AUTHOR], $request->getContext()->getId());
+        $context = $request->getContext();
+        $authorUserGroups = Repo::userGroup()->getByRoleIds([Role::ROLE_ID_AUTHOR], $context->getId());
         $publication = $this->getPublication();
         $countries = [];
         foreach (Locale::getCountries() as $country) {
@@ -168,6 +167,7 @@ class PKPAuthorForm extends Form
             'publicationId' => $publication->getId(),
             'countries' => $countries,
             'authorUserGroups' => $authorUserGroups,
+            'requireAuthorCompetingInterests' => $context->getData('requireAuthorCompetingInterests'),
         ]);
 
         return parent::fetch($request, $template, $display);
@@ -189,7 +189,7 @@ class PKPAuthorForm extends Form
             'country',
             'email',
             'userUrl',
-            'orcid',
+            'competingInterests',
             'userGroupId',
             'biography',
             'primaryContact',
@@ -205,6 +205,8 @@ class PKPAuthorForm extends Form
     public function execute(...$functionParams)
     {
         $publication = $this->getPublication(); /** @var Publication $publication */
+        $submission = Repo::submission()->get($publication->getData('submissionId'));
+        $context = Services::get('context')->get($submission->getData('contextId'));
 
         $author = $this->getAuthor();
         if (!$author) {
@@ -228,7 +230,9 @@ class PKPAuthorForm extends Form
         $author->setCountry($this->getData('country'));
         $author->setEmail($this->getData('email'));
         $author->setUrl($this->getData('userUrl'));
-        $author->setOrcid($this->getData('orcid'));
+        if ($context->getData('requireAuthorCompetingInterests')) {
+            $author->setCompetingInterests($this->getData('competingInterests'), null);
+        }
         $author->setUserGroupId($this->getData('userGroupId'));
         $author->setBiography($this->getData('biography'), null); // localized
         $author->setIncludeInBrowse(($this->getData('includeInBrowse') ? true : false));
@@ -244,8 +248,6 @@ class PKPAuthorForm extends Form
         }
 
         if ($this->getData('primaryContact')) {
-            $submission = Repo::submission()->get($publication->getData('submissionId'));
-            $context = Services::get('context')->get($submission->getData('contextId'));
             $params = ['primaryContactId' => $authorId];
             $errors = Repo::publication()->validate(
                 $publication,
@@ -257,8 +259,10 @@ class PKPAuthorForm extends Form
                 throw new Exception('Invalid primary contact ID. This author can not be a primary contact.');
             }
             Repo::publication()->edit($publication, $params);
+        } else {
+            // Log an event when publication data is updated
+            $publication = Repo::publication()->edit($publication, []);
         }
-
         return $authorId;
     }
 }

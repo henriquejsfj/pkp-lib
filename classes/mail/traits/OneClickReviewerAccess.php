@@ -29,12 +29,13 @@ trait OneClickReviewerAccess
             return;
         }
 
-        $reviewInvitation = new ReviewerAccessInvite(
-            $reviewAssignment->getReviewerId(),
-            $context->getId(),
-            $reviewAssignment->getId()
-        );
-        $reviewInvitation->setMailable($this);
-        $reviewInvitation->dispatch();
+        $reviewInvitation = new ReviewerAccessInvite();
+        $reviewInvitation->initialize($reviewAssignment->getReviewerId(), $context->getId(), null);
+
+        $reviewInvitation->reviewAssignmentId = $reviewAssignment->getId();
+        $reviewInvitation->updatePayload();
+
+        $reviewInvitation->invite();
+        $reviewInvitation->updateMailableWithUrl($this);
     }
 }

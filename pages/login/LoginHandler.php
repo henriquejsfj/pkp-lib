@@ -26,13 +26,11 @@ use PKP\config\Config;
 use PKP\context\Context;
 use PKP\core\PKPApplication;
 use PKP\core\PKPRequest;
-use PKP\core\PKPString;
 use PKP\form\validation\FormValidatorReCaptcha;
 use PKP\mail\mailables\PasswordResetRequested;
 use PKP\security\authorization\RoleBasedHandlerOperationPolicy;
 use PKP\security\Role;
 use PKP\security\Validation;
-use PKP\session\SessionManager;
 use PKP\site\Site;
 use PKP\user\form\LoginChangePasswordForm;
 use PKP\user\form\ResetPasswordForm;
@@ -69,13 +67,10 @@ class LoginHandler extends Handler
             $request->redirectSSL();
         }
 
-        $sessionManager = SessionManager::getManager();
-        $session = $sessionManager->getUserSession();
-
         $templateMgr = TemplateManager::getManager($request);
         $templateMgr->assign([
             'loginMessage' => $request->getUserVar('loginMessage'),
-            'username' => $session->getSessionVar('email') ?? $session->getSessionVar('username'),
+            'username' => $request->getSession()->get('email') ?? $request->getSession()->get('username'),
             'remember' => $request->getUserVar('remember'),
             'source' => $request->getUserVar('source'),
             'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
@@ -84,7 +79,7 @@ class LoginHandler extends Handler
         // For force_login_ssl with base_url[...]: make sure SSL used for login form
         $loginUrl = $request->url(null, 'login', 'signIn');
         if (Config::getVar('security', 'force_login_ssl')) {
-            $loginUrl = PKPString::regexp_replace('/^http:/', 'https:', $loginUrl);
+            $loginUrl = preg_replace('/^http:/', 'https:', $loginUrl);
         }
         $templateMgr->assign('loginUrl', $loginUrl);
 
@@ -104,6 +99,7 @@ class LoginHandler extends Handler
     public function _redirectAfterLogin($request)
     {
         $context = $this->getTargetContext($request);
+
         // If there's a context, send them to the dashboard after login.
         if ($context && $request->getUserVar('source') == '' && array_intersect(
             [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_AUTHOR, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_ASSISTANT],
@@ -112,7 +108,8 @@ class LoginHandler extends Handler
             return $request->redirect($context->getPath(), 'dashboard');
         }
 
-        $request->getRouter()->redirectHome($request);
+        $pkpPageRouter = $request->getRouter(); /** @var \PKP\core\PKPPageRouter $pkpPageRouter */
+        $pkpPageRouter->redirectHome($request);
     }
 
     /**
@@ -142,13 +139,16 @@ class LoginHandler extends Handler
             }
         }
 
+        $username = $request->getUserVar('username');
         $reason = null;
-        $user = $error ? false : Validation::login($request->getUserVar('username'), $request->getUserVar('password'), $reason, !!$request->getUserVar('remember'));
+        $user = $error || !strlen($username ?? '')
+            ? null
+            : Validation::login($username, $request->getUserVar('password'), $reason, !!$request->getUserVar('remember'));
         if ($user) {
             if ($user->getMustChangePassword()) {
                 // User must change their password in order to log in
                 Validation::logout();
-                $request->redirect(null, null, 'changePassword', $user->getUsername());
+                $request->redirect(null, null, 'changePassword', [$user->getUsername()]);
             }
             $source = $request->getUserVar('source');
             if (preg_match('#^/\w#', (string) $source) === 1) {
@@ -170,7 +170,7 @@ class LoginHandler extends Handler
 
 
         $templateMgr->assign([
-            'username' => $request->getUserVar('username'),
+            'username' => $username,
             'remember' => $request->getUserVar('remember'),
             'source' => $request->getUserVar('source'),
             'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
@@ -220,48 +220,41 @@ class LoginHandler extends Handler
         $this->setupTemplate($request);
         $templateMgr = TemplateManager::getManager($request);
 
-        $email = $request->getUserVar('email');
-        $user = Repo::user()->getByEmail($email, true); /** @var User $user */
+        $email = (string) $request->getUserVar('email');
+        $user = $email ? Repo::user()->getByEmail($email, true) : null;
+        if ($user !== null) {
+            if ($user->getDisabled()) {
+                $templateMgr
+                    ->assign([
+                        'error' => 'user.login.lostPassword.confirmationSentFailedWithReason',
+                        'reason' => empty($reason = $user->getDisabledReason() ?? '')
+                            ? __('user.login.accountDisabled')
+                            : __('user.login.accountDisabledWithReason', ['reason' => htmlspecialchars($reason)])
+                    ])
+                    ->display('frontend/pages/userLostPassword.tpl');
 
-        if ($user === null) {
-            $templateMgr
-                ->assign('error', 'user.login.lostPassword.invalidUser')
-                ->display('frontend/pages/userLostPassword.tpl');
+                return;
+            }
 
-            return;
+            // Send email confirming password reset
+            $site = $request->getSite(); /** @var Site $site */
+            $context = $request->getContext(); /** @var Context $context */
+            $template = Repo::emailTemplate()->getByKey(
+                $context ? $context->getId() : PKPApplication::CONTEXT_SITE,
+                PasswordResetRequested::getEmailTemplateKey()
+            );
+            $mailable = (new PasswordResetRequested($site))
+                ->recipients($user)
+                ->from($site->getLocalizedContactEmail(), $site->getLocalizedContactName())
+                ->body($template->getLocalizedData('body'))
+                ->subject($template->getLocalizedData('subject'));
+            Mail::send($mailable);
         }
-
-        if ($user->getDisabled()) {
-            $templateMgr
-                ->assign([
-                    'error' => 'user.login.lostPassword.confirmationSentFailedWithReason',
-                    'reason' => empty($reason = $user->getDisabledReason() ?? '')
-                        ? __('user.login.accountDisabled')
-                        : __('user.login.accountDisabledWithReason', ['reason' => htmlspecialchars($reason)])
-                ])
-                ->display('frontend/pages/userLostPassword.tpl');
-
-            return;
-        }
-
-        // Send email confirming password reset
-        $site = $request->getSite(); /** @var Site $site */
-        $context = $request->getContext(); /** @var Context $context */
-        $template = Repo::emailTemplate()->getByKey(
-            $context ? $context->getId() : PKPApplication::CONTEXT_SITE,
-            PasswordResetRequested::getEmailTemplateKey()
-        );
-        $mailable = (new PasswordResetRequested($site))
-            ->recipients($user)
-            ->from($site->getLocalizedContactEmail(), $site->getLocalizedContactName())
-            ->body($template->getLocalizedData('body'))
-            ->subject($template->getLocalizedData('subject'));
-        Mail::send($mailable);
 
         $templateMgr->assign([
             'pageTitle' => 'user.login.resetPassword',
             'message' => 'user.login.lostPassword.confirmationSent',
-            'backLink' => $request->url(null, $request->getRequestedPage(), null, null, ['username' => $user->getUsername()]),
+            'backLink' => $request->url(null, $request->getRequestedPage(), null, null),
             'backLinkLabel' => 'user.login',
         ])->display('frontend/pages/message.tpl');
     }
@@ -394,9 +387,6 @@ class LoginHandler extends Handler
         if ($passwordForm->validate()) {
             if ($passwordForm->execute()) {
                 $user = Validation::login($passwordForm->getData('username'), $passwordForm->getData('password'), $reason);
-
-                $sessionManager = SessionManager::getManager();
-                $sessionManager->invalidateSessions($user->getId(), $sessionManager->getUserSession()->getId());
             }
             $this->sendHome($request);
         } else {
@@ -414,8 +404,8 @@ class LoginHandler extends Handler
     {
         if (isset($args[0]) && !empty($args[0])) {
             $userId = (int)$args[0];
-            $session = $request->getSession();
-            if (Validation::getAdministrationLevel($userId, $session->getUserId()) !== Validation::ADMINISTRATION_FULL) {
+            $sessionGuard = $request->getSessionGuard();
+            if (Validation::getAdministrationLevel($userId, $sessionGuard->getUserId()) !== Validation::ADMINISTRATION_FULL) {
                 $this->setupTemplate($request);
                 // We don't have administrative rights
                 // over this user. Display an error.
@@ -431,11 +421,8 @@ class LoginHandler extends Handler
 
             $newUser = Repo::user()->get($userId, true);
 
-            if (isset($newUser) && $session->getUserId() != $newUser->getId()) {
-                $session->setSessionVar('signedInAs', $session->getUserId());
-                $session->setSessionVar('userId', $userId);
-                $session->setUserId($userId);
-                $session->setSessionVar('username', $newUser->getUsername());
+            if (isset($newUser) && $sessionGuard->getUserId() != $newUser->getId()) {
+                $request->getSessionGuard()->signInAs($newUser);
                 $this->_redirectByURL($request);
             }
         }
@@ -453,19 +440,15 @@ class LoginHandler extends Handler
     public function signOutAsUser($args, $request)
     {
         $session = $request->getSession();
-        $signedInAs = $session->getSessionVar('signedInAs');
+        $signedInAs = $session->get('signedInAs');
 
         if (isset($signedInAs) && !empty($signedInAs)) {
             $signedInAs = (int)$signedInAs;
 
             $oldUser = Repo::user()->get($signedInAs, true);
 
-            $session->unsetSessionVar('signedInAs');
-
             if (isset($oldUser)) {
-                $session->setSessionVar('userId', $signedInAs);
-                $session->setUserId($signedInAs);
-                $session->setSessionVar('username', $oldUser->getUsername());
+                $request->getSessionGuard()->signOutAs($oldUser);
             }
         }
         $this->_redirectByURL($request);

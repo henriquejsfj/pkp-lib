@@ -31,12 +31,14 @@ use PKP\decision\Repository as DecisionRepository;
 use PKP\emailTemplate\Repository as EmailTemplateRepository;
 use PKP\highlight\Repository as HighlightRepository;
 use PKP\institution\Repository as InstitutionRepository;
-use PKP\invitation\repositories\Invitation as InvitationRepository;
+use PKP\invitation\repositories\Repository as InvitationRepository;
 use PKP\job\repositories\FailedJob as FailedJobRepository;
 use PKP\job\repositories\Job as JobRepository;
 use PKP\log\event\Repository as EventLogRepository;
 use PKP\submissionFile\Repository as SubmissionFileRepository;
 use PKP\userGroup\Repository as UserGroupRepository;
+use PKP\jats\Repository as JatsRepository;
+use PKP\stageAssignment\Repository as StageAssignmentRepository;
 
 class Repo
 {
@@ -103,5 +105,15 @@ class Repo
     public static function highlight(): HighlightRepository
     {
         return app(HighlightRepository::class);
+    }
+
+    public static function jats(): JatsRepository
+    {
+        return app(JatsRepository::class);
+    }
+
+    public static function stageAssignment(): StageAssignmentRepository
+    {
+        return app(StageAssignmentRepository::class);
     }
 }

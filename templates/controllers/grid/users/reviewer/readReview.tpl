@@ -26,6 +26,13 @@
 			{/fbvFormSection}
 
 			{if $reviewAssignment->getDateCompleted()}
+				{if $reviewAssignment->getCompetingInterests()}
+					<h3>{translate key="reviewer.submission.competingInterests"}</h3>
+					<div class="review_competing_interests">
+						{$reviewAssignment->getCompetingInterests()|nl2br|strip_unsafe_html}
+					</div>
+				{/if}
+
 				{fbvFormSection}
 					<div class="pkp_controllers_informationCenter_itemLastEvent">
 						{translate key="common.completed.date" dateCompleted=$reviewAssignment->getDateCompleted()|date_format:$datetimeFormatShort}
@@ -53,12 +60,6 @@
 						{include file="controllers/revealMore.tpl" content=$comment->getComments()|strip_unsafe_html}
 					{/iterate}
 				{/if}
-				{if $reviewAssignment->getCompetingInterests()}
-					<h3>{translate key="reviewer.submission.competingInterests"}</h3>
-					<div class="review_competing_interests">
-						{$reviewAssignment->getCompetingInterests()|nl2br|strip_unsafe_html}
-					</div>
-				{/if}
 
 			{else}
 				{if $reviewAssignment->getDateCompleted()}
@@ -83,7 +84,7 @@
 
 	{fbvFormArea id="readReview"}
 		{fbvFormSection title="reviewer.submission.reviewerFiles"}
-			{capture assign=reviewAttachmentsGridUrl}{url router=\PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.files.attachment.EditorReviewAttachmentsGridHandler" op="fetchGrid" submissionId=$submission->getId() reviewId=$reviewAssignment->getId() stageId=$reviewAssignment->getStageId() escape=false}{/capture}
+			{capture assign=reviewAttachmentsGridUrl}{url router=PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.files.attachment.EditorReviewAttachmentsGridHandler" op="fetchGrid" submissionId=$submission->getId() reviewId=$reviewAssignment->getId() stageId=$reviewAssignment->getStageId() escape=false}{/capture}
 			{load_url_in_div id="readReviewAttachmentsGridContainer" url=$reviewAttachmentsGridUrl}
 		{/fbvFormSection}
 

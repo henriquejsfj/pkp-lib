@@ -18,7 +18,7 @@ namespace PKP\services;
 
 use APP\core\Application;
 use APP\template\TemplateManager;
-use PKP\cache\FileCache;
+use Illuminate\Support\Facades\Cache;
 use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
 use PKP\facades\Locale;
@@ -58,10 +58,9 @@ class PKPNavigationMenuService
                 'description' => __('manager.navigationMenus.about.description'),
                 'conditionalWarning' => __('manager.navigationMenus.about.conditionalWarning'),
             ],
-            NavigationMenuItem::NMI_TYPE_EDITORIAL_TEAM => [
-                'title' => __('about.editorialTeam'),
-                'description' => __('manager.navigationMenus.editorialTeam.description'),
-                'conditionalWarning' => __('manager.navigationMenus.editorialTeam.conditionalWarning'),
+            NavigationMenuItem::NMI_TYPE_MASTHEAD => [
+                'title' => __('common.editorialMasthead'),
+                'description' => __('manager.navigationMenus.editorialMasthead.description'),
             ],
             NavigationMenuItem::NMI_TYPE_SUBMISSIONS => [
                 'title' => __('about.submissions'),
@@ -172,10 +171,10 @@ class PKPNavigationMenuService
         // Conditionally hide some items
         switch ($menuItemType) {
             case NavigationMenuItem::NMI_TYPE_ANNOUNCEMENTS:
-                $navigationMenuItem->setIsDisplayed($context && $context->getData('enableAnnouncements'));
-                break;
-            case NavigationMenuItem::NMI_TYPE_EDITORIAL_TEAM:
-                $navigationMenuItem->setIsDisplayed($context && $context->getLocalizedData('editorialTeam'));
+                $navigationMenuItem->setIsDisplayed(
+                    ($context && $context->getData('enableAnnouncements'))
+                    || (!$context && $request->getSite()->getData('enableAnnouncements'))
+                );
                 break;
             case NavigationMenuItem::NMI_TYPE_CONTACT:
                 $navigationMenuItem->setIsDisplayed($context && ($context->getData('mailingAddress') || $context->getData('contactName')));
@@ -193,9 +192,6 @@ class PKPNavigationMenuService
                 break;
             case NavigationMenuItem::NMI_TYPE_ADMINISTRATION:
                 $navigationMenuItem->setIsDisplayed($isUserLoggedIn && $currentUser->hasRole([Role::ROLE_ID_SITE_ADMIN], PKPApplication::CONTEXT_SITE));
-                break;
-            case NavigationMenuItem::NMI_TYPE_SEARCH:
-                $navigationMenuItem->setIsDisplayed($context);
                 break;
             case NavigationMenuItem::NMI_TYPE_PRIVACY:
                 $navigationMenuItem->setIsDisplayed($context && $context->getLocalizedData('privacyStatement'));
@@ -252,13 +248,13 @@ class PKPNavigationMenuService
                         null
                     ));
                     break;
-                case NavigationMenuItem::NMI_TYPE_EDITORIAL_TEAM:
+                case NavigationMenuItem::NMI_TYPE_MASTHEAD:
                     $navigationMenuItem->setUrl($dispatcher->url(
                         $request,
                         PKPApplication::ROUTE_PAGE,
                         null,
                         'about',
-                        'editorialTeam',
+                        'editorialMasthead',
                         null
                     ));
                     break;
@@ -390,7 +386,7 @@ class PKPNavigationMenuService
         $templateMgr->assign('navigationMenuItem', $navigationMenuItem);
     }
 
-    public function loadMenuTree(&$navigationMenu)
+    public function loadMenuTree(NavigationMenu $navigationMenu)
     {
         /** @var NavigationMenuItemDAO */
         $navigationMenuItemDao = DAORegistry::getDAO('NavigationMenuItemDAO');
@@ -435,34 +431,26 @@ class PKPNavigationMenuService
         }
         /** @var NavigationMenuDAO */
         $navigationMenuDao = DAORegistry::getDAO('NavigationMenuDAO');
-        $cache = $navigationMenuDao->getCache($navigationMenu->getId());
-        $json = json_encode($navigationMenu);
-        $cache->setEntireCache($json);
+        Cache::put("navigationMenu-{$navigationMenu->getId()}", 60 * 24 * 24, json_encode($navigationMenu));
     }
 
     /**
      * Get a tree of NavigationMenuItems assigned to this menu
-     *
-     * @param NavigationMenu $navigationMenu
-     *
      */
-    public function getMenuTree(&$navigationMenu)
+    public function getMenuTree(NavigationMenu &$navigationMenu): void
     {
         /** @var NavigationMenuDAO */
         $navigationMenuDao = DAORegistry::getDAO('NavigationMenuDAO');
-        /** @var FileCache */
-        $cache = $navigationMenuDao->getCache($navigationMenu->getId());
-        if ($cache->cache) {
-            $navigationMenu = json_decode($cache->cache, true);
-            $navigationMenu = $this->arrayToObject('NavigationMenu', $navigationMenu);
-            $this->loadMenuTreeDisplayState($navigationMenu);
-            return;
+        $cachedNavigationMenu = Cache::get("navigationMenu-{$navigationMenu->getId()}");
+        if ($cachedNavigationMenu) {
+            $navigationMenu = $this->arrayToObject('NavigationMenu', json_decode($cachedNavigationMenu, true));
+        } else {
+            $this->loadMenuTree($navigationMenu);
         }
-        $this->loadMenuTree($navigationMenu);
         $this->loadMenuTreeDisplayState($navigationMenu);
     }
 
-    private function loadMenuTreeDisplayState(&$navigationMenu)
+    private function loadMenuTreeDisplayState(NavigationMenu $navigationMenu): void
     {
         foreach ($navigationMenu->menuTree as $assignment) {
             $nmi = $assignment->getMenuItem();
@@ -654,9 +642,9 @@ class PKPNavigationMenuService
     {
         $request = Application::get()->getRequest();
 
-        $page = & $args[0];
-        $op = & $args[1];
-        $handler = & $args[3];
+        $page = &$args[0];
+        $op = &$args[1];
+        $handler = &$args[3];
 
         // Construct a path to look for
         $path = $page;

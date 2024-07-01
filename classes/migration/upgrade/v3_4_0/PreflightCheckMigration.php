@@ -44,6 +44,7 @@ abstract class PreflightCheckMigration extends \PKP\migration\Migration
     {
         try {
             $this->checkUsageStatsLogs();
+            $this->checkRequiredUserEditor();
             // It's needed to clear the duplicated settings before looking for duplicated localized data to avoid false positives
             $this->clearDuplicatedUserSettings();
             $this->checkLocaleConflicts();
@@ -102,11 +103,11 @@ abstract class PreflightCheckMigration extends \PKP\migration\Migration
     {
         $missingContactContexts = DB::table($this->getContextTable() . ' AS contexts')
             ->select('contexts.path AS path')
-            ->leftJoin($this->getContextSettingsTable() . ' AS email_join', function ($join) {
+            ->leftJoin($this->getContextSettingsTable() . ' AS email_join', function (JoinClause $join) {
                 $join->on("contexts.{$this->getContextKeyField()}", '=', "email_join.{$this->getContextKeyField()}")
                     ->where('email_join.setting_name', '=', 'contactEmail');
             })
-            ->leftJoin($this->getContextSettingsTable() . ' AS name_join', function ($join) {
+            ->leftJoin($this->getContextSettingsTable() . ' AS name_join', function (JoinClause $join) {
                 $join->on("contexts.{$this->getContextKeyField()}", '=', "name_join.{$this->getContextKeyField()}")
                     ->where('name_join.setting_name', '=', 'contactName');
             })
@@ -207,9 +208,12 @@ abstract class PreflightCheckMigration extends \PKP\migration\Migration
         $usageStatsDir = StatisticsHelper::getUsageStatsDirPath();
         // check if there are usage stats log files older than yesterday
         foreach (glob($usageStatsDir . '/usageEventLogs/*') as $usageStatsLogFile) {
-            $lastModified = date('Ymd', filemtime($usageStatsLogFile));
+            if (!preg_match('/(\d{8})\.log$/', $usageStatsLogFile, $logFileDate)) {
+                throw new Exception("The log file \"{$usageStatsLogFile}\" doesn't follow the expected naming pattern \"usage_events_YearMonthDay.log\"");
+            }
+            $logFileDate = $logFileDate[1];
             $yesterday = date('Ymd', strtotime('-1 days'));
-            if ($yesterday > $lastModified) {
+            if ($yesterday > $logFileDate) {
                 throw new Exception("There are unprocessed log files from more than 1 day ago in the directory {$usageStatsDir}/usageEventLogs/. This happens when the scheduled task to process usage stats logs is not being run daily. All logs in this directory older than {$yesterday} must be processed or removed before the upgrade can continue.");
             }
         }
@@ -220,6 +224,32 @@ abstract class PreflightCheckMigration extends \PKP\migration\Migration
             count(glob($usageStatsDir . '/stage/*')) !== 0
         ) {
             throw new Exception("There are one or more log files that were unable to finish processing. This happens when the scheduled task to process usage stats logs encounters a failure of some kind. These logs must be repaired and reprocessed or removed before the upgrade can continue. The logs can be found in the folders reject, processing and stage in {$usageStatsDir}.");
+        }
+    }
+
+    /**
+     * Ensures that contexts with section editor assignments have a section editor role
+     * @see classes\migration\upgrade\v3_4_0\I7191_EditorAssignments.php
+     *
+     * @throws Exception
+     */
+    protected function checkRequiredUserEditor(): void
+    {
+        $contextId = "c.{$this->getContextKeyField()}";
+        // Look for contexts that have section editor assignments, but no section editor role
+        $contextsWithoutSubEditor = DB::table($this->getContextTable(), 'c')
+            ->whereNotExists(fn (Builder $q) => $q->from('user_groups', 'ug')
+                ->whereColumn('ug.context_id', '=', $contextId)
+                ->where('ug.role_id', '=', 17) // Role::ROLE_ID_SUB_EDITOR
+                ->selectRaw('0')
+            )
+            ->whereExists(fn (Builder $q) => $q->from('subeditor_submission_group', 'ssg')
+                ->whereColumn('ssg.context_id', '=', $contextId)
+                ->selectRaw('0')
+            )
+            ->pluck('c.path');
+        if ($contextsWithoutSubEditor->count()) {
+            throw new Exception("The following contexts have section editor assignments, but no \"section editor\" role. Please, create the \"section editor\" role before proceeding with the upgrade: {$contextsWithoutSubEditor->join(', ')}");
         }
     }
 
@@ -238,7 +268,7 @@ abstract class PreflightCheckMigration extends \PKP\migration\Migration
         // Flag users that have same emails if we consider them case insensitively.
         // By default, MySQL/MariaDB use case-insensitive collation, so they are not generally affected.
         $result = DB::table('users AS a')
-            ->join('users AS b', function ($join) {
+            ->join('users AS b', function (JoinClause $join) {
                 $join->on(DB::Raw('LOWER(a.email)'), '=', DB::Raw('LOWER(b.email)'));
                 $join->on('a.user_id', '<>', 'b.user_id');
             })
@@ -254,7 +284,7 @@ abstract class PreflightCheckMigration extends \PKP\migration\Migration
         // Flag users that have same username if we consider them case insensitively
         // By default, MySQL/MariaDB use case-insensitive collation, so they are not generally affected.
         $result = DB::table('users AS a')
-            ->join('users AS b', function ($join) {
+            ->join('users AS b', function (JoinClause $join) {
                 $join->on(DB::Raw('LOWER(a.username)'), '=', DB::Raw('LOWER(b.username)'));
                 $join->on('a.user_id', '<>', 'b.user_id');
             })

@@ -225,7 +225,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1788,21 +1788,6 @@ msgstr ""
 msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 
@@ -2071,12 +2056,6 @@ msgid "manager.navigationMenus.about.description"
 msgstr ""
 
 msgid "manager.navigationMenus.about.conditionalWarning"
-msgstr ""
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
 msgstr ""
 
 msgid "manager.navigationMenus.submissions.description"
@@ -3106,3 +3085,9 @@ msgstr ""
 #, fuzzy
 #~ msgid "emails.reviewRemind.body"
 #~ msgstr "דוא\"ל זה נשלח על ידי עורך מדור להזכיר מבקר שהביקורת שלהם נובעת."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+
+msgid "manager.setup.masthead"
+msgstr ""

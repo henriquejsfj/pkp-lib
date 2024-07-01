@@ -1,5 +1,5 @@
 {**
- * templates/submission/review-details-step.tpl
+ * templates/submission/review-details.tpl
  *
  * Copyright (c) 2014-2022 Simon Fraser University
  * Copyright (c) 2003-2022 John Willinsky
@@ -68,6 +68,7 @@
                     </div>
                 {/if}
             {/if}
+            {call_hook name="Template::SubmissionWizard::Section::Review::Details" submission=$submission step=$step.id}
         </div>
     </div>
 {/foreach}

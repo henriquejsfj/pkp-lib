@@ -2,7 +2,7 @@
 # Emilija Andonoska <emilija-andonoska@hotmail.com>, 2023.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2023-08-01 08:25+0000\n"
+"PO-Revision-Date: 2023-11-27 16:39+0000\n"
 "Last-Translator: Mirko Spiroski <mspiroski@id-press.eu>\n"
 "Language-Team: Macedonian <http://translate.pkp.sfu.ca/projects/pkp-lib/"
 "manager/mk/>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n==1 || n%10==1 ? 0 : 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "manager.website.information"
 msgstr "Информација"
@@ -255,7 +255,7 @@ msgstr "Прикажи запис"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Порака за успешна регистрација"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI(и) успешно се ажурирани"
 
 msgid "manager.dois.registration.depositDois"
@@ -1573,8 +1573,7 @@ msgstr ""
 "Плагинот е веќе инсталиран и е понова од верзијата достапна во галеријата."
 
 msgid "manager.plugins.installedVersionOlder"
-msgstr ""
-"Плагинот е веќе инсталиран и е понова од верзијата достапна во галеријата."
+msgstr "Плагинот е веќе инсталиран, но може да се обнови со понова верзија."
 
 msgid "manager.plugins.installedVersionNewest"
 msgstr "Плагинот веќе инсталиран и ажуриран."
@@ -2094,28 +2093,6 @@ msgstr ""
 "Барај авторот да предложи клучни зборови пред да биде прифатен нивниот "
 "поднесок."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Јазикот укажува на примарен јазик за работа со користење на јазичен код (\"en"
-"\") с опција за дополнителен код на земјата (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Овозможи метаподатоци за јазик"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"За време на поднесувањето, не ги барајте јазиците на поднесокот од авторот."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"За време на поднесувањето, прашајте го авторот да ги посочи јазиците на "
-"поднесокот."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Барај авторот да ги внесе јазиците на поднесокот пред да биде прифатен "
-"нивниот поднесок."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Задржани се било какви права над поднесокот, што може да вклучува права на "
@@ -2470,16 +2447,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Овој линк ќе биде прикажан само доколку ја имате пополнето секцијата За "
 "списанието во Поставки > Списание."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Линк до страницата која ја прикажува Главната содржина во Подесување > "
-"Списание."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Овој линк ќе биде прикажан само доколку ја имате пополнето секцијата "
-"Уреднички тим во Поставки > Списание."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Поврзете се до страницата која ги прикажува упатствата за поднесување."
@@ -3709,3 +3676,45 @@ msgstr ""
 
 msgid "emailTemplate.variable.activateUrl"
 msgstr "Линк за валидација на и-мејл"
+
+msgid "manager.announcements.notEnabled"
+msgstr ""
+"Мора да <a href=\"#announcements/announcement-settings\">овозможите "
+"најава</a>."
+
+msgid "manager.image"
+msgstr "Слика"
+
+msgid "manager.highlights.add"
+msgstr "Додади потенцирање"
+
+msgid "manager.highlights.confirmDelete"
+msgstr ""
+"Сигурни сте дека саката да го избришете {$title}? Оваа постапка не може да "
+"се отповика."
+
+msgid "manager.highlights.delete"
+msgstr "Избриши Потенцирање"
+
+msgid "manager.highlights.edit"
+msgstr "Поправи Потенцирање"
+
+msgid "manager.highlights.image"
+msgstr "Слика"
+
+msgid "manager.highlights.url.description"
+msgstr "Целосен УРЛ, вклучувајќи https://, за копчето во потенцирање."
+
+msgid "manager.highlights.urlText"
+msgstr "Ознака на Копче"
+
+msgid "manager.highlights.urlText.description"
+msgstr "Ознака, како Прочитај Повеќе, за копчето во потенцирање."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Потребно е да ги доставите авторите да поднесат изјава за натпреварувачки "
+"интерес (КИ) со нивно поднесување."
+
+msgid "manager.setup.masthead"
+msgstr "Мајстор"

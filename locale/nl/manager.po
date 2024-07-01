@@ -229,7 +229,7 @@ msgstr ""
 msgid "manager.dois.registration.viewRecord.title"
 msgstr ""
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr ""
 
 msgid "manager.dois.registration.depositDois"
@@ -1981,29 +1981,6 @@ msgid "manager.setup.metadata.keywords.require"
 msgstr ""
 "Verplicht auteurs om trefwoorden toe te voegen tijdens het inzendingsproces."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Taal duidt de hoofdtaal aan van een werk, met een taalcode (\"en\") en een "
-"optionele landcode (\"en_US\")."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Schakel metadata over talen in"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr ""
-"Vraag auteurs niet om talen van een inzending aan te duiden tijdens het "
-"inzendingsproces."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr ""
-"Vraag auteurs om talen van een inzending aan te duiden tijdens het "
-"inzendingsproces."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Verplicht auteurs om talen van een inzending aan te duiden tijdens het "
-"inzendingsproces."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Rechten op de inzending, zoals intellectuele eigendomsrechten (IPR), "
@@ -2353,14 +2330,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Deze link zal alleen worden getoond wanneer de sectie \"Over het tijdschrift"
 "\" is ingevuld in Instellingen > Tijdschrift > Impressum."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr "Link naar een \"Redactie\" pagina in Instellingen > Tijdschrift."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Deze link zal alleen worden getoond wanneer de sectie \"Redactie\" is "
-"ingevuld in Instellingen > Tijdschrift > Impressum."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Link naar de pagina met instructies voor inzendingen."
@@ -3421,3 +3390,11 @@ msgstr ""
 #~ msgstr ""
 #~ "Deze e-mail wordt door de sectieredacteur verstuurd om een reviewer eraan "
 #~ "te herinneren dat de afgesproken reviewperiode verstreken is."
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Verplicht auteurs een verklaring omtrent  strijdige belangen in te dienen "
+"met hun inzending."
+
+msgid "manager.setup.masthead"
+msgstr "Impressum"

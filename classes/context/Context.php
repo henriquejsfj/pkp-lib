@@ -16,8 +16,6 @@
 
 namespace PKP\context;
 
-use APP\core\Application;
-use APP\core\Services;
 use APP\plugins\IDoiRegistrationAgency;
 use Illuminate\Support\Arr;
 use PKP\config\Config;
@@ -328,7 +326,6 @@ abstract class Context extends \PKP\core\DataObject
     /**
      * Get the supported form locales.
      *
-     * @return array
      */
     public function getSupportedFormLocales(): ?array
     {
@@ -360,14 +357,10 @@ abstract class Context extends \PKP\core\DataObject
     /**
      * Return associative array of all locales supported by submissions on the
      * context.
-     *
-     * @param  int  $langLocaleStatus The const value of one of LocaleMetadata:LANGUAGE_LOCALE_*
-     *
-     * @return array
      */
-    public function getSupportedSubmissionLocaleNames(int $langLocaleStatus = LocaleMetadata::LANGUAGE_LOCALE_WITHOUT)
+    public function getSupportedSubmissionLocaleNames(): array
     {
-        return $this->getData('supportedSubmissionLocaleNames') ?? Locale::getFormattedDisplayNames($this->getSupportedSubmissionLocales(), null, $langLocaleStatus);
+        return $this->getData('supportedSubmissionLocaleNames') ?? Locale::getSubmissionLocaleDisplayNames($this->getSupportedSubmissionLocales());
     }
 
     /**
@@ -391,6 +384,55 @@ abstract class Context extends \PKP\core\DataObject
     public function getSupportedLocaleNames(int $langLocaleStatus = LocaleMetadata::LANGUAGE_LOCALE_WITHOUT)
     {
         return $this->getData('supportedLocaleNames') ?? Locale::getFormattedDisplayNames($this->getSupportedLocales(), null, $langLocaleStatus);
+    }
+
+    /**
+     * Get the supported added submission locales.
+     */
+    public function getSupportedAddedSubmissionLocales(): array
+    {
+        return $this->getData('supportedAddedSubmissionLocales');
+    }
+
+    /**
+     * Return associative array of added locales supported by submissions on the
+     * context.
+     */
+    public function getSupportedAddedSubmissionLocaleNames(): array
+    {
+        return Locale::getSubmissionLocaleDisplayNames($this->getSupportedAddedSubmissionLocales());
+    }
+
+    /**
+     * Get the supported default submission locale.
+     */
+    public function getSupportedDefaultSubmissionLocale(): string
+    {
+        return $this->getData('supportedDefaultSubmissionLocale');
+    }
+
+    /**
+     * Return string default submission locale supported by the site.
+     */
+    public function getSupportedDefaultSubmissionLocaleName(): string
+    {
+        return Locale::getSubmissionLocaleDisplayNames([$l = $this->getSupportedDefaultSubmissionLocale()])[$l];
+    }
+
+    /**
+     * Get the supported metadata locales.
+     */
+    public function getSupportedSubmissionMetadataLocales(): array
+    {
+        return $this->getData('supportedSubmissionMetadataLocales');
+    }
+
+    /**
+     * Return associative array of all locales supported by submission metadata forms on the site.
+     */
+    public function getSupportedSubmissionMetadataLocaleNames(): array
+    {
+        return Locale::getSubmissionLocaleDisplayNames($this->getSupportedSubmissionMetadataLocales());
     }
 
     /**
@@ -501,20 +543,6 @@ abstract class Context extends \PKP\core\DataObject
     }
 
     /**
-     * Update a context setting value.
-     *
-     * @param string $name
-     * @param string $type optional
-     * @param bool $isLocalized optional
-     *
-     * @deprecated 3.3.0.0
-     */
-    public function updateSetting($name, $value, $type = null, $isLocalized = false)
-    {
-        Services::get('context')->edit($this, [$name => $value], Application::get()->getRequest());
-    }
-
-    /**
      * Whether to track usage statistics by institutions.
      * Consider context setting only if the site setting is enabled and context setting disabled (= false).
      */
@@ -561,7 +589,6 @@ abstract class Context extends \PKP\core\DataObject
             'dataAvailability',
             'disciplines',
             'keywords',
-            'languages',
             'rights',
             'source',
             'subjects',

@@ -31,6 +31,7 @@ use PKP\file\TemporaryFileManager;
 use PKP\log\event\PKPSubmissionEventLogEntry;
 use PKP\observers\events\PublicationPublished;
 use PKP\observers\events\PublicationUnpublished;
+use PKP\orcid\OrcidManager;
 use PKP\plugins\Hook;
 use PKP\security\Validation;
 use PKP\services\PKPSchemaService;
@@ -133,8 +134,8 @@ abstract class Repository
      */
     public function validate(?Publication $publication, array $props, Submission $submission, Context $context): array
     {
-        $allowedLocales = $context->getSupportedSubmissionLocales();
-        $primaryLocale = $submission->getLocale();
+        $primaryLocale = $submission->getData('locale');
+        $allowedLocales = $submission->getpublicationLanguages($context->getSupportedSubmissionMetadataLocales());
 
         $errors = [];
 
@@ -245,7 +246,7 @@ abstract class Repository
      * wants to enforce particular publishing requirements, such as
      * requiring certain metadata or other information.
      *
-     * @param array $allowedLocales The context's supported submission locales
+     * @param array $allowedLocales The context's supported submission metadata locales
      * @param string $primaryLocale The submission's primary locale
      *
      * @hook Publication::validatePublish [[&$errors, $publication, $submission, $allowedLocales, $primaryLocale]]
@@ -262,6 +263,21 @@ abstract class Repository
         // Don't allow a publication to be published before passing the review stage
         if ($submission->getData('stageId') <= WORKFLOW_STAGE_ID_EXTERNAL_REVIEW) {
             $errors['reviewStage'] = __('publication.required.reviewStage');
+        }
+
+        // Orcid errors
+        if (OrcidManager::isEnabled()) {
+            $orcidIds = [];
+            foreach ($publication->getData('authors') as $author) {
+                $authorOrcid = $author->getData('orcid');
+                if ($authorOrcid and in_array($authorOrcid, $orcidIds)) {
+                    $errors['hasDuplicateOrcids'] = __('orcid.verify.duplicateOrcidAuthor');
+                } elseif ($authorOrcid && !$author->getData('orcidAccessToken')) {
+                    $errors['hasUnauthenticatedOrcid'] = __('orcid.verify.hasUnauthenticatedOrcid');
+                } else {
+                    $orcidIds[] = $authorOrcid;
+                }
+            }
         }
 
         Hook::call('Publication::validatePublish', [&$errors, $publication, $submission, $allowedLocales, $primaryLocale]);
@@ -286,7 +302,7 @@ abstract class Repository
                 $submissionContext = Services::get('context')->get($submission->getData('contextId'));
             }
 
-            $supportedLocales = $submissionContext->getSupportedSubmissionLocales();
+            $supportedLocales = $submission->getPublicationLanguages($submissionContext->getSupportedSubmissionMetadataLocales());
             foreach ($supportedLocales as $localeKey) {
                 if (!array_key_exists($localeKey, $publication->getData('coverImage'))) {
                     continue;
@@ -350,6 +366,17 @@ abstract class Repository
             $citationDao->importCitations($newPublication->getId(), $newPublication->getData('citationsRaw'));
         }
 
+        $genreDao = DAORegistry::getDAO('GenreDAO');
+        $genres = $genreDao->getEnabledByContextId($context->getId());
+
+        $jatsFile = Repo::jats()
+            ->getJatsFile($publication->getId(), null, $genres->toArray());
+
+        if (!$jatsFile->isDefaultContent) {
+            Repo::submissionFile()
+                ->versionSubmissionFile($jatsFile->submissionFile, $newPublication);
+        }
+
         $newPublication = Repo::publication()->get($newPublication->getId());
 
         Hook::call('Publication::version', [&$newPublication, $publication]);
@@ -383,7 +410,7 @@ abstract class Repository
                 $submissionContext = Services::get('context')->get($submission->getData('contextId'));
             }
 
-            $supportedLocales = $submissionContext->getSupportedSubmissionLocales();
+            $supportedLocales = $submission->getPublicationLanguages($submissionContext->getSupportedSubmissionMetadataLocales());
             foreach ($supportedLocales as $localeKey) {
                 if (!array_key_exists($localeKey, $params['coverImage'])) {
                     continue;

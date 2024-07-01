@@ -1,8 +1,8 @@
 # Gadirova <leylakb@yahoo.com>, 2023.
-# Osman Durmaz <osmandurmaz@hotmail.de>, 2023.
+# Osman Durmaz <osmandurmaz@hotmail.de>, 2023, 2024.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2023-06-03 08:38+0000\n"
+"PO-Revision-Date: 2024-04-20 00:03+0000\n"
 "Last-Translator: Osman Durmaz <osmandurmaz@hotmail.de>\n"
 "Language-Team: Azerbaijani <http://translate.pkp.sfu.ca/projects/pkp-lib/"
 "admin/az/>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "admin.systemInfo.settingName"
 msgstr "Adı təyin edin"
@@ -276,27 +276,27 @@ msgid "admin.cli.tool.jobs.pagination.next"
 msgstr "Sonrakı"
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.representationId"
+msgid "admin.job.processLogFile.invalidLogEntry.representationId"
 msgstr "Nümayəndəlik nömrəsi tam deyil."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.assocType"
+msgid "admin.job.processLogFile.invalidLogEntry.assocType"
 msgstr "Dosy tipi dəstəklənmir."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.fileType"
+msgid "admin.job.processLogFile.invalidLogEntry.fileType"
 msgstr "Fayl növü dəstəklənmir."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.country"
+msgid "admin.job.processLogFile.invalidLogEntry.country"
 msgstr "Ölkə iki əlifba simvolu simli deyil."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.region"
+msgid "admin.job.processLogFile.invalidLogEntry.region"
 msgstr "Bölgə üç alfasayısal simvol uzun bir simli deyil."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.institutionIds"
+msgid "admin.job.processLogFile.invalidLogEntry.institutionIds"
 msgstr "Təşkilat şəxsiyyət vəsiqələri bir sıra deyil."
 
 #, fuzzy
@@ -423,7 +423,7 @@ msgid "admin.jobs.totalCount"
 msgstr "Növbədə cəmi <strong> {$total} </ strong> iş (lər) var"
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.insertError"
+msgid "admin.job.processLogFile.insertError"
 msgstr ""
 "Giriş faylını {$file} -də {$linenumber} -də emal edərkən səhv baş verdi: "
 "{$msg}"
@@ -444,8 +444,8 @@ msgstr "İstifadə Statistikası Fayl Yükləyicisi vəzifəsi"
 
 msgid "admin.scheduledTask.updateGeoDB.fileRename.error"
 msgstr ""
-"DB-IP City Lite verilənlər bazası faylının adını {$ tencorfilename} saytı {$ "
-"sourcyfilename} nömrəsi uğursuz oldu."
+"DB-IP City Lite verilənlər bazası faylının adını {$sourceFilename} saytı "
+"{$targetFilename} nömrəsi uğursuz oldu."
 
 msgid "admin.scheduledTask.usageStatsLoader.processingPathNotEmpty"
 msgstr ""
@@ -458,7 +458,7 @@ msgstr ""
 "Fayl {$file}, işlənə bilməyən və beləliklə səhnə qovluğuna köçürülə bilən "
 "köhnə giriş faylı formatında."
 
-msgid "admin.scheduledTask.usageStatsLoader.openFileFailed"
+msgid "admin.job.processLogFile.openFileFailed"
 msgstr "{$file} faylı açılmadı və rədd edildi."
 
 msgid "admin.server.apacheVersion"
@@ -491,25 +491,25 @@ msgstr ""
 "istifadə etməlisiniz."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.time"
+msgid "admin.job.processLogFile.invalidLogEntry.time"
 msgstr "Vaxt etibarlı bir tarix deyil."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.contextId"
+msgid "admin.job.processLogFile.invalidLogEntry.contextId"
 msgstr "Kontekst id tam deyil."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry.submissionId"
+msgid "admin.job.processLogFile.invalidLogEntry.submissionId"
 msgstr "Göndərmə id tam deyil."
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.invalidLogEntry"
+msgid "admin.job.processLogFile.invalidLogEntry"
 msgstr ""
 "Giriş sənədində {$lineNumber} xəttində etibarsız giriş girişləri {$file}: "
 "{$error}"
 
 #, fuzzy
-msgid "admin.scheduledTask.usageStatsLoader.wrongLoglineFormat"
+msgid "admin.job.processLogFile.wrongLoglineFormat"
 msgstr ""
 "Giriş sənədində {$lineNumber} xətti {$file} səhv formatdadır və beləliklə "
 "atlanacaqdır."

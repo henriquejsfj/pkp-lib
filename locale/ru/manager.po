@@ -1,10 +1,10 @@
-# Pavel Pisklakov <ppv1979@mail.ru>, 2021, 2022, 2023.
+# Pavel Pisklakov <ppv1979@mail.ru>, 2021, 2022, 2023, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:50:00+00:00\n"
-"PO-Revision-Date: 2023-08-01 08:25+0000\n"
+"PO-Revision-Date: 2024-02-16 20:22+0000\n"
 "Last-Translator: Pavel Pisklakov <ppv1979@mail.ru>\n"
 "Language-Team: Russian <http://translate.pkp.sfu.ca/projects/pkp-lib/manager/"
 "ru/>\n"
@@ -12,9 +12,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.13.1\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "manager.website.information"
 msgstr "Информация"
@@ -263,7 +263,7 @@ msgstr "Показать запись"
 msgid "manager.dois.registration.viewRecord.title"
 msgstr "Сообщение об успешной регистрации"
 
-msgid "manger.dois.update.success"
+msgid "manager.dois.update.success"
 msgstr "DOI успешно обновлены"
 
 msgid "manager.dois.registration.depositDois"
@@ -2117,25 +2117,6 @@ msgstr ""
 "Требовать, чтобы автор обязательно указал ключевые слова до приёма его "
 "материала."
 
-msgid "manager.setup.metadata.languages.description"
-msgstr ""
-"Язык указывает основной язык работы с помощью кода языка («ru») с "
-"дополнительным кодом страны («ru_RU»)."
-
-msgid "manager.setup.metadata.languages.enable"
-msgstr "Включить язык в метаданные"
-
-msgid "manager.setup.metadata.languages.noRequest"
-msgstr "Не запрашивать языки материала у автора во время отправки."
-
-msgid "manager.setup.metadata.languages.request"
-msgstr "Просить автора указать языки материала во время отправки."
-
-msgid "manager.setup.metadata.languages.require"
-msgstr ""
-"Требовать, чтобы автор обязательно указал языки материала до приёма этого "
-"материала."
-
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
 "Любые права, которые распространяются на отправляемый материал, сюда могут "
@@ -2490,16 +2471,6 @@ msgid "manager.navigationMenus.about.conditionalWarning"
 msgstr ""
 "Эта ссылка будет показываться только в случае, если вы заполнили раздел «О "
 "журнале» в Настройки > Журнал."
-
-msgid "manager.navigationMenus.editorialTeam.description"
-msgstr ""
-"Ссылка на страницу, отображающую контент «Выходные данные» в Настройки > "
-"Журнал."
-
-msgid "manager.navigationMenus.editorialTeam.conditionalWarning"
-msgstr ""
-"Эта ссылка будет показываться только в случае, если вы заполнили раздел "
-"«Редакция» в Настройки > Журнал."
 
 msgid "manager.navigationMenus.submissions.description"
 msgstr "Ссылка на страницу, отображающую инструкции по отправке."
@@ -3715,3 +3686,118 @@ msgstr ""
 
 msgid "emailTemplate.variable.activateUrl"
 msgstr "Ссылка для подтверждения адреса электронной почты"
+
+msgid "manager.announcements.notEnabled"
+msgstr ""
+"Вы должны <a href=\"#announcements/announcement-settings\">включить "
+"объявления</a>."
+
+msgid "manager.highlights.url.description"
+msgstr "Полный URL, включая https://, для кнопки в выделении."
+
+msgid "manager.highlights.urlText.description"
+msgstr "Надпись, например, «Читать далее», для кнопки в выделении."
+
+msgid "manager.image"
+msgstr "Изорбажение"
+
+msgid "manager.highlights.add"
+msgstr "Добавить выделение"
+
+msgid "manager.highlights.confirmDelete"
+msgstr ""
+"Вы уверены, что хотите удалить {$title}? Это действие не может быть отменено."
+
+msgid "manager.highlights.delete"
+msgstr "Удалить выделение"
+
+msgid "manager.highlights.edit"
+msgstr "Редактировать выделение"
+
+msgid "manager.highlights.image"
+msgstr "Изображение"
+
+msgid "manager.highlights.urlText"
+msgstr "Надпись кнопки"
+
+msgid "manager.setup.competingInterests.requireAuthors"
+msgstr ""
+"Требовать от авторов представлять Декларацию о конфликте интересов вместе с "
+"отправляемым материалом."
+
+msgid "plugins.importexport.native.error.submissionFileInvalidFileStage"
+msgstr ""
+"Файл материала {$id} был пропущен, потому что у него не правильно указана "
+"стадия файла."
+
+msgid "manager.statistics.counterR5"
+msgstr "Counter R5"
+
+msgid "manager.statistics.counterR5Reports"
+msgstr "Отчёты Counter R5"
+
+msgid "manager.statistics.counterR5Reports.usageNotPossible"
+msgstr "Статистика использования COUNTER R5 пока отсутствует."
+
+msgid "manager.statistics.counterR5Report.settings"
+msgstr "Настройки отчёта"
+
+msgid "manager.statistics.counterR5Report.settings.startDate"
+msgstr "Дата начала"
+
+msgid "manager.statistics.counterR5Report.settings.date.startDate.description"
+msgstr ""
+"Дата должна быть в формате ГГГГ-ММ-ДД или ГГГГ-ММ. Самая ранняя возможная "
+"дата — {$earliestDate}."
+
+msgid "manager.statistics.counterR5Report.settings.endDate"
+msgstr "Дата окончания"
+
+msgid "manager.statistics.counterR5Report.settings.wrongDateFormat"
+msgstr "Неправильный формат даты."
+
+msgid "manager.statistics.counterR5Report.settings.customerId"
+msgstr "ID клиента"
+
+msgid "manager.statistics.counterR5Report.settings.metricType"
+msgstr "Тип метрики"
+
+msgid "manager.statistics.counterR5Report.settings.attributesToShow"
+msgstr "Атрибуты для показа"
+
+msgid "manager.statistics.counterR5Report.settings.yop"
+msgstr "Год публикации"
+
+msgid "manager.statistics.counterR5Report.settings.date.yop.description"
+msgstr ""
+"Список или диапазон лет публикации, который нужно вернуть в ответ в формате "
+"гггг|гггг|гггг-гггг."
+
+msgid "manager.statistics.counterR5Report.settings.wrongYOPFormat"
+msgstr "Неправильный формат года публикации."
+
+msgid "manager.statistics.counterR5Report.settings.itemId"
+msgstr "ID материала"
+
+msgid "manager.statistics.counterR5Report.settings.wrongItemId"
+msgstr "ID материала не существует."
+
+msgid "manager.statistics.counterR5Report.settings.excludeMonthlyDetails"
+msgstr "Убрать детализацию по месяцам"
+
+msgid "manager.statistics.counterR5Reports.description"
+msgstr ""
+"Дополнительную информацию о каждом отчете см. в <a href=\"https://cop5."
+"projectcounter.org/en/5.0.3/04-reports/index.html\" target=\"_new\""
+">документации COUNTER 5.0.3</a>."
+
+msgid "manager.statistics.counterR5Report.settings.date.endDate.description"
+msgstr ""
+"Дата должна быть в формате ГГГГ-ММ-ДД или ГГГГ-ММ. Самая поздняя возможная "
+"дата — {$lastDate}."
+
+msgid "manager.statistics.counterR5Report.settings.includeParentDetails"
+msgstr "Включить сведения о родительском элементе"
+
+msgid "manager.setup.masthead"
+msgstr "Выходные данные"

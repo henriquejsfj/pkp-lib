@@ -268,9 +268,23 @@
 				"nullable"
 			]
 		},
+		"orcidIsVerified": {
+			"type": "boolean",
+			"apiSummary": true,
+			"validation": [
+				"nullable"
+			]
+		},
 		"orcidReviewPutCode": {
 			"type": "string",
 			"apiSummary": true,
+			"validation": [
+				"nullable"
+			]
+		},
+		"rememberToken": {
+			"type": "string",
+			"writeOnly": true,
 			"validation": [
 				"nullable"
 			]

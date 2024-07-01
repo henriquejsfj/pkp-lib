@@ -18,13 +18,13 @@
 namespace PKP\API\v1\vocabs;
 
 use APP\core\Application;
+use APP\facades\Repo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use PKP\core\PKPBaseController;
 use PKP\core\PKPRequest;
-use PKP\core\PKPString;
 use PKP\db\DAORegistry;
 use PKP\facades\Locale;
 use PKP\plugins\Hook;
@@ -34,9 +34,7 @@ use PKP\security\Role;
 use PKP\submission\SubmissionAgencyDAO;
 use PKP\submission\SubmissionDisciplineDAO;
 use PKP\submission\SubmissionKeywordDAO;
-use PKP\submission\SubmissionLanguageDAO;
 use PKP\submission\SubmissionSubjectDAO;
-use Stringy\Stringy;
 
 class PKPVocabController extends PKPBaseController
 {
@@ -107,8 +105,9 @@ class PKPVocabController extends PKPBaseController
         $vocab = $requestParams['vocab'] ?? '';
         $locale = $requestParams['locale'] ?? Locale::getLocale();
         $term = $requestParams['term'] ?? null;
+        $locales = array_merge($context->getSupportedSubmissionMetadataLocales(), isset($requestParams['submissionId']) ? Repo::submission()->get((int) $requestParams['submissionId'])?->getPublicationLanguages() ?? [] : []);
 
-        if (!in_array($locale, $context->getData('supportedSubmissionLocales'))) {
+        if (!in_array($locale, $locales)) {
             return response()->json([
                 'error' => __('api.vocabs.400.localeNotSupported', ['locale' => $locale]),
             ], Response::HTTP_BAD_REQUEST);
@@ -127,16 +126,6 @@ class PKPVocabController extends PKPBaseController
                 $submissionDisciplineEntryDao = DAORegistry::getDAO('SubmissionDisciplineEntryDAO'); /** @var \PKP\submission\SubmissionDisciplineEntryDAO $submissionDisciplineEntryDao */
                 $entries = $submissionDisciplineEntryDao->getByContextId($vocab, $context->getId(), $locale, $term)->toArray();
                 break;
-            case SubmissionLanguageDAO::CONTROLLED_VOCAB_SUBMISSION_LANGUAGE:
-                $words = array_filter(PKPString::regexp_split('/\s+/', $term), 'strlen');
-                $languageNames = [];
-                foreach (Locale::getLanguages() as $language) {
-                    if ($language->getAlpha2() && $language->getType() === 'L' && $language->getScope() === 'I' && Stringy::create($language->getLocalName())->containsAny($words, false)) {
-                        $languageNames[] = $language->getLocalName();
-                    }
-                }
-                asort($languageNames);
-                return response()->json($languageNames, Response::HTTP_OK);
             case SubmissionAgencyDAO::CONTROLLED_VOCAB_SUBMISSION_AGENCY:
                 $submissionAgencyEntryDao = DAORegistry::getDAO('SubmissionAgencyEntryDAO'); /** @var \PKP\submission\SubmissionAgencyEntryDAO $submissionAgencyEntryDao */
                 $entries = $submissionAgencyEntryDao->getByContextId($vocab, $context->getId(), $locale, $term)->toArray();
